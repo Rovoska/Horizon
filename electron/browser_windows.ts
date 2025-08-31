@@ -20,7 +20,7 @@ import l from '../chat/localize';
  * The maximum number of tabs that can be opened in the application. In production, this is set to 3, while in development it is set to 5.
  * This does not change tha amount of connections to the live server, it's used so that we can connect more sessions to the test server during development.
  */
-const maxTabCount = process.env.NODE_ENV === 'production' ? 3 : 5;
+const maxTabCount = 6;
 
 /**
  * Used to store the mapping of character names to their respective web contents from a tab.
