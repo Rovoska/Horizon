@@ -80,24 +80,6 @@
               :disabled="loggingIn"
             />
           </div>
-          <div class="mb-3" v-show="showAdvanced">
-            <label class="control-label" for="host">{{
-              l('login.host')
-            }}</label>
-            <div class="input-group">
-              <input
-                class="form-control"
-                id="host"
-                v-model="settings.host"
-                @keypress.enter="login()"
-                :disabled="loggingIn"
-              />
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" @click="resetHost()">
-                  <span class="fas fa-undo-alt"></span>
-                </button>
-              </div>
-            </div>
             <div style="height: 8px"></div>
             <label class="control-label" for="proxy">{{
               l('login.proxy')
