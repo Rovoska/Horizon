@@ -36,7 +36,7 @@ This repository contains a continuation of the heavily customized F-Chat Rising,
 
 ## Features
 
-In a non-exhaustive list, F-Chat Horizon has these features!
+In a non-exhaustive list, Horizon has these features!
 
 - **Profile matching** automatically compares your profile with others to determine with whom you are compatible.
 - **Automatic ad posting** repeatedly posts and rotates ads on selected channels.
@@ -73,12 +73,9 @@ It should be known that this project aligns closely with the ideaology of [KDE](
 
 # Installing
 
-F-Chat Horizon can be installed on all _major_ operating systems (Minus BSDs.)
+Horizon can be installed on all _major_ operating systems (Minus BSDs.)
 
 ## Windows
-
-> [!NOTE]
-> I, the developer of this project, do not use windows, _and thus cannot test these._ While I have no reason to believe they won't work, please [contact me](https://horizn.moe/contact.html) with any bugs.
 
 1. Download the installer for your architecture:
    - [Windows x64](https://github.com/Fchat-Horizon/Horizon/releases/latest/download/F-Chat.Horizon-win-x64.exe)
@@ -94,13 +91,16 @@ F-Chat Horizon can be installed on all _major_ operating systems (Minus BSDs.)
 
 Since we currently don't have a paid developer license (and MacOS by default blocks unsigned apps downloaded from the internet), you may need to manually allow the app in your command line or System Settings.
 
-1. Download the installer. This _should_ work for both M1 and Intel based systems
+1. Download the installer. There are both versions specific to Intel (pre-2020) and Apple Sillicon Macs, and a 'Universal' one that works on both.
+   - [MacOS (Apple Sillicon)](https://github.com/Fchat-Horizon/Horizon/releases/latest/download/F-Chat.Horizon-mac-arm64.dmg)
+   - [MacOS (Intel)](https://github.com/Fchat-Horizon/Horizon/releases/latest/download/F-Chat.Horizon-mac-arm64.dmg)
    - [MacOS (Universal)](https://github.com/Fchat-Horizon/Horizon/releases/latest/download/F-Chat.Horizon-mac-universal.dmg)
-2. Open the downloaded .dmg file and drag the application to your Applications folder.
-   If you get a warning saying `"F-Chat" is damaged and can't be opened. You should move it to the Bin.` while attempting to open F-Chat, continue past step 2:
 
-3. Open the Applications folder in your finder, and hold the Ctrl key while clicking the F-Chat Horizon icon, and select "Open".
-4. The warning should appear like normal, but if you then go to System Settings > Privacy and Security, F-Chat Horizon should appear as a blocked app. Clicking "Open Anyway" should add it to the whitelist and let you use it as normal.
+2. Open the downloaded .dmg file and drag the application to your Applications folder.
+   If you get a warning saying `"Horizon" is damaged and can't be opened. You should move it to the Bin.` while attempting to open Horizon, continue past step 2:
+
+3. Open the Applications folder in your finder, and hold the Ctrl key while clicking the Horizon icon, and select "Open".
+4. The warning should appear like normal, but if you then go to System Settings > Privacy and Security, Horizon should appear as a blocked app. Clicking "Open Anyway" should add it to the whitelist and let you use it as normal.
 
 ![MacOS Ctrl-Open](https://raw.githubusercontent.com/Fchat-Horizon/Horizon/refs/heads/main/docs/images/macos-whitelist-ctrl-open.png)
 ![MacOS System Settings Whitelist](https://raw.githubusercontent.com/Fchat-Horizon/Horizon/refs/heads/main/docs/images/macos-whitelist-settings.png)
@@ -120,7 +120,7 @@ This is unfortunately unresolvable unless we either get a paid developer license
 
 ## Linux
 
-Horizon has excellent Linux support. Read more at [horizon-packages](https://github.com/Fchat-Horizon/horizon-packages)
+Horizon has excellent Linux support. Read more at [horizon-packages](https://github.com/Fchat-Horizon/horizon-packages).
 
 ### Supported distros
 
@@ -216,31 +216,12 @@ When you first load F-Chat Horizon, you'll notice its interface is closely simil
 
 ## Wiki
 
-The (currently work in progress and non-existing at this current moment) wiki has additional information on using Horizon
+[The wiki](https://horizn.moe/docs/), while still a work in progress, has additional information on using Horizon
 
 ## FAQ:
 
-1. The more information you have in your profile (**non-custom** kinks in particular), the better the matching quality will be. The algorithm considers the following data points:
-   - Age
-   - Gender
-   - Sexual preference
-   - Dominance preference
-   - Human/anthro preference
-   - Post length preference
-   - Position preference
-   - Non-custom kinks
-   - Species
-1. Matching for non-binary genders relies on kinks. For example, if your non-binary character has a preference for females, make sure 'females' are listed as a favorite kink.
-   - Similarly if you want to match with non-binary genders -- independent of your characters' gender -- add your preferred non-binary types into your kink list.
-1. 'Older characters' and 'younger characters' kink preferences are interpreted as age difference of 8+ years.
-1. Comparison results will get faster over time, as more and more character data is cached.
-1. If you have a species-fluid character (e.g. you play both your character as both a human and an anthro), you can indicate this by setting your **species** in your character profile in the following ways. F-List Horizon will then score you against the best fitting type.
-   - Human or tiger
-   - Human, tiger, or dragon
-   - Anthro (Horse or Tiger)
-   - Dragon (Dwarf, Elf, or Human)
-   - Elf (optionally vampire or dwarf)
-   - Feline (optionally horse, tiger, or elf)
+> [!INFO]
+> Our FAQ section, for both the Readme and the website, is in the process of being fully rewritten.
 
 # Development
 

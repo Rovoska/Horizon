@@ -1,4 +1,4 @@
-import { isToday } from 'date-fns';
+import { isToday, format } from 'date-fns';
 import { Keys } from '../keys';
 import { Character, Conversation, Settings as ISettings } from './interfaces';
 import core from './core';
@@ -49,6 +49,7 @@ export class Settings implements ISettings {
   highlightWords: string[] = [];
   showAvatars = true;
   animatedEicons = true;
+  smoothMosaics = true;
   idleTimer = 0;
   messageSeparators = false;
   eventMessages = true;
@@ -161,18 +162,22 @@ export class ConversationSettings implements Conversation.Settings {
   horizonHighlightUsers: string[] = [];
 }
 
-function pad(num: number): string | number {
-  return num < 10 ? `0${num}` : num;
-}
-
 export function formatTime(
   this: any | never,
   date: Date,
   noDate: boolean = false
 ): string {
-  if (!noDate && isToday(date))
-    return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  const use12 =
+    (core &&
+      core.state &&
+      (core.state as any).generalSettings &&
+      (core.state as any).generalSettings.use12HourTime) ||
+    false;
+
+  const timeOnlyFormat = use12 ? 'hh:mm a' : 'HH:mm';
+  if (!noDate && isToday(date)) return format(date, timeOnlyFormat);
+  const absoluteFormat = `yyyy-MM-dd ${timeOnlyFormat}`;
+  return format(date, absoluteFormat);
 }
 
 export function messageToString(

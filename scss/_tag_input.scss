@@ -33,11 +33,11 @@
 }
 
 .tag-error {
-  border: 1px solid theme-color-level(danger, $alert-border-level);
-  background-color: theme-color-level(danger, $alert-bg-level);
+  border: 1px solid mix($black, $danger, $alert-border-level * 8%);
+  background-color: mix($white, $danger, abs($alert-bg-level) * 8%);
   .tag-input {
-    text-color: theme-color-level(danger, $alert-color-level);
-    background-color: theme-color-level(danger, $alert-bg-level);
+    text-color: mix($black, $danger, $alert-color-level * 8%);
+    background-color: mix($white, $danger, abs($alert-bg-level) * 8%);
   }
 }
 

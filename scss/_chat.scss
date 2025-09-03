@@ -7,7 +7,7 @@
 .btn-primary,
 .btn-primary:hover,
 .btn-primary:active {
-  color: color-yiq(theme-color('primary'));
+  color: color-yiq($primary);
 }
 
 .bg-solid-text {
@@ -37,7 +37,7 @@
 }
 
 .has-new {
-  background-color: theme-color-level('danger', 4) !important;
+  background-color: mix($black, $danger, 4 * 8%) !important;
 }
 @keyframes throb {
   0% {
@@ -91,8 +91,7 @@
   background: $body-bg;
   z-index: 10;
   flex-shrink: 0;
-  margin: -10px;
-  padding: 10px;
+  padding: 0px 0px 10px 0px;
 
   .body {
     height: 100%;
@@ -216,12 +215,13 @@
     }
     flex: auto;
     padding: 5px 3px 5px 3px;
-    min-width: 55px;
+    min-width: 50px;
     text-align: center;
     font-size: 1.15rem;
     display: inline-block;
     border-radius: 6px;
     transition: 0.2s;
+    position: relative;
     .userInfo-pager-text {
       font-size: 1rem;
       color: var(--gray-dark);
@@ -265,7 +265,7 @@
 }
 .ads-text-box,
 .ads-text-box:focus {
-  background-color: theme-color-level('info', -4);
+  background-color: mix($white, $info, 4 * 8%);
 }
 
 .border-top {
@@ -319,8 +319,7 @@
 
 .messages-both {
   .message-ad:not(.message-score) {
-    --bs-bg-opacity: 0.3;
-    background-color: rgba(var(--bs-info-rgb), var(--bs-bg-opacity)) !important;
+    background-color: mix($white, $info, 4 * 8%);
     padding: 0 2px 2px 2px;
     box-shadow: $gray-500 -2px -2px 2px inset;
   }
@@ -364,7 +363,7 @@
 }
 
 .message-highlight {
-  background-color: color.scale($color: $success, $alpha: -50%);
+  background-color: mix($white, $success, 4 * 8%);
 }
 
 .message-action .bbcode {
@@ -376,7 +375,7 @@
 }
 
 .last-read {
-  border-bottom: solid 2px theme-color-level('success', -2) !important;
+  border-bottom: solid 2px mix($white, $success, 2 * 8%) !important;
 }
 
 .fas.active {
@@ -408,11 +407,11 @@ $genders: (
 .vanillaGenderColors {
   @each $gender, $color in $genders {
     .gender-#{$gender} {
-      color: $color !important;
+      color: $color;
     }
 
     .message-event .gender-#{$gender} {
-      color: color.scale($color, $lightness: 5%) !important;
+      color: color.scale($color, $lightness: 5%);
     }
 
     .gender-#{$gender}.user-bookmark,
@@ -463,11 +462,11 @@ $genders: (
 
 #window-tabs {
   .hasNew {
-    background-color: theme-color-level('warning', -2);
-    border-color: theme-color-level('warning', -4);
+    background-color: mix($white, $warning, 2 * 8%);
+    border-color: mix($white, $warning, 4 * 8%);
     color: color-contrast($warning);
     &:hover {
-      background-color: theme-color-level('warning', -4);
+      background-color: mix($white, $warning, 4 * 8%);
     }
   }
   .tab:not(.active):not(:hover) {

@@ -6,7 +6,7 @@
   import { Component, Hook, Prop, Watch } from '@f-list/vue-ts';
   import { formatDistanceToNow, format } from 'date-fns';
   import Vue from 'vue';
-  import { settings } from '../site/utils';
+  import core from '../chat/core';
 
   @Component
   export default class DateDisplay extends Vue {
@@ -22,9 +22,18 @@
       const date = isNaN(+this.time)
         ? new Date(`${this.time}+00:00`)
         : new Date(+this.time * 1000);
-      const absolute = format(date, 'yyyy-MM-dd HH:mm');
+      const use12 =
+        (core &&
+          (core.state as any).generalSettings &&
+          (core.state as any).generalSettings.use12HourTime) ||
+        false;
+      const timeFormat = use12 ? 'yyyy-MM-dd hh:mm a' : 'yyyy-MM-dd HH:mm';
+      const absolute = format(date, timeFormat);
       const relative = formatDistanceToNow(date, { addSuffix: true });
-      if (settings.fuzzyDates) {
+      const fuzzy = core.state.generalSettings
+        ? core.state.generalSettings.fuzzyDates
+        : true;
+      if (fuzzy) {
         this.primary = relative;
         this.secondary = absolute;
       } else {

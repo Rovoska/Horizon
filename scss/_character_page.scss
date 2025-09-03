@@ -48,9 +48,9 @@
     }
 
     &.character-badge-maintainer {
-      background-color: theme-color-bg('success');
-      border: 1px solid theme-color-border('success');
-      color: theme-color-level('success', 8);
+      background-color: mix($white, $success, 10 * 8%);
+      border: 1px solid mix($white, $success, 9 * 8%);
+      color: mix($black, $success, 8 * 8%);
       font-weight: bold;
     }
   }

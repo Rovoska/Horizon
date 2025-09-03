@@ -15,12 +15,12 @@ a {
   min-width: 70%;
 }
 .card {
-  border-radius: 0.7em;
+  --bs-card-border-radius: 0.7em;
 }
 
 .card-header.character-card-header {
-  border-top-right-radius: 0.7em;
-  border-top-left-radius: 0.7em;
+  border-top-right-radius: var(--bs-card-border-radius);
+  border-top-left-radius: var(--bs-card-border-radius);
 }
 .kink-block .card {
   border-radius: initial;

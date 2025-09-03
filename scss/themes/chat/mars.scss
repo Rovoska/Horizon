@@ -33,35 +33,18 @@ body,
 }
 
 .sidebar {
-  background-color: rgba($body-bg, 0.4);
+  --sidebar-alpha: 1;
+  background-color: rgba($body-bg, var(--sidebar-alpha));
+
+  @media (min-width: breakpoint-min(md)) {
+    & {
+      --sidebar-alpha: 0.4;
+    }
+  }
 }
 
 .message-own:not(.message-warn) {
   background-color: rgba($gray-300, 0.75);
-}
-
-* {
-  &::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 2px $card-border-color;
-    border-radius: 10px;
-  }
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.8);
-    background-color: $gray-300;
-    &:hover {
-      background-color: $gray-500;
-    }
-
-    &:active {
-      background-color: $gray-700;
-    }
-  }
 }
 
 .colorblindMode {
@@ -74,7 +57,7 @@ body,
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 $genders: (

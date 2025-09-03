@@ -31,6 +31,9 @@ export class GeneralSettings {
   logDirectory = path.join(electron.app.getPath('userData'), 'data');
   spellcheckLang: string[] | string | undefined = [getDefaultLanguage()];
   theme = 'default';
+  themeSync: boolean = false;
+  themeSyncDark: string = 'dark';
+  themeSyncLight: string = 'light';
   version = electron.app.getVersion();
   beta = false;
   updateCheck = true;
@@ -50,6 +53,8 @@ export class GeneralSettings {
   soundTheme = 'default';
   soundThemeSoundVolumes: { [theme: string]: { [sound: string]: number } } = {};
   horizonAutoLogin: boolean = false;
+  use12HourTime: boolean = false;
+  fuzzyDates: boolean = true;
 }
 
 log.debug('init.common.done');

@@ -50,10 +50,10 @@
               href="#"
               role="button"
               class="userInfo-button-item"
-              :title="l('settings.character')"
-              @click.prevent="showSettings()"
+              :title="l('characterSearch.open')"
+              @click.prevent="showSearch()"
             >
-              <i class="fa-solid fa-user-gear fa-fw"></i>
+              <i class="fa-solid fa-search fa-fw"></i>
             </a>
             <a
               href="#"
@@ -62,16 +62,25 @@
               :title="l('admgr.open')"
               @click.prevent="showAdLauncher()"
             >
-              <i class="fa-solid fa-rectangle-ad fa-fw"></i>
+              <i class="fa-solid fa-rectangle-ad fa-fw"></i
+              ><a v-show="adsAreRunning()" role="button" class="adControls">
+                <span
+                  title="Stop All Ads"
+                  class="fas fa-fw fa-stop"
+                  @click.stop="stopAllAds()"
+                ></span>
+              </a>
             </a>
 
-            <span v-show="adsAreRunning()" class="adControls">
-              <span
-                aria-label="Stop All Ads"
-                class="fas fa-fw fa-stop"
-                @click.prevent="stopAllAds()"
-              ></span>
-            </span>
+            <a
+              href="#"
+              role="button"
+              class="userInfo-button-item"
+              :title="l('settings.character')"
+              @click.prevent="showSettings()"
+            >
+              <i class="fa-solid fa-user-gear fa-fw"></i>
+            </a>
 
             <a
               href="#"
@@ -116,13 +125,6 @@
             >
           </span>
 
-          <a
-            href="#"
-            @click.prevent="showSearch()"
-            :title="l('characterSearch.open')"
-            class="btn"
-            ><span class="fas fa-fw fa-search"></span>
-          </a>
           <a
             href="#"
             @click.prevent="showRecent()"
@@ -974,7 +976,7 @@
 
   #sidebar {
     .body a.btn {
-      padding: 2px 0;
+      padding: 0px 4px;
       text-align: left;
     }
     .conversationList-header {
@@ -988,7 +990,6 @@
       .sidebar {
         position: static;
         margin: 0;
-        padding: 0;
         height: 100%;
       }
 
@@ -1002,17 +1003,12 @@
     }
 
     .adControls {
-      float: right;
-      margin-right: 0.25rem;
-      margin-top: 3px;
-
-      span {
-        color: var(--bs-danger);
-        cursor: pointer;
-
-        &:hover {
-          color: var(--red);
-        }
+      position: absolute;
+      color: var(--bs-danger);
+      z-index: 12;
+      top: 0px;
+      &:hover {
+        color: var(--bs-danger-text-emphasis);
       }
     }
 

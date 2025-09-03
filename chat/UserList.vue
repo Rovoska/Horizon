@@ -20,7 +20,7 @@
     ></tabs>
     <div
       class="users hidden-scrollbar"
-      style="padding-left: 10px; padding-bottom: 10px"
+      style="padding-left: 10px"
       v-if="tab === '0'"
     >
       <h4>{{ l('users.friends') }}</h4>
@@ -52,13 +52,7 @@
     </div>
     <div
       v-if="channel && tab === '1'"
-      style="
-        padding-bottom: 10px;
-        padding-left: 5px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      "
+      style="padding-left: 5px; flex: 1; display: flex; flex-direction: column"
     >
       <div class="users hidden-scrollbar" style="flex: 1; padding-left: 5px">
         <h4>
@@ -328,7 +322,6 @@
       .sidebar {
         position: static;
         margin: 0;
-        padding: 0;
         height: 100%;
       }
 

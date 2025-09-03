@@ -23,6 +23,7 @@
 @import '~bootstrap/scss/modal';
 @import '~bootstrap/scss/popover';
 @import '~bootstrap/scss/badge';
+@import '~bootstrap/scss/spinners';
 @import '~bootstrap/scss/utilities';
 @import '~bootstrap/scss/utilities/api';
 @import '~bootstrap/scss/helpers/color-bg';
@@ -99,6 +100,11 @@
       color: color-contrast($value);
     }
   }
+}
+
+.image-preview-wrapper .image-preview-toolbar {
+  background-color: rgba($gray-200, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 :root {

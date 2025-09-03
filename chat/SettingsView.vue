@@ -109,6 +109,19 @@
         </div>
       </div>
       <div class="mb-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="smoothMosaics"
+            v-model="smoothMosaics"
+          />
+          <label class="form-check-label" for="smoothMosaics">
+            {{ l('settings.smoothMosaics') }}
+          </label>
+        </div>
+      </div>
+      <div class="mb-3">
         <label class="control-label" for="idleTimer">{{
           l('settings.idleTimer')
         }}</label>
@@ -456,8 +469,7 @@
             v-model="risingShowUnreadOfflineCount"
           />
           <label class="form-check-label" for="risingShowUnreadOfflineCount">
-            Show unread note and offline message counts at the bottom right
-            corner
+            {{ l('settings.risingShowUnreadOfflineCount') }}
           </label>
         </div>
       </div>
@@ -948,6 +960,7 @@
     highlightWords!: string;
     showAvatars!: boolean;
     animatedEicons!: boolean;
+    smoothMosaics!: boolean;
     idleTimer!: string;
     messageSeparators!: boolean;
     eventMessages!: boolean;
@@ -1004,6 +1017,7 @@
       this.highlightWords = settings.highlightWords.join(',');
       this.showAvatars = settings.showAvatars;
       this.animatedEicons = settings.animatedEicons;
+      this.smoothMosaics = settings.smoothMosaics;
       this.idleTimer = settings.idleTimer.toString();
       this.messageSeparators = settings.messageSeparators;
       this.eventMessages = settings.eventMessages;
@@ -1118,6 +1132,7 @@
           .filter(x => x.length),
         showAvatars: this.showAvatars,
         animatedEicons: this.animatedEicons,
+        smoothMosaics: this.smoothMosaics,
         idleTimer: isNaN(idleTimer)
           ? 0
           : idleTimer < 0

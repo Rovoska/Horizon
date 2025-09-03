@@ -5,25 +5,95 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). You can also read it on our [website](https://fchat-horizon.github.io/docs/changelog.html).
 
+# [Unreleased]
+
+_Nothing yet._
+
 # [Releases]
+
+## [1.33.4] - 2025-09-01
+
+### Added
+
+- The colour picker shortcut (Ctrl/ Cmd + D) is now more intuitive and autocompletes the desired color [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/daef228846d62790366fd485f6ccc83425adc295)
+- Added a setting to toggle between 12 or 24 hours timestamps, and one to toggle fuzzy/ exact times on the profile viewer (similar to the website). [[12 hours]](https://github.com/Fchat-Horizon/Horizon/commit/fb7f6fad365fa57fb6b8b52bad2b63f5372c3b59) [[Fuzzy times]](https://github.com/Fchat-Horizon/Horizon/commit/e1033a74786f5afeae5f9e3c4af491a02712bdec)
+- Added a setting to sync your theme with your computer's light/ dark mode setting. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/368997ac899edf6163e7e35859c006fd98bd6046)
+- Button to join Discord in several places. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/bf4430d)
+- Character selector pinning. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/046c56c)
+- New Moon Prism theme by @ShiningVenus [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/7f080dc60f10cb066777fe65c064bb494fdefafb)
+  - This is her first contribution! 🎉
+- Double clicking a character in the selector now connects as it. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/861c07da66c056eef27c9f653daa136dc64ebfc3)
+- Sync mosaics option. Waits until all eicons in a message are loaded before playing them. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/eb145b1f829781806e0f0b8ede438dd91fcba3d8)
+- Windows installer custom sidebar replacing the default Electron Builder one. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/6a0773c9970d3bbcd38e5bfc6df0d2e26c31d374)
+
+### Fixed
+
+- Ensure default profile star and pin icons render above character images in the character selector. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/137da320fa5a87cb262b8290f5cce7b69eeb82ac)
+- Make character selector respect theme colours (removes placeholder colours). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/f1f7f2a)
+- Character selection screen fixes [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d5625c9):
+  - Fixes vertical scroll clipping for the whole grid.
+  - Fixes grid item backgrounds being invisible in light themes.
+  - Fixes avatars clipping into the avatar background.
+- UI items with their own colour scaling now have their scaling back after the Bootstrap 5 upgrade. [[Reimplemented scaling]](https://github.com/Fchat-Horizon/Horizon/commit/4e168e67d6ec4c4dacd7c38ba7427a4c15efc257) [[Overridden colors]](https://github.com/Fchat-Horizon/Horizon/commit/15c02d1a539b75fd65b2a04f9ace0d5932567a1e)
+  - This includes:
+    - Ping messages.
+    - Ads in mixed mode (while ad matching is disabled).
+    - Signed in tabs when you have a new ping.
+    - The text box while directly posting a channel ad.
+    - Character badges on the profile view
+  - This should also (hopefully) make some other instances of scaled colours slightly more accurate to how they were before.
+- Profile analysis now marks unparsable species more clearly [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c06642c)
+- Fixes eicons not being visible in the log viewer if you haven't signed in yet. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/7e5774d21f12f7b34091e31b03cacacfebf72244)
+- Fixes Default and Mars themes being detected as light themes by unstyled components. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/4a57466)
+- Fixes Dracula message-own background colour. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/8a5cc9e)
+- Fixes vanilla gender colours overriding the "Highlight friends/ bookmarks" name colours; that setting now uses the vanilla colour correctly. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/01603af)
+- Fixed the 'About Horizon' window being fullscreenable on all platforms. And fixes it being forced into full screen mode on MacOS if opened while the main window is in full screen mode too. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/96a1ea85716317448027769941bc726e6484f269)
+- Link preview middle click toolbar now theme-styled. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9ecd78d77468595dd9f484e546ef67178a6f3073)
+- Peached theme form styling improvements. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/69239c15813a454a75bad8ff31c4a11c83d0ee58)
+- App title size no longer shifts tab layout. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/8f42c3ecb29ae7fcd3b0d4d34c4196bc48037aa6)
+- Sidebar small mode & gradient alpha fixes. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/31a586ae6e2781c32ec2835d5419a1dc5fcf98da)
+- Sidebar bottom padding inconsistencies. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/45c84ab0dfd809b386e7e193f80a7c707516d715)
+- BBCode preview is scrollable and padded. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/1add1d2cf858f4fc040569b67ea17b47d3e0d854)
+- Channel list buttons aligned with their inputs. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/78232eee10cd6be1f99a9567180cae41c14b0c6b)
+
+### Changed
+
+- Notification volume control styled with Bootstrap classes. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/700ea2a)
+- Moved the version button to under "About Horizon". [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c6ae55a)
+- Better background/ text contrast for your own messages in light themes. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/283747c7b78792112a43b098b3d267d06b05b8db)
+- Ping highlight colour reduced (less intense). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ea41481380d3a860823aee567345cf54bc047bce)
+- Character search restored as a primary sidebar button. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/bc55cbe88e2e8e347e6e17ce95d0eee84c0143d2)
+- Ad Center & Launcher layout tweaks. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/
+- Slight settings menu reorganisation. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/1c8d9dd65a94a49209f7a4e9a5a6d1d3d7c4d9f0)
+
+### Development
+
+- Added GitHub Actions workflows for release notifications to Discord. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/f5b4dc6)
+- Removed redundant scrollbar stylings from themes. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/829096af66277d5938b46a6f76587ae4047a0a49)
+- README updated with more current info. [[Commit]]([https://](https://github.com/Fchat-Horizon/Horizon/commit/6404daaebdae4b940a39ad9de091720385ef4172)
+
+### Merged pull requests
+
+- https://github.com/Fchat-Horizon/Horizon/pull/367 by @ShiningVenus
+  - This is her first contribution! 🎉
 
 ## [1.33.3] - 2025-08-24
 
 ### Fixed
 
-- Fixed background color for ads when both ads and chat are visible being very hard to read. [\[Commit\]](https://github.com/Fchat-Horizon/Horizon/commit/94438bddd0959bdd43a059018e99750ada393a22)
-- The quick switcher on the top for narrow windows now shows up at the proper screen widths again. [\[Commit\]](https://github.com/Fchat-Horizon/Horizon/commit/fa372a179c5872c6aa0a96e538208a28cd8ef6c8)
-- Fixed a MacOS issue where the 'About Horizon' window could not be closed. [\[Commit\]](https://github.com/Fchat-Horizon/Horizon/commit/5a44f12f67a870177c1c6cbaa4e7155e0cd75c73)
-- Readjusted some overly bright text colours after the Bootstrap 5 upgrade: [\[Commit\]](https://github.com/Fchat-Horizon/Horizon/commit/017f4ced877626f69210f7d9faad7c330b2e89a9)
+- Fixed background color for ads when both ads and chat are visible being very hard to read. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/94438bddd0959bdd43a059018e99750ada393a22)
+- The quick switcher on the top for narrow windows now shows up at the proper screen widths again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/fa372a179c5872c6aa0a96e538208a28cd8ef6c8)
+- Fixed a MacOS issue where the 'About Horizon' window could not be closed. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5a44f12f67a870177c1c6cbaa4e7155e0cd75c73)
+- Readjusted some overly bright text colours after the Bootstrap 5 upgrade: [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/017f4ced877626f69210f7d9faad7c330b2e89a9)
   - Active tab text color
   - Unread conversation text color
   - Own message background color
-- Fixed the "Show friends/ bookmarks in a different color" setting not working for the new 1.33.0 themes. [\[Commit\]](https://github.com/Fchat-Horizon/Horizon/commit/14b9b0ecbf02bad376e6cdb7632503c8bb72d129)
+- Fixed the "Show friends/ bookmarks in a different color" setting not working for the new 1.33.0 themes. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/14b9b0ecbf02bad376e6cdb7632503c8bb72d129)
 
 ### Changed
 
-- The light theme's primary color has been reverted back to blue for legibility reasons. [\[Commit\]](https://github.com/Fchat-Horizon/Horizon/commit/33ca6e96c6410d3ad2bdedebcea381478eba9474)
-- Regrouped the text color settings into their own header. [\[Commit\]](https://github.com/Fchat-Horizon/Horizon/commit/80aa51dc63857c050f839a60dfb431d94182187b)
+- The light theme's primary color has been reverted back to blue for legibility reasons. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/33ca6e96c6410d3ad2bdedebcea381478eba9474)
+- Regrouped the text color settings into their own header. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/80aa51dc63857c050f839a60dfb431d94182187b)
 
 ## [1.33.2] - 2025-08-24
 
@@ -380,9 +450,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A new setting to notify you when a friend or bookmark logs in. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c5b401f59db98450ceede0818c9f85d74a95e737)
 - The 'Smart Filter' automated reply message can now be customized. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/3edab4956b0121cd711c1e67abb4d279bdfcd69d)
   - This also shuffles the related settings around, and hopefully explains the system a bit better.
-- A new setting to display gender symbols next to character names. [\[Commit\]](https://github.com/Fchat-Horizon/Horizon/commit/1ae7b9cd2c634b481e83aaee5823627a06decb8c)
+- A new setting to display gender symbols next to character names. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/1ae7b9cd2c634b481e83aaee5823627a06decb8c)
   - These symbols can (optionally) retain the original gendered name colour for characters using a custom colour.
-- Automated update checks. The settings button on top-- or on Mac, a new one only visible when there's an update, will glow when a new version of Horizon is available for download. [\[Commit\]](https://github.com/Fchat-Horizon/Horizon/commit/b9189fe9f123dcd2d7a6d6c939e48d744401504b)
+- Automated update checks. The settings button on top-- or on Mac, a new one only visible when there's an update, will glow when a new version of Horizon is available for download. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b9189fe9f123dcd2d7a6d6c939e48d744401504b)
   - This also brings back and repurposes the old 3.0 beta channel setting, for checking if pre-release versions are available.
 
 ### Fixed

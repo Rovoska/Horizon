@@ -800,9 +800,7 @@
       flex-direction: row;
       width: 15rem;
       flex-wrap: nowrap;
-      background-color: rgba(77, 76, 116, 0.92);
       border-radius: 3px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
       padding: 0.5rem;
       box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
       z-index: 1000;

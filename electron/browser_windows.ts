@@ -674,6 +674,7 @@ export function createAboutWindow(
     center: true,
     resizable: false,
     minimizable: false,
+    fullscreenable: false,
     useContentSize: process.platform === 'win32', // Important for Windows
     modal: process.platform !== 'darwin',
     parent: parentWindow,

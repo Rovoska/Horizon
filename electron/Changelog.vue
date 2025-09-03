@@ -39,6 +39,16 @@
               ref="mdContainer"
             ></div>
             <div class="modal-footer">
+              <a
+                class="btn btn-outline-primary"
+                href="https://discord.gg/JYuxqNVNtP"
+                target="_blank"
+                rel="noopener"
+                style="margin-left: 8px"
+              >
+                <span class="fab fa-discord"></span>
+                <span style="margin-left: 6px">Join Our Discord</span>
+              </a>
               <button
                 type="button"
                 class="btn btn-secondary"
@@ -96,6 +106,7 @@
   @Component()
   export default class Changelog extends Vue {
     settings!: GeneralSettings;
+    osIsDark = remote.nativeTheme.shouldUseDarkColors;
     updateVersion!: string | undefined;
     currentVersion = process.env.APP_VERSION;
     isMaximized = false;
@@ -107,7 +118,7 @@
 
     get styling(): string {
       try {
-        return `<style>${fs.readFileSync(path.join(__dirname, `themes/${this.settings.theme}.css`), 'utf8').toString()}</style>`;
+        return `<style>${fs.readFileSync(path.join(__dirname, `themes/${this.getSyncedTheme()}.css`), 'utf8').toString()}</style>`;
       } catch (e) {
         if (
           (<Error & { code: string }>e).code === 'ENOENT' &&
@@ -119,9 +130,18 @@
         throw e;
       }
     }
+    getSyncedTheme() {
+      if (!this.settings.themeSync) return this.settings.theme;
+      return this.osIsDark
+        ? this.settings.themeSyncDark
+        : this.settings.themeSyncLight;
+    }
 
     @Hook('mounted')
     async mounted(): Promise<void> {
+      remote.nativeTheme.on('updated', () => {
+        this.osIsDark = remote.nativeTheme.shouldUseDarkColors;
+      });
       const container = <HTMLElement>this.$refs['mdContainer'];
       if (container) {
         container.addEventListener('click', this.delegateLinkClick);
@@ -133,7 +153,7 @@
           : 'v' + process.env.APP_VERSION);
       let releaseInfo: ReleaseInfo = (await Axios.get<ReleaseInfo>(apiUrl))
         .data;
-      let md = markdownit();
+      let md = markdownit({ html: true, linkify: true, typographer: true });
       md.use(alert);
 
       const defaultRender =
@@ -313,5 +333,21 @@
   .disableWindowsHighContrast,
   .disableWindowsHighContrast * {
     forced-color-adjust: none;
+  }
+
+  /* Make images and embedded media inside the changelog scale to the window while keeping aspect ratio */
+  .logs-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0.5em auto;
+    max-height: calc(100vh - 160px);
+    object-fit: contain;
+  }
+
+  .logs-container iframe,
+  .logs-container video {
+    max-width: 100%;
+    max-height: calc(100vh - 160px);
   }
 </style>
