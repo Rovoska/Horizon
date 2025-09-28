@@ -211,14 +211,35 @@ function onReady(): void {
     const deny = (): boolean => false;
 
     targetSession.setPermissionRequestHandler(
-      (_webContents, _permission, callback) => {
+      (_webContents, permission, callback) => {
+        if (
+          permission === 'notifications' &&
+          partitionName === 'persist:fchat'
+        ) {
+          log.debug('permissions.allowed.notifications', {
+            partition: partitionName
+          });
+          callback(true);
+          return;
+        }
+
+        log.debug('permissions.blocked', {
+          partition: partitionName,
+          permission: permission
+        });
         callback(false);
       }
     );
 
     // Optional handlers if available
     targetSession.setPermissionCheckHandler?.(
-      (_webContents, _permission, _details) => {
+      (_webContents, permission, _details) => {
+        if (
+          permission === 'notifications' &&
+          partitionName === 'persist:fchat'
+        ) {
+          return true;
+        }
         return deny();
       }
     );
