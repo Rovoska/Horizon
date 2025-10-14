@@ -199,7 +199,7 @@ const commands: { readonly [key: string]: Command | undefined } = {
   },
   roll: {
     exec: (conv: ChannelConversation | PrivateConversation, dice: string) => {
-      if (dice.toLocaleLowerCase() === 'inf') {
+      if (dice.toLocaleLowerCase().includes('inf')) {
         conv.infoText =
           'Inf took many lives during its reign. Thankfully, you have been spared.';
         return;

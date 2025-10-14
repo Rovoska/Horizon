@@ -29,7 +29,7 @@ const Tabs = Vue.extend({
       this.$emit('input', (this._v = this.selected));
     return createElement(
       'div',
-      { staticClass: `nav-tabs-scroll ${this.fullWidth ? 'nav-fill' : ''}` },
+      { staticClass: `nav-tabs ${this.fullWidth ? 'nav-justified' : ''}` },
       [
         createElement('ul', { staticClass: 'nav nav-tabs' }, [
           keys.map(key =>
@@ -46,7 +46,9 @@ const Tabs = Vue.extend({
               )
             ])
           ),
-          createElement('div', { staticClass: 'nav-tab-spacer' })
+          ...(this.fullWidth
+            ? []
+            : [createElement('div', { staticClass: 'nav-tab-spacer' })])
         ])
       ]
     );

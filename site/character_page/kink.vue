@@ -46,8 +46,10 @@
 </template>
 
 <script lang="ts">
-  import { Component, Prop, Watch } from '@f-list/vue-ts';
+  import { Component, Prop, Watch, Hook } from '@f-list/vue-ts';
+  import anyAscii from 'any-ascii';
   import Vue from 'vue';
+  import core from '../../chat/core';
   import { DisplayKink } from './interfaces';
   import { kinkComparisonSwaps } from '../../learn/matcher-types';
 
@@ -75,6 +77,17 @@
         this.listClosed = false;
       } else {
         this.listClosed = this.initialListClosedState;
+      }
+    }
+    @Hook('mounted')
+    mounted(): void {
+      if (
+        this.kink.isCustom &&
+        core.state.generalSettings &&
+        core.state.generalSettings.horizonForceAsciiProfiles
+      ) {
+        this.kink.description = anyAscii(this.kink.description);
+        this.kink.name = anyAscii(this.kink.name);
       }
     }
 

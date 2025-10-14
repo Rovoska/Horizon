@@ -14,6 +14,13 @@ a {
 .modal-dialog.modal-70 {
   min-width: 70%;
 }
+
+.modal-dialog.modal-80 {
+  min-width: 80%;
+}
+.modal-dialog.modal-90 {
+  min-width: 90%;
+}
 .card {
   --bs-card-border-radius: 0.7em;
 }
@@ -121,7 +128,14 @@ input:checked {
 }
 
 .nav.nav-tabs .nav-link {
-  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-x: clip;
+  font-weight: 500;
+}
+
+.nav-tabs.nav-justified .nav-link.active {
+  text-overflow: initial;
 }
 
 .nav-tab-spacer {

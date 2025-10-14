@@ -10,11 +10,14 @@ jobs:
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_RELEASES }}
           nodetail: true
+          url: ${{ github.event.release.html_url }}
           title: 'New Release (${{ github.event.release.tag_name }})'
           description: |
-            ${{ github.event.release.body }}
 
             [Download Here](${{ github.event.release.html_url }})
+
+            ${{ github.event.release.body }}
+
           color: 0x00FF00
           content: '||<@&1409675106900246540>||'
           username: 'Release Bot'

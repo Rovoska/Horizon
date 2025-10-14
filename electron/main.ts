@@ -14,6 +14,7 @@ import { IpcMainEvent, session } from 'electron';
 import Axios from 'axios';
 import * as browserWindows from './browser_windows';
 import * as remoteMain from '@electron/remote/main';
+import { Event } from 'electron/main';
 
 const configuredSessions = new WeakSet<electron.Session>();
 
@@ -32,6 +33,182 @@ const app = electron.app;
 remoteMain.initialize();
 
 const characters: string[] = [];
+
+async function tryHandleCli(): Promise<boolean> {
+  const argv = process.argv.slice(1);
+  const command = argv[0];
+  const has = (flag: string) => argv.includes(flag);
+  const get = (flag: string): string | undefined => {
+    const idx = argv.indexOf(flag);
+    return idx !== -1 ? argv[idx + 1] : undefined;
+  };
+
+  if (command === 'help' || has('--help') || has('-h')) {
+    console.log(`
+Horizon - CLI Usage
+
+USAGE:
+  horizon <command> [flags]
+  horizon [flags]              Start GUI (with optional flags)
+
+COMMANDS:
+  export                  Export user data to a ZIP archive
+  import                  Import user data from a ZIP archive
+  help                    Show this help message
+
+GUI FLAGS:
+  --devtools              Open DevTools on startup for debugging
+
+EXPORT FLAGS:
+  --data-dir <path>       Data directory (default: userData/data)
+  --out <path>            Output ZIP file path (default: ./horizon-export.zip)
+  --characters <list>     Comma-separated list of characters to export (default: all)
+  -n, --dry-run           Perform a dry run without creating the actual export
+  --include-general       Include general settings (default: true)
+  --include-character-settings    Include character settings (default: true)
+  --include-logs          Include chat logs (default: true)
+  --include-drafts        Include message drafts (default: true)
+  --include-pinned-conversations  Include pinned conversations (default: true)
+  --include-pinned-eicons Include pinned eicons (default: true)
+  --include-recents       Include recent users/channels (default: true)
+  --include-hidden        Include hidden users (default: true)
+
+IMPORT FLAGS:
+  --zip <path>            ZIP file to import (required)
+  --data-dir <path>       Data directory (default: userData/data)
+  --characters <list>     Comma-separated list of characters to import (default: all)
+  -n, --dry-run           Perform a dry run without modifying any files
+  --overwrite             Overwrite existing files (default: false)
+  --include-general       Include general settings (default: true)
+  --include-character-settings    Include character settings (default: true)
+  --include-logs          Include chat logs (default: true)
+  --include-drafts        Include message drafts (default: true)
+  --include-pinned-conversations  Include pinned conversations (default: true)
+  --include-pinned-eicons Include pinned eicons (default: true)
+  --include-recents       Include recent users/channels (default: true)
+  --include-hidden        Include hidden users (default: true)
+
+EXAMPLES:
+  # Export all data
+  horizon export --data-dir ~/.config/horizon/data --out ~/backup.zip
+
+  # Export only logs for specific characters
+  horizon export --characters "CharName1,CharName2" --include-logs
+
+  # Dry run to see what would be exported
+  horizon export --dry-run --out ~/backup.zip
+
+  # Import from a backup
+  horizon import --zip ~/backup.zip --data-dir ~/.config/horizon/data
+
+  # Import with overwrite
+  horizon import --zip ~/backup.zip --overwrite
+
+  # Dry run to see what would be imported
+  horizon import --zip ~/backup.zip --dry-run
+
+  # Start GUI with DevTools
+  horizon --devtools
+`);
+    app.exit(0);
+    return true;
+  }
+
+  if (command === 'export') {
+    const { runExportCli } = await import(
+      './services/exporter/backup-export-cli'
+    );
+    const dataDir =
+      get('--data-dir') || path.join(app.getPath('userData'), 'data');
+    const out = get('--out') || path.join(process.cwd(), 'horizon-export.zip');
+    const include = (f: string, d = false) => (has(f) ? true : d);
+    const chars = get('--characters')?.split(',').filter(Boolean);
+    const dryRun = has('-n') || has('--dry-run');
+    const exportResult = await runExportCli({
+      dataDir,
+      out,
+      includeGeneral: include('--include-general', true),
+      includeCharacterSettings: include('--include-character-settings', true),
+      includeLogs: include('--include-logs', true),
+      includeDrafts: include('--include-drafts', true),
+      includePinnedConversations: include(
+        '--include-pinned-conversations',
+        true
+      ),
+      includePinnedEicons: include('--include-pinned-eicons', true),
+      includeRecents: include('--include-recents', true),
+      includeHidden: include('--include-hidden', true),
+      characters: chars,
+      dryRun
+    });
+    // Emit a simple summary for cron logs
+    console.log(
+      JSON.stringify({
+        op: 'export',
+        dryRun,
+        out: exportResult.out,
+        characters: exportResult.characters.length
+      })
+    );
+    // Exit without opening any window
+    app.exit(0);
+    return true;
+  }
+
+  if (command === 'import') {
+    const { runImportCli } = await import(
+      './services/importer/backup-import-cli'
+    );
+    const zip = get('--zip');
+    if (!zip) return false;
+    const dataDir =
+      get('--data-dir') || path.join(app.getPath('userData'), 'data');
+    const include = (f: string, d = false) => (has(f) ? true : d);
+    const chars = get('--characters')?.split(',').filter(Boolean);
+    const overwrite = has('--overwrite');
+    const dryRun = has('-n') || has('--dry-run');
+    const importResult = await runImportCli({
+      zip,
+      dataDir,
+      includeGeneral: include('--include-general', true),
+      includeCharacterSettings: include('--include-character-settings', true),
+      includeLogs: include('--include-logs', true),
+      includeDrafts: include('--include-drafts', true),
+      includePinnedConversations: include(
+        '--include-pinned-conversations',
+        true
+      ),
+      includePinnedEicons: include('--include-pinned-eicons', true),
+      includeRecents: include('--include-recents', true),
+      includeHidden: include('--include-hidden', true),
+      overwrite,
+      characters: chars,
+      dryRun
+    });
+    console.log(
+      JSON.stringify({
+        op: 'import',
+        dryRun,
+        zip,
+        touchedCharacters: importResult.touchedCharacters.length,
+        generalImported: importResult.generalImported
+      })
+    );
+    app.exit(0);
+    return true;
+  }
+  return false;
+}
+
+function broadcastConnectedCharacters(): void {
+  for (const w of electron.webContents.getAllWebContents()) {
+    try {
+      w.send('connected-characters-updated', characters.slice());
+    } catch {
+      // ignore
+    }
+  }
+}
 
 const baseDir = app.getPath('userData');
 fs.mkdirSync(baseDir, { recursive: true });
@@ -53,8 +230,9 @@ const settings = new GeneralSettings();
 //We need this, since displaying the changelog is done through a child window instead of an external link
 let showChangelogOnBoot = false;
 
-if (!fs.existsSync(settingsFile)) shouldImportSettings = true;
-else
+if (!fs.existsSync(settingsFile)) {
+  shouldImportSettings = true;
+} else {
   try {
     Object.assign(
       settings,
@@ -63,6 +241,7 @@ else
   } catch (e) {
     log.error(`Error loading settings: ${e}`);
   }
+}
 
 if (!settings.hwAcceleration) {
   log.info('Disabling hardware acceleration.');
@@ -149,7 +328,7 @@ export function openURLExternally(linkUrl: string): void {
     if (fileIsExecutable) {
       // regular expression that looks for an encoded % symbol followed by two hexadecimal characters
       // using this expression, we can find parts of the URL that were encoded twice
-      const re = new RegExp('%25([0-9a-f]{2})', 'ig');
+      const re = /%25([0-9a-f]{2})/gi;
 
       // encode the URL no matter what
       linkUrl = encodeURI(linkUrl);
@@ -163,7 +342,7 @@ export function openURLExternally(linkUrl: string): void {
       }
 
       // replace %s in arguments with URL and encapsulate in quotes to prevent issues with spaces and special characters in the path
-      let link = settings.browserArgs.replace('%s', '\"' + linkUrl + '\"');
+      let link = settings.browserArgs.replace('%s', '"' + linkUrl + '"');
 
       const execFile = require('child_process').exec;
       if (process.platform === 'darwin') {
@@ -184,7 +363,15 @@ export function openURLExternally(linkUrl: string): void {
 
 let zoomLevel = settings.zoomLevel;
 
-function onReady(): void {
+async function onReady(): Promise<void> {
+  try {
+    if (await tryHandleCli()) return;
+  } catch (err) {
+    log.error('cli.run.failed', err);
+    app.exit(1);
+    return;
+  }
+
   let hasCompletedUpgrades = false;
 
   const logLevel = process.env.NODE_ENV === 'production' ? 'info' : 'silly';
@@ -197,7 +384,7 @@ function onReady(): void {
 
   app.setAppUserModelId('net.flist.fchat');
   app.on('open-file', () => {
-    browserWindows.createMainWindow(settings, shouldImportSettings, baseDir);
+    browserWindows.createMainWindow(settings, 'none', baseDir);
   });
   const configurePermissionPolicy = (
     targetSession: electron.Session | null,
@@ -426,7 +613,7 @@ function onReady(): void {
             click: (_m: electron.MenuItem, w: electron.BrowserWindow) => {
               let win = w || electron.BrowserWindow.getFocusedWindow();
               if (!win) return;
-              browserWindows.createChangelogWindow(settings, false, win);
+              browserWindows.createChangelogWindow(settings, 'none', win);
             }
           },
           { type: 'separator' },
@@ -434,11 +621,7 @@ function onReady(): void {
             label: l('action.newWindow'),
             click: () => {
               if (hasCompletedUpgrades)
-                browserWindows.createMainWindow(
-                  settings,
-                  shouldImportSettings,
-                  baseDir
-                );
+                browserWindows.createMainWindow(settings, 'none', baseDir);
             },
             accelerator: 'CmdOrCtrl+n'
           },
@@ -447,19 +630,26 @@ function onReady(): void {
             click: (_m: electron.MenuItem, w: electron.BrowserWindow) => {
               if (hasCompletedUpgrades) browserWindows.openTab(w);
             },
-            id: 'newTab'
+            id: 'newTab',
+            accelerator: 'CmdOrCtrl+Shift+T'
           },
           {
             label: l('action.preferences'),
             click: (_m, window: electron.BrowserWindow) => {
               browserWindows.createSettingsWindow(
                 settings,
-                shouldImportSettings,
+                shouldImportSettings ? 'auto' : 'none',
                 window
               );
             },
             accelerator:
               process.platform === 'darwin' ? 'CmdOrCtrl+,' : undefined
+          },
+          {
+            label: l('settings.export.title'),
+            click: (_m, window: electron.BrowserWindow) => {
+              browserWindows.createExporterWindow(settings, 'none', window);
+            }
           },
           {
             label: l('fixLogs.action'),
@@ -480,23 +670,7 @@ function onReady(): void {
 
           { type: 'separator' },
           { role: 'minimize' },
-          {
-            accelerator: process.platform === 'darwin' ? 'Cmd+Q' : undefined,
-            label: l('action.quit'),
-            click(_m: electron.MenuItem, window: electron.BrowserWindow): void {
-              if (characters.length === 0) return app.quit();
-              const button = electron.dialog.showMessageBoxSync(window, {
-                message: l('chat.confirmLeave'),
-                title: l('title'),
-                buttons: [l('confirmYes'), l('confirmNo')],
-                cancelId: 1
-              });
-              if (button === 0) {
-                browserWindows.quitAllWindows();
-                app.quit();
-              }
-            }
-          }
+          { role: 'quit', label: l('action.quit') }
         ] as MenuItemConstructorOptions[]
       },
       {
@@ -654,7 +828,6 @@ function onReady(): void {
         'https://horizn.moe/download.html?ver=' + updateVersion
       );
       browserWindows.quitAllWindows();
-      app.quit();
     }
   );
   electron.ipcMain.on(
@@ -662,7 +835,7 @@ function onReady(): void {
     (_event: IpcMainEvent, updateVersion: string) => {
       browserWindows.createChangelogWindow(
         settings,
-        true,
+        'none',
         electron.BrowserWindow.getFocusedWindow()!,
         updateVersion
       );
@@ -671,10 +844,23 @@ function onReady(): void {
   electron.ipcMain.on('open-settings-menu', (_event: IpcMainEvent) => {
     browserWindows.createSettingsWindow(
       settings,
-      true,
+      'none',
       electron.BrowserWindow.getFocusedWindow()!
     );
   });
+
+  electron.ipcMain.on(
+    'open-exporter-window',
+    (_event: IpcMainEvent, importHint?: string) => {
+      const targetWindow = electron.BrowserWindow.getFocusedWindow();
+      if (!targetWindow) return;
+      browserWindows.createExporterWindow(
+        settings,
+        importHint as any,
+        targetWindow
+      );
+    }
+  );
 
   electron.ipcMain.on(
     'save-login',
@@ -688,9 +874,13 @@ function onReady(): void {
   electron.ipcMain.on(
     'connect',
     (e: IpcMainEvent & { sender: electron.WebContents }, character: string) => {
-      if (characters.indexOf(character) !== -1) return (e.returnValue = false);
+      if (characters.indexOf(character) !== -1) {
+        e.returnValue = false;
+        return;
+      }
       characters.push(character);
       e.returnValue = true;
+      broadcastConnectedCharacters();
     }
   );
   electron.ipcMain.on(
@@ -714,8 +904,13 @@ function onReady(): void {
     (_event: IpcMainEvent, character: string) => {
       const index = characters.indexOf(character);
       if (index !== -1) characters.splice(index, 1);
+      broadcastConnectedCharacters();
     }
   );
+
+  electron.ipcMain.handle('get-connected-characters', () => {
+    return characters.slice();
+  });
 
   const adCoordinator = new AdCoordinatorHost();
   electron.ipcMain.on('request-send-ad', (event: IpcMainEvent, adId: string) =>
@@ -733,6 +928,10 @@ function onReady(): void {
     // log.info('MENU ZOOM UPDATE', zoomLevel);
     for (const w of electron.webContents.getAllWebContents())
       w.send('update-zoom', zl);
+  });
+
+  electron.ipcMain.on('open-dir', (_e, directory: string) => {
+    electron.shell.openPath(directory);
   });
 
   electron.ipcMain.handle('browser-option-browse', async () => {
@@ -766,8 +965,6 @@ function onReady(): void {
   electron.ipcMain.on(
     'browser-option-update',
     (_e, _path: string, _args: string) => {
-      log.debug('Browser Path settings update:', _path, _args);
-      // store the new path and args in our general settings
       settings.browserPath = _path;
       settings.browserArgs = _args;
       setGeneralSettings(settings);
@@ -810,13 +1007,13 @@ function onReady(): void {
 
   let window = browserWindows.createMainWindow(
     settings,
-    shouldImportSettings,
+    shouldImportSettings ? 'auto' : 'none',
     baseDir
   );
   if (showChangelogOnBoot && window) {
     browserWindows.createChangelogWindow(
       settings,
-      shouldImportSettings,
+      shouldImportSettings ? 'auto' : 'none',
       window
     );
     showChangelogOnBoot = false;
@@ -844,6 +1041,27 @@ else
     });
   });
 app.on('second-instance', () => {
-  browserWindows.createMainWindow(settings, shouldImportSettings, baseDir);
+  browserWindows.createMainWindow(settings, 'none', baseDir);
+});
+app.on('before-quit', (event: Event) => {
+  if (characters.length !== 0) {
+    const focusedWindow = electron.BrowserWindow.getFocusedWindow();
+    //forcing a window to be focused is weird. Let's just make it so that it floats otherwise.
+    const options = {
+      message: l('chat.confirmLeave'),
+      title: l('title'),
+      buttons: [l('confirmYes'), l('confirmNo')],
+      cancelId: 1
+    };
+    const button = focusedWindow
+      ? electron.dialog.showMessageBoxSync(focusedWindow, options)
+      : electron.dialog.showMessageBoxSync(options);
+
+    if (button === 1) {
+      event.preventDefault();
+      return;
+    }
+  }
+  browserWindows.quitAllWindows();
 });
 app.on('window-all-closed', () => app.quit());

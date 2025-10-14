@@ -23,6 +23,13 @@ import l from '../chat/localize';
 const maxTabCount = 7;
 
 /**
+ * Hint to the renderer process about which importer to trigger on startup.
+ *
+ * @typedef {'auto' | 'vanilla' | 'advanced' | 'slimcat' | 'none'} ImporterHint
+ */
+type ImporterHint = 'auto' | 'vanilla' | 'advanced' | 'slimcat' | 'none';
+
+/**
  * Used to store the mapping of character names to their respective web contents from a tab.
  * This allows for quick access to the web contents associated with a specific character.
  * @internal
@@ -191,17 +198,18 @@ export function openTab(w: electron.BrowserWindow) {
  * @function
  * @param {GeneralSettings} settings
  * This contains the general settings for the application.
- * @param {boolean} shouldImportSettings
- * Seemingly unreferenced outside of creating the window.
+ * @param {ImporterHint} ImporterHint
+ * Handles what and how we should import
  * @param {string} baseDir
  * Base directory for the application, used for the ad blocker.
  * @returns {electron.BrowserWindow | undefined}
  */
 export function createMainWindow(
   settings: GeneralSettings,
-  shouldImportSettings: boolean,
+  ImporterHint: ImporterHint,
   baseDir: string
 ): electron.BrowserWindow | undefined {
+  log.info('browser_windows.createMainWindow', { ImporterHint });
   if (tabCount >= maxTabCount) return;
   const lastState = windowState.getSavedWindowState();
 
@@ -212,6 +220,7 @@ export function createMainWindow(
     center: lastState.x === undefined,
     show: false,
     icon: process.platform === 'win32' ? winIcon : pngIcon,
+    transparent: settings.allowWindowTransparency,
     webPreferences: {
       webviewTag: true,
       nodeIntegration: true,
@@ -295,12 +304,12 @@ export function createMainWindow(
   );
 
   // tslint:disable-next-line:no-floating-promises
-  window.loadFile(path.join(__dirname, 'window.html'), {
-    query: {
-      settings: JSON.stringify(settings),
-      import: shouldImportSettings ? 'true' : ''
-    }
-  });
+  const query = {
+    settings: JSON.stringify(settings),
+    import: ImporterHint === 'none' ? '' : ImporterHint
+  };
+  log.info('browser_windows.loadFile', { import: query.import });
+  window.loadFile(path.join(__dirname, 'window.html'), { query });
 
   setUpWebContents(window.webContents, settings);
 
@@ -385,7 +394,10 @@ export function setUpWebContents(
       /^https?:\/\/(www\.)?f-list.net\/c\/([^/#]+)\/?#?/
     );
     if (profileMatch !== null && settings.profileViewer) {
-      webContents.send('open-profile', decodeURIComponent(profileMatch[2]));
+      const characterName = decodeURIComponent(
+        profileMatch[2].replace(/\+/g, '%20')
+      );
+      webContents.send('open-profile', characterName);
       return;
     }
 
@@ -454,7 +466,6 @@ function createTrayMenu(): electron.MenuItemConstructorOptions[] {
       label: l('action.quit'),
       click: () => {
         quitAllWindows();
-        electron.app.quit();
       }
     }
   ];
@@ -500,8 +511,11 @@ export function updateZoomLevel(zoomLevel: number) {
  * Quits all browser windows.
  * @function
  */
-export function quitAllWindows() {
-  for (const w of windows) w.webContents.send('quit');
+export async function quitAllWindows() {
+  for (const w of windows) {
+    w.webContents.send('quit');
+    w.close();
+  }
 }
 
 /**
@@ -529,8 +543,8 @@ export function toggleUpdateNotice(updateAvailable: boolean, version?: string) {
  * @function
  * @param {GeneralSettings} settings
  * The general settings for the application, modified by the user in the settings window.
- * @param {boolean} shouldImportSettings
- * Seemingly unreferenced outside of creating the window.
+ * @param {ImporterHint} ImporterHint
+ * Handles what and how we should import
  * @param {electron.BrowserWindow} parentWindow
  * The parent window for the settings window. This is used to create a modal dialog.
  * @returns {electron.BrowserWindow | undefined}
@@ -538,11 +552,11 @@ export function toggleUpdateNotice(updateAvailable: boolean, version?: string) {
  */
 export function createSettingsWindow(
   settings: GeneralSettings,
-  shouldImportSettings: boolean,
+  ImporterHint: ImporterHint,
   parentWindow: electron.BrowserWindow
 ): electron.BrowserWindow | undefined {
   let desiredHeight = 570;
-  let desiredWidth = 805;
+  let desiredWidth = 885;
 
   const windowProperties: electron.BrowserWindowConstructorOptions = {
     center: true,
@@ -576,7 +590,7 @@ export function createSettingsWindow(
   browserWindow.loadFile(path.join(__dirname, 'settings.html'), {
     query: {
       settings: JSON.stringify(settings),
-      import: shouldImportSettings ? 'true' : ''
+      import: ImporterHint === 'none' ? '' : ImporterHint
     }
   });
 
@@ -592,8 +606,8 @@ export function createSettingsWindow(
  *
  * @param settings
  * The general application settings to be passed to the changelog window.
- * @param shouldImportSettings
- * Seemingly unreferenced outside of creating the window.
+ * @param ImporterHint
+ * Handles what and how we should import
  * @param parentWindow
  * The parent window for the settings window. This is used to create a modal dialog.
  * @param updateVer
@@ -604,7 +618,7 @@ export function createSettingsWindow(
  */
 export function createChangelogWindow(
   settings: GeneralSettings,
-  shouldImportSettings: boolean,
+  ImporterHint: ImporterHint,
   parentWindow: electron.BrowserWindow,
   updateVer?: string
 ): electron.BrowserWindow | undefined {
@@ -643,8 +657,72 @@ export function createChangelogWindow(
   browserWindow.loadFile(path.join(__dirname, 'changelog.html'), {
     query: {
       settings: JSON.stringify(settings),
-      import: shouldImportSettings ? 'true' : '',
-      updateVer: updateVer ? updateVer : ''
+      import: ImporterHint === 'none' ? '' : ImporterHint,
+      updateVer: updateVer || ''
+    }
+  });
+
+  browserWindow.once('ready-to-show', () => {
+    browserWindow.show();
+  });
+
+  return browserWindow;
+}
+
+/**
+ * Creates an exporter window for backing up user data.
+ * @function
+ * @param {GeneralSettings} settings
+ * The general application settings to be passed to the exporter window.
+ * @param {ImporterHint} importHint
+ * Optional hint to the renderer about which importer to trigger.
+ * @param {electron.BrowserWindow} parentWindow
+ * The parent window for the exporter window. This is used to create a modal dialog.
+ * @returns {electron.BrowserWindow | undefined}
+ * Returns the newly created exporter window or undefined if creation failed.
+ */
+export function createExporterWindow(
+  settings: GeneralSettings,
+  importHint: ImporterHint,
+  parentWindow: electron.BrowserWindow
+): electron.BrowserWindow | undefined {
+  let desiredHeight = 720;
+  let desiredWidth = 885;
+
+  const windowProperties: electron.BrowserWindowConstructorOptions = {
+    center: true,
+    show: false,
+    icon: process.platform === 'win32' ? winIcon : pngIcon,
+    frame: false,
+    width: desiredWidth,
+    minWidth: desiredWidth,
+    height: desiredHeight,
+    minHeight: desiredHeight,
+    resizable: true,
+    modal: true,
+    parent: parentWindow,
+    maximizable: false,
+    webPreferences: {
+      webviewTag: true,
+      nodeIntegration: true,
+      nodeIntegrationInWorker: true,
+      spellcheck: true,
+      enableRemoteModule: true,
+      contextIsolation: false,
+      partition: 'persist:fchat'
+    } as any
+  };
+
+  if (process.platform === 'darwin') {
+    windowProperties.titleBarStyle = 'hiddenInset';
+  }
+
+  const browserWindow = new electron.BrowserWindow(windowProperties);
+  remoteMain.enable(browserWindow.webContents);
+  browserWindow.loadFile(path.join(__dirname, 'exporter.html'), {
+    query: {
+      settings: JSON.stringify(settings),
+      import: importHint === 'none' ? '' : importHint
     }
   });
 

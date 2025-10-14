@@ -29,14 +29,19 @@
               <span :class="getResultIcon(result)"></span>
             </span>
 
-            <span class="result-name"
-              >{{ result.name }}
-              <span v-show="hasMentions(result)" class="badge text-bg-warning"
-                >!</span
-              ></span
-            >
+            <span class="result-name">{{ result.name }} </span>
+            <span v-if="hasMentions(result)" class="badge text-bg-warning"
+              ><i class="fa-fw fa-solid fa-exclamation"></i
+            ></span>
+            <span v-else-if="isUnread(result)" class="badge text-bg-danger"
+              ><i class="fa-fw fa-solid fa-ellipsis"></i
+            ></span>
             <span class="result-description" v-if="result.description">
-              {{ result.description }}
+              {{
+                isMostRecent(result)
+                  ? l('quickJump.lastConversation')
+                  : result.description
+              }}
             </span>
           </div>
         </div>
@@ -150,7 +155,10 @@
           name: conversation.name,
           type: 'channel',
           conversation,
-          description: `${conversation.channel.sortedMembers.length} ${l('quickJump.members')}`
+          description: l(
+            'quickJump.members',
+            conversation.channel.sortedMembers.length
+          )
         });
       }
 
@@ -210,7 +218,34 @@
       results.sort((a, b) => {
         if (!a.conversation || !b.conversation) return 0;
 
-        // Prioritize conversations with unread messages
+        //First we want pings
+        if (
+          a.conversation.unread === Conversation.UnreadState.Mention &&
+          b.conversation.unread !== Conversation.UnreadState.Mention
+        ) {
+          return -1;
+        }
+        if (
+          b.conversation.unread === Conversation.UnreadState.Mention &&
+          a.conversation.unread !== Conversation.UnreadState.Mention
+        ) {
+          return 1;
+        }
+
+        if (
+          a.conversation === core.conversations.lastConversation &&
+          b.conversation !== core.conversations.lastConversation
+        ) {
+          return -1;
+        }
+        if (
+          b.conversation === core.conversations.lastConversation &&
+          a.conversation !== core.conversations.lastConversation
+        ) {
+          return 1;
+        }
+
+        //Any other unread states (currently only UnreadState.Unread) that aren't None get prioritized after
         if (
           a.conversation.unread !== Conversation.UnreadState.None &&
           b.conversation.unread === Conversation.UnreadState.None
@@ -339,6 +374,20 @@
       return (
         result.conversation !== undefined &&
         result.conversation.unread === Conversation.UnreadState.Mention
+      );
+    }
+
+    isUnread(result: SearchResult): boolean {
+      return (
+        result.conversation !== undefined &&
+        result.conversation.unread !== Conversation.UnreadState.None
+      );
+    }
+
+    isMostRecent(result: SearchResult): boolean {
+      return (
+        result.conversation !== undefined &&
+        result.conversation === core.conversations.lastConversation
       );
     }
 

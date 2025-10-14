@@ -121,7 +121,7 @@
         :class="{ disabled: !hasAdLogs() }"
       >
         <span class="fa fa-fw fa-ad"></span
-        ><span class="action-label">Show ad log</span>
+        ><span class="action-label">{{ l('user.showAdLog') }}</span>
       </a>
       <a
         tabindex="-1"
@@ -182,7 +182,7 @@
       ref="memo"
       :disabled="memoLoading"
       @submit="updateMemo"
-      buttonText="Save and Close"
+      :buttonText="l('action.saveAndClose')"
       dialogClass="w-100"
       iconClass="fas fa-note-sticky"
     >
@@ -421,8 +421,14 @@
 
     private onClick(character: Character): void {
       this.character = character;
-      if (core.state.settings.clickOpensMessage) this.openConversation(true);
-      else window.open(this.profileLink);
+      // Always open profile for own character, regardless of clickOpensMessage setting
+      if (character.name === core.characters.ownCharacter.name) {
+        window.open(this.profileLink);
+      } else if (core.state.settings.clickOpensMessage) {
+        this.openConversation(true);
+      } else {
+        window.open(this.profileLink);
+      }
       this.showContextMenu = false;
     }
 
@@ -492,14 +498,7 @@
     }
   }
 
-  #userMenu-userInfo,
-  #userMenu-avatar {
-    //display: inline-block;
-  }
-
-  #userMenu-userInfo {
-    //width: 140px;
-  }
+  /* removed empty rulesets */
 
   .userInfo-status {
     opacity: 0.7;
@@ -533,6 +532,10 @@
     background: none;
     width: min-content;
     min-width: 100%;
+  }
+
+  #userMenuStatus {
+    max-width: 100%;
   }
 
   #userMenuMatch {

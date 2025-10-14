@@ -2,48 +2,52 @@
   <modal
     :action="l('characterSearch.action')"
     @submit.prevent="submit()"
-    dialogClass="modal-70"
+    dialogClass="modal-xl modal-80"
     :buttonText="state === 'results' ? l('characterSearch.again') : undefined"
     class="character-search"
     iconClass="fas fa-magnifying-glass"
   >
     <div v-if="options && state === 'search'">
       <div v-show="error" class="alert alert-danger">{{ error }}</div>
-      <filterable-select
-        v-model="data.kinks"
-        :multiple="true"
-        :placeholder="l('filter')"
-        :title="l('characterSearch.kinks')"
-        :filterFunc="filterKink"
-        :options="options.kinks"
-      >
-        <template slot-scope="s">{{ s.option.name }}</template>
-      </filterable-select>
-      <filterable-select
-        v-for="item in listItems"
-        :multiple="true"
-        v-model="data[item]"
-        :placeholder="l('filter')"
-        :title="l('characterSearch.' + item)"
-        :options="options[item]"
-        :key="item"
-      >
-      </filterable-select>
-
-      <filterable-select
-        class="species-filter"
-        v-model="data.species"
-        :filterFunc="filterSpecies"
-        :multiple="true"
-        :placeholder="l('filter')"
-        :title="l('characterSearch.species')"
-        :options="options.species"
-      >
-        <template slot-scope="s"
-          >{{ s.option.shortName }}
-          <small>{{ s.option.details }}</small></template
+      <div class="row align-items-start">
+        <filterable-select
+          v-model="data.kinks"
+          class="col-xl-4 col-lg-6 col-12"
+          :multiple="true"
+          :placeholder="l('filter')"
+          :title="l('characterSearch.kinks')"
+          :filterFunc="filterKink"
+          :options="options.kinks"
         >
-      </filterable-select>
+          <template slot-scope="s">{{ s.option.name }}</template>
+        </filterable-select>
+        <filterable-select
+          v-for="item in listItems"
+          class="col-xl-4 col-lg-6 col-12"
+          :multiple="true"
+          v-model="data[item]"
+          :placeholder="l('filter')"
+          :title="l('characterSearch.' + item)"
+          :options="options[item]"
+          :key="item"
+        >
+        </filterable-select>
+
+        <filterable-select
+          class="col-xl-4 col-lg-6 col-12 species-filter"
+          v-model="data.species"
+          :filterFunc="filterSpecies"
+          :multiple="true"
+          :placeholder="l('filter')"
+          :title="l('characterSearch.species')"
+          :options="options.species"
+        >
+          <template slot-scope="s"
+            >{{ s.option.shortName }}
+            <small>{{ s.option.details }}</small></template
+          >
+        </filterable-select>
+      </div>
 
       <div v-if="searchString" class="search-string">
         Searching for <span>{{ searchString }}</span>
@@ -92,22 +96,28 @@
         :class="'status-' + record.character.status"
       >
         <template v-if="record.character.status === 'looking'" v-once>
-          <img
-            :src="characterImage(record.character.name)"
-            class="character-avatar user"
-            v-if="showAvatars"
-          />
-          <user
-            :character="record.character"
-            :showStatus="true"
-            :match="shouldShowMatch"
-            :avatar="false"
-            :isMarkerShown="shouldShowMarker"
-          ></user>
-          <bbcode
-            :text="record.character.statusText"
-            class="status-text"
-          ></bbcode>
+          <div class="d-flex">
+            <div class="flex-shrink-0">
+              <img
+                :src="characterImage(record.character.name)"
+                class="character-avatar user"
+                v-if="showAvatars"
+              />
+            </div>
+            <div class="w-100 p-2">
+              <user
+                :character="record.character"
+                :showStatus="true"
+                :match="shouldShowMatch"
+                :avatar="false"
+                :isMarkerShown="shouldShowMarker"
+              ></user>
+              <bbcode
+                :text="record.character.statusText"
+                class="status-text"
+              ></bbcode>
+            </div>
+          </div>
         </template>
         <template v-else v-once>
           <user

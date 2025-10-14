@@ -32,7 +32,7 @@ $brown-color: #aa840c;
 $pink-color: #ffcbdb;
 $gray-color: #d3d3d3;
 $orange-color: orange;
-
+$bookmark-color: $green-color;
 .card-header,
 .modal-header,
 .bg-solid-text,
@@ -242,18 +242,24 @@ $genders: (
 );
 
 @each $gender, $color in $genders {
-  .gender-#{$gender} {
-    color: $color;
+  .gender-#{$gender},
+  .gender-icon-#{$gender} {
+    --gender-color: #{$color};
+  }
+
+  .gender-icon-#{$gender},
+  .message-event .gender-icon-#{gender} {
+    color: var(--gender-color);
   }
 
   .message-event .gender-#{$gender} {
-    color: $color;
+    --gender-color: #{$color};
   }
 }
 
 .redText,
 .redNameText {
-  color: #f00;
+  --text-color: #f00;
 }
 
 .bbcode-toolbar .color-selector .btn.text-color.red {
@@ -354,11 +360,6 @@ $genders: (
 }
 .bbcode-toolbar .color-selector .btn.text-color.black {
   background-color: #000;
-}
-
-.user-bookmark,
-.message-event .user-bookmark {
-  color: $green-color;
 }
 
 //@import "../../util/accecss";

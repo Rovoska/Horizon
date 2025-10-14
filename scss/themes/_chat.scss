@@ -37,6 +37,14 @@
 @import '../flist_overrides';
 @import '../rising';
 
+$selection-bg: $primary;
+$selection-color: color-contrast($primary);
+
+::selection {
+  background-color: $selection-bg;
+  color: $selection-color;
+}
+
 // Color contrast overrides for Bootstrap components
 .list-group-item.active {
   color: color-contrast($primary);

@@ -10,13 +10,16 @@ jobs:
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_TESTERS }}
           nodetail: true
+          url: ${{ github.event.release.html_url }}
           title: 'New Prerelease (${{ github.event.release.tag_name }})'
           description: |
-            ${{ github.event.release.body }}
 
             [Download Here](${{ github.event.release.html_url }})
 
             Discuss in <#1409676927995740272>
+
+            ${{ github.event.release.body }}
+
           color: 0x00FF00
           content: '||<@&1409673714890440828>||'
           username: 'Pre-Release Bot'

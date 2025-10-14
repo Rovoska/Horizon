@@ -34,9 +34,18 @@
             target="_blank"
             rel="noopener"
             class="btn"
-            title="Join our Discord"
+            :title="l('chat.joinDiscord')"
           >
             <span class="fab fa-discord"></span>
+          </a>
+          <a
+            href="https://chat.f-list.net/stats/"
+            target="_blank"
+            rel="noopener"
+            class="btn"
+          >
+            <span class="fa fa-chart-line"></span>
+            <span class="btn-text">{{ l('chat.stats') }}</span>
           </a>
 
           <a
@@ -93,7 +102,7 @@
               class="char-icon pin-icon"
               :class="{ pinned: isPinned(character.id) }"
               @click.stop="togglePin(character)"
-              :title="isPinned(character.id) ? 'Unpin' : 'Pin'"
+              :title="isPinned(character.id) ? l('chat.unpin') : l('chat.pin')"
             >
               <i class="fas fa-thumbtack"></i>
             </span>
@@ -101,7 +110,7 @@
             <span
               v-if="character.id === defaultCharacter"
               class="char-icon default-star"
-              title="Default character"
+              :title="l('chat.defaultCharacter')"
             >
               <i class="fas fa-star"></i>
             </span>
@@ -109,7 +118,7 @@
             <div class="avatar-wrap">
               <img
                 :src="characterImage(character.name)"
-                alt="avatar"
+                :alt="l('common.avatar')"
                 class="avatar"
               />
               <div class="avatar-bg"></div>
@@ -164,7 +173,7 @@
   import { InlineDisplayMode, SimpleCharacter } from '../interfaces';
   import { Keys } from '../keys';
   import ChatView from './ChatView.vue';
-  import { errorToString, getKey, characterImage } from './common';
+  import { errorToString, characterImage } from './common';
   import core from './core';
   import l from './localize';
   import Logs from './Logs.vue';
@@ -428,7 +437,11 @@
     }
 
     focusFilter() {
-      this.$refs['filterInput'].focus();
+      const el = this.$refs['filterInput'] as
+        | HTMLInputElement
+        | Vue
+        | undefined;
+      (el as any)?.focus?.();
     }
 
     charTileKeyDown(e: KeyboardEvent): void {

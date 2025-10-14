@@ -1,6 +1,6 @@
 <template>
   <modal
-    action="UI Test"
+    :action="l('ui.test')"
     ref="dialog"
     dialogClass="modal-fullscreen"
     iconClass="fas fa-code"
@@ -10,7 +10,7 @@
       style="flex-shrink: 0; margin-bottom: 10px"
       v-model="selectedTab"
       :fullWidth="true"
-      :tabs="['Generic items', 'Messages']"
+      :tabs="[l('ui.genericItems'), l('ui.messages'), l('ui.messages.modern')]"
     ></tabs>
 
     <div v-show="selectedTab === '0'">
@@ -923,6 +923,234 @@
         <span>This is a message with block style.</span>
       </div>
     </div>
+    <div v-show="selectedTab === '2'">
+      <h2>Modern UI Messages</h2>
+
+      <h3>Ungrouped Messages with BBCode Colors and All Genders</h3>
+      <div class="layout-modern">
+        <div class="message message-message message-modern">
+          <div class="message-avatar-spacer"></div>
+          <div class="message-modern-inner">
+            <div class="message-header">
+              <span class="user-view gender-none">
+                <span
+                  class="user-gender fa fa-fw fa-genderless gender-none"
+                ></span>
+                <span class="user-status fa-fw far fa-user"></span>
+                NoneUser
+              </span>
+              <span class="message-time">10:30</span>
+            </div>
+            <div class="message-content">
+              <span
+                >Testing <span class="redText">red</span>,
+                <span class="blueText">blue</span>,
+                <span class="whiteText">white</span>,
+                <span class="yellowText">yellow</span>,
+                <span class="pinkText">pink</span>,
+                <span class="grayText">gray</span>,
+                <span class="greenText">green</span>,
+                <span class="orangeText">orange</span>,
+                <span class="purpleText">purple</span>,
+                <span class="blackText">black</span>,
+                <span class="brownText">brown</span>, and
+                <span class="cyanText">cyan</span> colors.</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="message message-message message-modern message-own">
+          <div class="message-avatar-spacer"></div>
+          <div class="message-modern-inner">
+            <div class="message-header">
+              <span class="user-view gender-male">
+                <span class="user-gender fa fa-fw fa-mars gender-male"></span>
+                <span class="user-status fa-fw far fa-user"></span>
+                MaleUser
+              </span>
+              <span class="message-time">10:31</span>
+            </div>
+            <div class="message-content">
+              <span
+                >Own message with <span class="redText">red</span>,
+                <span class="blueText">blue</span>,
+                <span class="whiteText">white</span>,
+                <span class="yellowText">yellow</span>,
+                <span class="pinkText">pink</span>,
+                <span class="grayText">gray</span>,
+                <span class="greenText">green</span>,
+                <span class="orangeText">orange</span>,
+                <span class="purpleText">purple</span>,
+                <span class="blackText">black</span>,
+                <span class="brownText">brown</span>, and
+                <span class="cyanText">cyan</span> colors.</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="message message-message message-modern message-highlight">
+          <div class="message-avatar-spacer"></div>
+          <div class="message-modern-inner">
+            <div class="message-header">
+              <span class="user-view gender-female">
+                <span
+                  class="user-gender fa fa-fw fa-venus gender-female"
+                ></span>
+                <span class="user-status fa-fw far fa-user"></span>
+                FemaleUser
+              </span>
+              <span class="message-time">10:32</span>
+            </div>
+            <div class="message-content">
+              <span
+                >Highlighted message with <span class="redText">red</span>,
+                <span class="blueText">blue</span>,
+                <span class="whiteText">white</span>,
+                <span class="yellowText">yellow</span>,
+                <span class="pinkText">pink</span>,
+                <span class="grayText">gray</span>,
+                <span class="greenText">green</span>,
+                <span class="orangeText">orange</span>,
+                <span class="purpleText">purple</span>,
+                <span class="blackText">black</span>,
+                <span class="brownText">brown</span>, and
+                <span class="cyanText">cyan</span> colors.</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="message message-warn message-modern">
+          <div class="message-avatar-spacer"></div>
+          <div class="message-modern-inner">
+            <div class="message-header">
+              <span class="user-view gender-shemale">
+                <span
+                  class="user-gender fa fa-fw fa-mars-and-venus gender-shemale"
+                ></span>
+                <span class="user-status fa-fw far fa-user"></span>
+                ShemaleUser
+              </span>
+              <span class="message-time">10:33</span>
+            </div>
+            <div class="message-content">
+              <i class="message-pre fa fa-fw fa-triangle-exclamation"></i>
+              <span
+                >Warning message with <span class="redText">red</span>,
+                <span class="blueText">blue</span>,
+                <span class="whiteText">white</span>,
+                <span class="yellowText">yellow</span>,
+                <span class="pinkText">pink</span>,
+                <span class="grayText">gray</span>,
+                <span class="greenText">green</span>,
+                <span class="orangeText">orange</span>,
+                <span class="purpleText">purple</span>,
+                <span class="blackText">black</span>,
+                <span class="brownText">brown</span>, and
+                <span class="cyanText">cyan</span> colors.</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Grouped Messages by Same User</h3>
+      <div class="layout-modern">
+        <div class="message message-message message-modern">
+          <div class="message-avatar-spacer"></div>
+          <div class="message-modern-inner">
+            <div class="message-header">
+              <span class="user-view gender-herm">
+                <span
+                  class="user-gender fa fa-fw fa-mercury gender-herm"
+                ></span>
+                <span class="user-status fa-fw far fa-user"></span>
+                HermUser
+              </span>
+              <span class="message-time">10:34</span>
+            </div>
+            <div class="message-content">
+              <span
+                >Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore et dolore magna
+                aliqua.</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="message message-message message-modern message-highlight">
+          <div class="message-avatar-spacer">
+            <span class="message-time">10:35</span>
+          </div>
+          <div class="message-modern-inner">
+            <div class="message-content">
+              <span
+                >Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                laboris nisi ut aliquip ex ea commodo consequat.</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="message message-warn message-modern">
+          <div class="message-avatar-spacer">
+            <span class="message-time">10:36</span>
+          </div>
+          <div class="message-modern-inner">
+            <div class="message-content">
+              <i class="message-pre fa fa-fw fa-triangle-exclamation"></i>
+              <span
+                >Duis aute irure dolor in reprehenderit in voluptate velit esse
+                cillum dolore eu fugiat nulla pariatur.</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <h3>Grouped Messages by You</h3>
+      <div class="layout-modern">
+        <div class="message message-message message-modern message-own">
+          <div class="message-avatar-spacer"></div>
+          <div class="message-modern-inner">
+            <div class="message-header">
+              <span class="user-view gender-herm">
+                <span
+                  class="user-gender fa fa-fw fa-mercury gender-none"
+                ></span>
+                <span class="user-status fa-fw far fa-user"></span>
+                You
+              </span>
+              <span class="message-time">10:34</span>
+            </div>
+            <div class="message-content">
+              <span
+                >Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididunt ut labore et dolore magna
+                aliqua.</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="message message-warn message-modern message-own">
+          <div class="message-avatar-spacer">
+            <span class="message-time">10:36</span>
+          </div>
+          <div class="message-modern-inner">
+            <div class="message-content">
+              <i class="message-pre fa fa-fw fa-triangle-exclamation"></i>
+              <span
+                >Duis aute irure dolor in reprehenderit in voluptate velit esse
+                cillum dolore eu fugiat nulla pariatur.</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </modal>
 </template>
 
@@ -931,11 +1159,13 @@
   import CustomDialog from '../components/custom_dialog';
   import Modal from '../components/Modal.vue';
   import Tabs from '../components/tabs';
+  import l from './localize';
 
   @Component({
     components: { modal: Modal, tabs: Tabs }
   })
   export default class UITest extends CustomDialog {
     selectedTab = '0';
+    l = l;
   }
 </script>

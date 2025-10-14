@@ -173,20 +173,24 @@ export class ProfileRecommendationAnalyzer {
   }
 
   protected checkCustomKinks(): void {
+    //we define it here, because we want to make sure this array is typed as a string[]
+    let unfilledList: string[] = [];
     const counts = _.reduce(
       this.profile.character.customs,
       (accum, kink) => {
         if (kink) {
           accum.total += 1;
 
-          if (kink.description && kink.description.trim().length > 0) {
+          if (kink.description && kink.description.length > 0) {
             accum.filled += 1;
+          } else {
+            accum.unfilledList.push(kink.name);
           }
         }
 
         return accum;
       },
-      { filled: 0, total: 0 }
+      { filled: 0, total: 0, unfilledList }
     );
 
     if (counts.total === 0) {
@@ -212,7 +216,7 @@ export class ProfileRecommendationAnalyzer {
         `ADD_MORE_CUSTOM_KINK_DESCRIPTIONS`,
         ProfileRecommendationLevel.NOTE,
         'Add descriptions to custom kinks',
-        `Some or all of your custom kinks are missing descriptions. Add descriptions to your custom kinks to attract more players.`,
+        `Some or all of your custom kinks are missing descriptions. Add descriptions to your custom kinks to attract more players: ${counts.unfilledList}`,
         'https://wiki.f-list.net/Guide:_Character_Profiles#Custom_Kinks'
       );
     }

@@ -10,7 +10,9 @@
       class="border-bottom"
       id="window-tabs"
     >
-      <h4 style="padding: 2px 0" class="d-md-block d-none">{{ l('title') }}</h4>
+      <h4 style="padding: 2px 0" class="d-md-block d-none">
+        {{ l(windowTitleKey) }}
+      </h4>
       <div class="btn btn-light" @click="openMenu" id="settings">
         <i class="fas fa-bars"></i>
       </div>
@@ -120,6 +122,7 @@
   import { GeneralSettings, getSyncedTheme } from './common';
   import { getSafeLanguages, updateSupportedLanguages } from './language';
   import log from 'electron-log';
+  import { Dialog } from '../helpers/dialog';
 
   const browserWindow = remote.getCurrentWindow();
 
@@ -185,6 +188,7 @@
     hasNew: boolean;
     avatarUrl?: string;
     insertedCssKey?: string;
+    title: string;
   }
 
   // console.log(require('./build/tray.png').default);
@@ -194,6 +198,7 @@
   @Component
   export default class Window extends Vue {
     settings!: GeneralSettings;
+    importHint: string | undefined;
     tabs: Tab[] = [];
     activeTab: Tab | undefined;
     tabMap: { [key: number]: Tab } = {};
@@ -206,6 +211,8 @@
     platform = process.platform;
     lockTab = false;
     hasCompletedUpgrades = false;
+    windowTitleKey: string =
+      process.env.NODE_ENV === 'production' ? 'title' : 'title.dev';
 
     @Hook('mounted')
     async mounted(): Promise<void> {
@@ -296,6 +303,8 @@
         (_e: Electron.IpcRendererEvent, id: number, name: string) => {
           const tab = this.tabMap[id];
           tab.user = name;
+          tab.title = l('title.connected', name);
+          this.refreshWindowTitle();
           const menu = this.createTrayMenu(tab);
           menu.unshift(
             { label: tab.user, enabled: false },
@@ -352,6 +361,8 @@
             );
           }
           tab.user = undefined;
+          tab.title = l('title');
+          this.refreshWindowTitle();
           Vue.set(tab, 'avatarUrl', undefined);
         }
       );
@@ -440,7 +451,7 @@
         }
         if (!this.settings.closeToTray)
           return setImmediate(() => {
-            if (confirm(l('chat.confirmLeave'))) {
+            if (Dialog.confirmDialog(l('chat.confirmLeave'))) {
               this.destroyAllTabs();
               browserWindow.close();
             }
@@ -469,6 +480,13 @@
       browserWindow.setBrowserView(null!); //tslint:disable-line:no-null-keyword
       this.tabs.forEach(destroyTab);
       this.tabs = [];
+    }
+
+    refreshWindowTitle() {
+      document.title =
+        this.settings.horizonWindowTitleCharacter && this.activeTab
+          ? this.activeTab.title
+          : l('title');
     }
 
     get styling(): string {
@@ -551,7 +569,13 @@
 
       log.debug('init.window.tab.add.notify');
 
-      const tab = { active: false, view, user: undefined, hasNew: false };
+      const tab = {
+        active: false,
+        view,
+        user: undefined,
+        hasNew: false,
+        title: l('title')
+      };
       this.tabs.push(tab);
       this.tabMap[view.webContents.id] = tab;
 
@@ -568,7 +592,8 @@
         slashes: true,
         query: {
           settings: JSON.stringify(this.settings),
-          hasCompletedUpgrades: JSON.stringify(this.hasCompletedUpgrades)
+          hasCompletedUpgrades: JSON.stringify(this.hasCompletedUpgrades),
+          import: this.importHint || ''
         }
       });
 
@@ -601,6 +626,7 @@
       browserWindow.setBrowserView(tab.view);
       tab.view.setBounds(getWindowBounds());
       tab.view.webContents.focus();
+      this.refreshWindowTitle();
 
       // tab.view.webContents.send('active-tab', { webContentsId: tab.view.webContents.id });
       _.each(this.tabs, t =>
@@ -615,7 +641,7 @@
         this.lockTab ||
         (shouldConfirm &&
           tab.user !== undefined &&
-          !confirm(l('chat.confirmLeave')))
+          !Dialog.confirmDialog(l('chat.confirmLeave')))
       )
         return;
       this.tabs.splice(this.tabs.indexOf(tab), 1);

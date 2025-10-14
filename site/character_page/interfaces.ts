@@ -22,6 +22,17 @@ export interface StoreMethods {
     description: string,
     choice: KinkChoice
   ): Promise<void>;
+  /**
+   * This is the, "I need the data returned right now" version of `CacheManager.addProfile`. Where that function adds the profile fetching to a queue (which calls characterData then adds the character profile to the profile cache), this function directly returns the character profile.
+   *
+   * All values are passed to `executeCharacterData`.
+   * @param name Character name
+   * @param definitions Custom kink definitions to use? Otherwise, {@link Store.shared} is used.
+   * @param skipEvent (Default: false) Do not emit the `character-data` {@link EventBus | `EventBus`} event.
+   * @returns Character with name `name`
+   *
+   * Comment imported from Frolic; may be inaccurate if significant changes occured.
+   */
   characterData(
     name: string | undefined,
     id: number | undefined,
@@ -137,6 +148,9 @@ export interface CharacterMemo {
   memo: string;
 }
 
+/**
+ * Character page API response (including the public character page as `character`).
+ */
 export interface Character {
   readonly is_self: boolean;
   character: CharacterInfo;

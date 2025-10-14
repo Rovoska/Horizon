@@ -30,6 +30,7 @@ export class GeneralSettings {
   host = defaultHost;
   logDirectory = path.join(electron.app.getPath('userData'), 'data');
   spellcheckLang: string[] | string | undefined = [getDefaultLanguage()];
+  displayLanguage: string = 'en_us';
   theme = 'default';
   themeSync: boolean = false;
   themeSyncDark: string = 'dark';
@@ -53,8 +54,15 @@ export class GeneralSettings {
   soundTheme = 'default';
   soundThemeSoundVolumes: { [theme: string]: { [sound: string]: number } } = {};
   horizonAutoLogin: boolean = false;
+  horizonWindowTitleCharacter: boolean = false;
   use12HourTime: boolean = false;
+  showSeconds: boolean = false;
   fuzzyDates: boolean = true;
+  allowWindowTransparency: boolean = false;
+  horizonForceAsciiProfiles: boolean = false;
+  hasImportedVanillaLogs: boolean = false;
+  hasDismissedVanillaImport: boolean = false;
+  vanillaCustomBaseDir: string | undefined = undefined;
 }
 
 log.debug('init.common.done');

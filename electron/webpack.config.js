@@ -84,6 +84,11 @@ const mainConfig = {
         path.join(__dirname, 'changelog.html'),
         path.join(__dirname, 'build', 'tray@2x.png')
       ],
+      exporter: [
+        path.join(__dirname, 'exporter.ts'),
+        path.join(__dirname, 'exporter.html'),
+        path.join(__dirname, 'build', 'tray@2x.png')
+      ],
       about: [
         path.join(__dirname, 'about.ts'),
         path.join(__dirname, 'about.html'),
@@ -217,52 +222,6 @@ const mainConfig = {
               .replace(/\\/g, '/'),
             to: path.join('preview', 'assets'),
             context: path.resolve(__dirname, '..', 'chat', 'preview', 'assets')
-          },
-          {
-            from: path
-              .resolve(
-                __dirname,
-                '..',
-                'node_modules',
-                '@cliqz',
-                'adblocker-electron-preload',
-                'dist',
-                'preload.cjs.js'
-              )
-              .replace(/\\/g, '/'),
-            to: path.join('preview', 'assets', 'adblocker', 'preload.cjs.js'),
-            toType: 'file',
-            context: path.resolve(
-              __dirname,
-              '..',
-              'node_modules',
-              '@cliqz',
-              'adblocker-electron-preload',
-              'dist'
-            )
-          },
-          {
-            from: path
-              .resolve(
-                __dirname,
-                '..',
-                'node_modules',
-                '@cliqz',
-                'adblocker-electron-preload',
-                'dist',
-                'preload.es6.js'
-              )
-              .replace(/\\/g, '/'),
-            to: path.join('preview', 'assets', 'adblocker', 'preload.js'),
-            toType: 'file',
-            context: path.resolve(
-              __dirname,
-              '..',
-              'node_modules',
-              '@cliqz',
-              'adblocker-electron-preload',
-              'dist'
-            )
           },
           {
             from: path

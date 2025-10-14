@@ -2,6 +2,9 @@
   <div
     class="bbcode-editor"
     style="display: flex; flex-wrap: wrap; justify-content: flex-end"
+    @keydown="onKeyDownGlobal"
+    tabindex="1"
+    ref="editorContainer"
   >
     <slot></slot>
     <a
@@ -15,11 +18,19 @@
     >
       <i class="fa fa-code"></i>
     </a>
+
+    <EIconSelector
+      :onSelect="onSelectEIcon"
+      ref="eIconSelector"
+    ></EIconSelector>
+
     <div
       class="bbcode-toolbar btn-toolbar"
       role="toolbar"
       :disabled="disabled"
-      :style="showToolbar ? { display: 'flex' } : undefined"
+      :style="
+        showToolbar || colorPopupVisible ? { display: 'flex' } : undefined
+      "
       @mousedown.stop.prevent
       v-if="hasToolbar"
       style="flex: 1 51%"
@@ -45,24 +56,19 @@
               >
             </div>
           </div>
-          <div class="btn-group" role="group" aria-label="Color">
+          <div class="btn-group" role="group" :aria-label="l('common.color')">
             <button
               v-for="btnCol in buttonColors"
               type="button"
               class="btn text-color"
               :class="btnCol"
               :title="btnCol"
-              @click.prevent.stop="colorApply(btnCol)"
+              @click.prevent.stop="applyAndClearColor(btnCol)"
               tabindex="0"
             ></button>
           </div>
         </div>
       </div>
-
-      <EIconSelector
-        :onSelect="onSelectEIcon"
-        ref="eIconSelector"
-      ></EIconSelector>
 
       <div class="btn-group toolbar-buttons" style="flex-wrap: wrap">
         <div v-if="!!characterName" class="character-btn">
@@ -82,9 +88,13 @@
         </div>
         <div
           @click="previewBBCode"
-          class="btn btn-light btn-sm"
+          class="btn btn-light btn-sm bbcode-editor-preview"
           :class="preview ? 'active' : ''"
-          :title="preview ? 'Close Preview' : 'Preview'"
+          :title="
+            preview
+              ? l('editor.closePreview', `${this.shortcutModifierKey}+Shift+P`)
+              : l('editor.preview', `${this.shortcutModifierKey}+Shift+P`)
+          "
         >
           <i class="fa fa-eye"></i>
         </div>
@@ -92,7 +102,7 @@
       <button
         type="button"
         class="btn-close"
-        aria-label="Close"
+        :aria-label="l('action.close')"
         style="margin-left: 10px"
         @click="showToolbar = false"
       ></button>
@@ -138,12 +148,14 @@
   import { getKey } from '../chat/common';
   import { Keys } from '../keys';
   import { BBCodeElement, CoreBBCodeParser, urlRegex } from './core';
+  import core from '../chat/core';
   import { defaultButtons, EditorButton, EditorSelection } from './editor';
   import { BBCodeParser } from './parser';
   import { default as IconView } from './IconView.vue';
   import { default as EIconSelector } from './EIconSelector.vue';
   import Modal from '../components/Modal.vue';
   import { Character } from '../fchat';
+  import l from '../chat/localize';
 
   @Component({
     components: {
@@ -153,6 +165,7 @@
     mixins: [clickaway]
   })
   export default class Editor extends Vue {
+    l = l;
     @Prop
     readonly extras?: EditorButton[];
 
@@ -209,7 +222,7 @@
     maxHeight!: number;
     minHeight!: number;
     showToolbar = false;
-
+    shortcutModifierKey: String = process.platform == 'darwin' ? '⌘' : 'Ctrl';
     protected parser!: BBCodeParser;
     protected defaultButtons = defaultButtons;
 
@@ -296,6 +309,7 @@
       this.sizer.style.visibility = 'hidden';
       this.resize();
       window.addEventListener('resize', this.resizeListener);
+      this.editorContainer = this.$refs['editorContainer'] as HTMLElement;
     }
 
     //tslint:enable
@@ -506,6 +520,22 @@
       this.lastInput = Date.now();
     }
 
+    //By "global" we mean global to the editor, not for the entire page.
+    //They fire when the editor element is focused, not the text box.
+    onKeyDownGlobal(e: KeyboardEvent): void {
+      const key = getKey(e);
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && key === Keys.KeyP) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.togglePreview();
+      }
+      if ((key === Keys.Enter || key === Keys.Space) && this.preview) {
+        e.stopPropagation();
+        e.preventDefault();
+        this.togglePreview();
+      }
+    }
+
     onKeyDown(e: KeyboardEvent): void {
       const key = getKey(e);
       if (this.awaitingColorKey) {
@@ -579,7 +609,11 @@
             this.lastInput = Date.now();
           }
         }
-        if (key === Keys.KeyD) {
+        if (
+          this.hasToolbar &&
+          core.state.settings.horizonUseColorPicker &&
+          key === Keys.KeyD
+        ) {
           e.stopPropagation();
           e.preventDefault();
           this.awaitingColorKey = true;
@@ -622,7 +656,14 @@
       const data = e.clipboardData!.getData('text/plain');
       if (!this.isShiftPressed && urlRegex.test(data)) {
         e.preventDefault();
-        this.applyText(`[url=${data}]`, '[/url]');
+        console.log('bbcode.url.paste', data);
+
+        //we only replace the brackets instead of trying to force the whole path to be escaped because
+        //these two characters give us trouble with BBCode and the rest can just be picked up by the browser anyway
+        this.applyText(
+          `[url=${data.replace('[', '%5B').replace(']', '%5D')}]`,
+          '[/url]'
+        );
       }
     }
 
@@ -651,6 +692,18 @@
         targetElement.appendChild(this.parser.parseEverything(this.text));
         this.previewWarnings = this.parser.warnings;
         this.parser.storeWarnings = false;
+      }
+    }
+
+    togglePreview(): void {
+      this.doPreview();
+      // If we're in preview mode, we need to ensure focus is maintained
+      if (this.preview) {
+        this.$nextTick(() => {
+          this.editorContainer.focus();
+        });
+      } else {
+        this.$nextTick(() => this.focus());
       }
     }
   }
@@ -682,6 +735,12 @@
 
   .bbcode-editor {
     resize: none;
+    &:focus {
+      outline: none;
+      .bbcode-editor-preview {
+        outline: 2px ridge var(--bs-primary-border-subtle);
+      }
+    }
   }
 
   .bbcode-toolbar {

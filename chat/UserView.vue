@@ -187,7 +187,7 @@
         } else {
           genderClass =
             `fa ${getGenderIcon(character.gender, character.status)}` +
-            ` gender-${gender}`;
+            ` gender-icon-${gender}`;
         }
       }
     }
@@ -246,6 +246,9 @@
 
     @Prop({ default: false })
     readonly isMarkerShown: boolean = false;
+
+    @Prop({ default: false })
+    readonly useOriginalAvatar: boolean = false;
 
     userClass = '';
 
@@ -348,9 +351,10 @@
       this.matchClass = res.matchClass;
       this.matchScore = res.matchScore;
       this.userClass = res.userClass;
-      this.avatarUrl =
-        this.character.overrides.avatarUrl ||
-        characterImage(this.character.name);
+      this.avatarUrl = characterImage(
+        this.character.name,
+        this.useOriginalAvatar
+      );
     }
 
     getMatchScoreTitle(score: number | string | null): string {

@@ -105,16 +105,18 @@
     </div>
     <div
       class="messages messages-both hidden-scrollbar"
+      :class="layoutClasses"
       style="overflow: auto; overscroll-behavior: none"
       ref="messages"
       tabindex="-1"
       @scroll="onMessagesScroll"
     >
       <message-view
-        v-for="message in displayedMessages"
+        v-for="(message, i) in displayedMessages"
         :message="message"
         :key="message.id"
         :logs="true"
+        :previous="displayedMessages[i - 1]"
       ></message-view>
     </div>
     <div class="input-group" style="flex-shrink: 0">
@@ -144,7 +146,7 @@
   import { Conversation, Logs as LogInterface } from './interfaces';
   import l from './localize';
   import MessageView from './message_view';
-  import Zip from './zip';
+  import AdmZip from 'adm-zip';
   import { Dialog } from '../helpers/dialog';
 
   function formatDate(this: void, date: Date): string {
@@ -173,13 +175,30 @@
                 }
               : undefined,
             html
-              ? t => `${core.bbCodeParser.parseEverything(t).innerHTML}`
+              ? t => {
+                  const parsedElement = core.bbCodeParser.parseEverything(t);
+                  const result = parsedElement.innerHTML;
+                  parsedElement.cleanup?.();
+                  return `${result}`;
+                }
               : undefined
           ),
         start
       ) +
       '</div>'
     );
+  }
+
+  function getMessageWrapperClasses(): any {
+    const classes: any = {};
+    let layout: 'classic' | 'modern' = 'classic';
+    try {
+      layout = (core.state as any)._settings?.chatLayoutMode || 'classic';
+    } catch (_) {
+      layout = 'classic';
+    }
+    classes['layout-' + layout] = true;
+    return classes;
   }
 
   @Component({
@@ -192,6 +211,7 @@
   export default class Logs extends CustomDialog {
     @Prop
     readonly conversation?: Conversation;
+    core = core;
     conversations: LogInterface.Conversation[] = [];
     selectedConversation: LogInterface.Conversation | undefined;
     dates: ReadonlyArray<Date> = [];
@@ -209,6 +229,9 @@
     windowStart = 0;
     windowEnd = 0;
     resizeListener = async () => this.onMessagesScroll();
+    get layoutClasses(): any {
+      return getMessageWrapperClasses();
+    }
 
     get displayedMessages(): ReadonlyArray<Conversation.Message> {
       if (this.selectedDate !== undefined) return this.filteredMessages;
@@ -318,6 +341,49 @@
       });
     }
 
+    sanitizeConversationName(name: string): string {
+      /*
+       * Replace characters that are forbidden in paths with an underscore.
+       * This list should cover Unix, Windows and macOS.
+       * Files and folders also may not end with spaces.
+       */
+      let sanitizedName = name.replace(/[\/<>:"\\|?*.]/g, '_').trimRight();
+
+      /*
+       * For Windows, certain names are forbidden, too.
+       */
+      if (
+        [
+          'CON',
+          'PRN',
+          'AUX',
+          'NUL',
+          'COM1',
+          'COM2',
+          'COM3',
+          'COM4',
+          'COM5',
+          'COM6',
+          'COM7',
+          'COM8',
+          'COM9',
+          'LPT1',
+          'LPT2',
+          'LPT3',
+          'LPT4',
+          'LPT5',
+          'LPT6',
+          'LPT7',
+          'LPT8',
+          'LPT9'
+        ].includes(sanitizedName)
+      ) {
+        sanitizedName += '_';
+      }
+
+      return sanitizedName;
+    }
+
     downloadDay(): void {
       if (
         this.selectedConversation === undefined ||
@@ -326,7 +392,7 @@
       )
         return;
       const html = Dialog.confirmDialog(l('logs.html'));
-      const name = `${this.selectedConversation.name}-${formatDate(new Date(this.selectedDate))}.${html ? 'html' : 'txt'}`;
+      const name = `${this.sanitizeConversationName(this.selectedConversation.name)}-${formatDate(new Date(this.selectedDate))}.${html ? 'html' : 'txt'}`;
       this.download(
         name,
         `data:${encodeURIComponent(name)},${encodeURIComponent(getLogs(this.messages, html))}`
@@ -335,7 +401,7 @@
 
     async downloadConversation(): Promise<void> {
       if (this.selectedConversation === undefined) return;
-      const zip = new Zip();
+      const zip = new AdmZip();
       const html = Dialog.confirmDialog(l('logs.html'));
       for (const date of this.dates) {
         const messages = await core.logs.getLogs(
@@ -345,12 +411,12 @@
         );
         zip.addFile(
           `${formatDate(date)}.${html ? 'html' : 'txt'}`,
-          getLogs(messages, html)
+          Buffer.from(getLogs(messages, html), 'utf-8')
         );
       }
       this.download(
-        `${this.selectedConversation.name}.zip`,
-        URL.createObjectURL(zip.build())
+        `${this.sanitizeConversationName(this.selectedConversation.name)}.zip`,
+        URL.createObjectURL(new Blob([zip.toBuffer()]))
       );
     }
 
@@ -360,14 +426,19 @@
         !Dialog.confirmDialog(l('logs.confirmExport', this.selectedCharacter))
       )
         return;
-      const zip = new Zip();
+      const zip = new AdmZip();
       const html = Dialog.confirmDialog(l('logs.html'));
+      const existingConversationNames = new Array<string>();
       for (const conv of this.conversations) {
-        zip.addFile(`${conv.name}/`, '');
         const dates = await core.logs.getLogDates(
           this.selectedCharacter,
           conv.key
         );
+        let sanitizedConvName = this.sanitizeConversationName(conv.name);
+        while (existingConversationNames.includes(sanitizedConvName)) {
+          sanitizedConvName += '_';
+        }
+        existingConversationNames.push(sanitizedConvName);
         for (const date of dates) {
           const messages = await core.logs.getLogs(
             this.selectedCharacter,
@@ -375,14 +446,14 @@
             date
           );
           zip.addFile(
-            `${conv.name}/${formatDate(date)}.${html ? 'html' : 'txt'}`,
-            getLogs(messages, html)
+            `${sanitizedConvName}/${formatDate(date)}.${html ? 'html' : 'txt'}`,
+            Buffer.from(getLogs(messages, html), 'utf-8')
           );
         }
       }
       this.download(
         `${this.selectedCharacter}.zip`,
-        URL.createObjectURL(zip.build())
+        URL.createObjectURL(new Blob([zip.toBuffer()]))
       );
     }
 

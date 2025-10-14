@@ -11,6 +11,7 @@ const params = <{ [key: string]: string | undefined }>(
   qs.parse(window.location.search.substr(1))
 );
 const settings = <GeneralSettings>JSON.parse(params['settings']!);
+const importHint = params['import'];
 
 const logLevel = process.env.NODE_ENV === 'production' ? 'info' : 'silly';
 
@@ -23,7 +24,7 @@ log.info('init.window.vue', Vue.version);
 //tslint:disable-next-line:no-unused-expression
 export default new Window({
   el: '#app',
-  data: { settings }
+  data: { settings, importHint }
 });
 
 log.debug('init.window.vue.done');

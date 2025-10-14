@@ -15,15 +15,15 @@
       :tabs="[
         l('settings.tabs.general'),
         l('settings.tabs.notifications'),
-        'Horizon ✨',
-        'Smart Filters ✨',
+        l('settings.tabs.horizon'),
+        l('settings.tabs.smartFilters'),
         l('settings.tabs.hideAds'),
         l('settings.tabs.import')
       ]"
     ></tabs>
     <div v-show="selectedTab === '0'">
       <div class="warning">
-        <h5>Heads up!</h5>
+        <h5>{{ l('warning.info') }}</h5>
         <div>
           {{ l('settings.charactersToGeneral') }}
         </div>
@@ -188,7 +188,7 @@
       </div>
       <div class="mb-3">
         <label class="control-label" for="fontSize">{{
-          l('settings.fontSize')
+          l('settings.experimental', l('settings.fontSize'))
         }}</label>
         <input
           id="fontSize"
@@ -316,7 +316,7 @@
       </div>
     </div>
     <div v-show="selectedTab === '2'">
-      <h5>Matching</h5>
+      <h5>{{ l('settings.matching') }}</h5>
 
       <div class="mb-3">
         <div class="form-check">
@@ -327,8 +327,7 @@
             v-model="risingAdScore"
           />
           <label class="form-check-label" for="risingAdScore">
-            Colorize ads, profiles, and names of compatible and incompatible
-            characters
+            {{ l('settings.matching.adScore') }}
           </label>
         </div>
       </div>
@@ -342,7 +341,7 @@
             v-model="risingComparisonInUserMenu"
           />
           <label class="form-check-label" for="risingComparisonInUserMenu">
-            Show quick match results in the right click character menu
+            {{ l('settings.matching.comparisonInUserMenu') }}
           </label>
         </div>
       </div>
@@ -356,7 +355,7 @@
             v-model="risingComparisonInSearch"
           />
           <label class="form-check-label" for="risingComparisonInSearch">
-            Show quick match results in the search results
+            {{ l('settings.matching.comparisonInSearch') }}
           </label>
         </div>
       </div>
@@ -368,7 +367,7 @@
       <!--                </label>-->
       <!--            </div>-->
 
-      <h5>Preview</h5>
+      <h5>{{ l('settings.preview') }}</h5>
 
       <div class="mb-3">
         <div class="form-check">
@@ -379,7 +378,7 @@
             v-model="risingLinkPreview"
           />
           <label class="form-check-label" for="risingLinkPreview">
-            Show a link/image preview when the mouse hovers over a link
+            {{ l('settings.preview.link') }}
           </label>
         </div>
       </div>
@@ -393,12 +392,12 @@
             v-model="risingCharacterPreview"
           />
           <label class="form-check-label" for="risingCharacterPreview">
-            Show a character preview when the mouse hovers over a character name
+            {{ l('settings.preview.character') }}
           </label>
         </div>
       </div>
 
-      <h5>Profile</h5>
+      <h5>{{ l('settings.profile') }}</h5>
 
       <div class="mb-3">
         <div class="form-check">
@@ -409,7 +408,7 @@
             v-model="risingAutoCompareKinks"
           />
           <label class="form-check-label" for="risingAutoCompareKinks">
-            Automatically compare kinks when viewing a character profile
+            {{ l('settings.profile.autoCompareKinks') }}
           </label>
         </div>
       </div>
@@ -423,12 +422,12 @@
             v-model="risingAutoExpandCustomKinks"
           />
           <label class="form-check-label" for="risingAutoExpandCustomKinks">
-            Automatically expand custom kinks
+            {{ l('settings.profile.autoExpandCustoms') }}
           </label>
         </div>
       </div>
 
-      <h5>Draft Messages</h5>
+      <h5>{{ l('settings.horizonDraftMessages') }}</h5>
 
       <div class="mb-3">
         <div class="form-check">
@@ -453,12 +452,12 @@
           type="number"
           class="form-control"
           v-model="horizonSaveDraftMessagesToDiskTimer"
-          placeholder="60"
+          :placeholder="'60'"
           min="5"
         />
       </div>
 
-      <h5>Misc</h5>
+      <h5>{{ l('settings.misc') }}</h5>
 
       <div class="mb-3">
         <div class="form-check">
@@ -478,12 +477,45 @@
           <input
             class="form-check-input"
             type="checkbox"
+            id="horizonShowSigninNotifications"
+            v-model="horizonShowSigninNotifications"
+          />
+          <label class="form-check-label" for="horizonShowSigninNotifications">
+            {{ l('settings.showSigninNotifications') }}
+          </label>
+        </div>
+      </div>
+      <div class="mb-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
             id="horizonNotifyFriendSignIn"
+            :disabled="!horizonShowSigninNotifications"
             v-model="horizonNotifyFriendSignIn"
           />
           <label class="form-check-label" for="horizonNotifyFriendSignIn">
-            Notify when friends or bookmarks sign in.
+            {{ l('settings.notifyFriendSignIn') }}
           </label>
+        </div>
+      </div>
+      <div class="mb-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="horizonShowDuplicateStatusNotifications"
+            v-model="horizonShowDuplicateStatusNotifications"
+          />
+          <label
+            class="form-check-label"
+            for="horizonShowDuplicateStatusNotifications"
+          >
+            {{ l('settings.showDuplicateStatusNotifications') }}
+          </label>
+          <div class="form-text text-muted">
+            {{ l('settings.showDuplicateStatusNotifications.note') }}
+          </div>
         </div>
       </div>
       <div class="mb-3">
@@ -495,7 +527,7 @@
             v-model="risingColorblindMode"
           />
           <label class="form-check-label" for="risingColorblindMode">
-            Colorblind mode
+            {{ l('settings.colorblindMode') }}
           </label>
         </div>
       </div>
@@ -509,7 +541,22 @@
             v-model="risingShowPortraitNearInput"
           />
           <label class="form-check-label" for="risingShowPortraitNearInput">
-            Show character portrait by text input
+            {{ l('settings.showPortraitNearInput') }}
+          </label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="horizonUseColorPicker"
+            v-model="horizonUseColorPicker"
+            :disabled="!bbCodeBar"
+          />
+          <label class="form-check-label" for="horizonUseColorPicker">
+            {{ l('settings.horizonUseColorPicker') }}
           </label>
         </div>
       </div>
@@ -523,7 +570,7 @@
             v-model="risingShowPortraitInMessage"
           />
           <label class="form-check-label" for="risingShowPortraitInMessage">
-            Show character portrait with each message
+            {{ l('settings.showPortraitInMessage') }}
           </label>
         </div>
       </div>
@@ -537,8 +584,64 @@
             v-model="risingShowHighQualityPortraits"
           />
           <label class="form-check-label" for="risingShowHighQualityPortraits">
-            Show high-quality portraits
+            {{ l('settings.showHighQualityPortraits') }}
           </label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="horizonMessagePortraitHighQuality"
+            v-model="horizonMessagePortraitHighQuality"
+            :disabled="!risingShowHighQualityPortraits"
+          />
+          <label
+            class="form-check-label"
+            for="horizonMessagePortraitHighQuality"
+          >
+            {{ l('settings.messagePortraitHighQuality') }}
+          </label>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="control-label" for="chatLayoutMode">{{
+          l('settings.experimental', l('settings.chatLayoutMode'))
+        }}</label>
+        <select
+          id="chatLayoutMode"
+          class="form-select"
+          v-model="chatLayoutMode"
+        >
+          <option value="classic">
+            {{ l('settings.chatLayoutMode.classic') }}
+          </option>
+          <option value="modern">
+            {{ l('settings.chatLayoutMode.modern') }}
+          </option>
+        </select>
+        <small class="form-text text-muted">{{
+          l('settings.chatLayoutMode.modernDescription')
+        }}</small>
+      </div>
+      <div class="mb-3">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="messageGrouping"
+            v-model="messageGrouping"
+            :disabled="chatLayoutMode !== 'modern'"
+          />
+          <label class="form-check-label" for="messageGrouping">
+            {{ l('settings.messageGrouping') }}
+          </label>
+          <div class="form-text text-muted">
+            {{ l('settings.messageGrouping.description') }}
+          </div>
         </div>
       </div>
 
@@ -554,7 +657,7 @@
             class="form-check-label"
             for="horizonShowCustomCharacterColors"
           >
-            Show custom character name colors
+            {{ l('settings.showCustomCharacterColors') }}
           </label>
         </div>
       </div>
@@ -568,7 +671,7 @@
             v-model="horizonShowDeveloperBadges"
           />
           <label class="form-check-label" for="horizonShowDeveloperBadges">
-            Show Horizon developer / maintainer badges
+            {{ l('settings.showDeveloperBadges') }}
           </label>
         </div>
       </div>
@@ -582,7 +685,7 @@
             v-model="horizonShowGenderMarker"
           />
           <label class="form-check-label" for="horizonShowGenderMarker">
-            Show a gender icon on everyone
+            {{ l('settings.showGenderIcon') }}
           </label>
         </div>
       </div>
@@ -599,8 +702,7 @@
             "
           />
           <label class="form-check-label" for="horizonGenderMarkerOrigColor">
-            Make gender icon use the original gender color instead of the custom
-            name color
+            {{ l('settings.genderIconUseOriginalColor') }}
           </label>
         </div>
       </div>
@@ -614,21 +716,23 @@
             v-model="horizonChangeOfflineColor"
           />
           <label class="form-check-label" for="horizonChangeOfflineColor">
-            Make color in chat change to grey when a user goes offline
+            {{ l('settings.changeOfflineColor') }}
           </label>
         </div>
       </div>
 
       <div class="mb-3">
         <label class="control-label" for="risingCharacterTheme">
-          Override UI theme (for this character only)
+          {{ l('settings.overrideCharacterTheme') }}
           <select
             id="risingCharacterTheme"
             class="form-select"
             v-model="risingCharacterTheme"
             style="flex: 1; margin-right: 10px"
           >
-            <option value="undefined">(Use default theme)</option>
+            <option value="undefined">
+              {{ l('settings.useDefaultTheme') }}
+            </option>
             <option disabled>---</option>
             <option v-for="theme in risingAvailableThemes" :value="theme">
               {{ theme }}
@@ -640,20 +744,17 @@
 
     <div v-show="selectedTab === '3'">
       <div class="warning">
-        <h5>Danger Zone!</h5>
+        <h5>{{ l('settings.dangerZone') }}</h5>
         <div>
-          By activating filtering, you may no longer be able to see or receive
-          all messages from F-Chat. Filters do not apply to friends or
-          bookmarked characters.
+          {{ l('settings.filteringWarning1') }}
         </div>
 
         <div>
-          Beta version. Some of these features and behaviors may be removed or
-          significantly changed in the future.
+          {{ l('settings.filteringWarning2') }}
         </div>
       </div>
 
-      <h5>Visibility</h5>
+      <h5>{{ l('settings.visibility') }}</h5>
 
       <div class="mb-3 filters">
         <div class="form-check">
@@ -664,7 +765,7 @@
             v-model="risingFilter.hideAds"
           />
           <label class="form-check-label" for="risingFilter.hideAds">
-            Hide <b>ads</b> from matching characters
+            <bbcode :text="l('settings.filter.hideAds')"></bbcode>
           </label>
         </div>
 
@@ -676,7 +777,7 @@
             v-model="risingFilter.hideSearchResults"
           />
           <label class="form-check-label" for="risingFilter.hideSearchResults">
-            Hide matching characters from <b>search results</b>
+            <bbcode :text="l('settings.filter.hideSearchResults')"></bbcode>
           </label>
         </div>
 
@@ -688,7 +789,7 @@
             v-model="risingFilter.hideChannelMembers"
           />
           <label class="form-check-label" for="risingFilter.hideChannelMembers">
-            Hide matching characters from <b>channel members lists</b>
+            <bbcode :text="l('settings.filter.hideChannelMembers')"></bbcode>
           </label>
         </div>
 
@@ -703,7 +804,9 @@
             class="form-check-label"
             for="risingFilter.hidePublicChannelMessages"
           >
-            Hide <b>public channel messages</b> from matching characters
+            <bbcode
+              :text="l('settings.filter.hidePublicChannelMessages')"
+            ></bbcode>
           </label>
         </div>
 
@@ -718,7 +821,9 @@
             class="form-check-label"
             for="risingFilter.hidePrivateChannelMessages"
           >
-            Hide <b>private channel messages</b> from matching characters
+            <bbcode
+              :text="l('settings.filter.hidePrivateChannelMessages')"
+            ></bbcode>
           </label>
         </div>
 
@@ -733,7 +838,7 @@
             class="form-check-label"
             for="risingFilter.hidePrivateMessages"
           >
-            Hide <b>private messages</b> (PMs) from matching characters
+            <bbcode :text="l('settings.filter.hidePrivateMessages')"></bbcode>
           </label>
         </div>
 
@@ -745,7 +850,7 @@
             v-model="risingFilter.showFilterIcon"
           />
           <label class="form-check-label" for="risingFilter.showFilterIcon">
-            Show <b>filter icon</b> on matching characters
+            <bbcode :text="l('settings.filter.showFilterIcon')"></bbcode>
           </label>
         </div>
       </div>
@@ -759,7 +864,7 @@
             v-model="risingFilter.penalizeMatches"
           />
           <label class="form-check-label" for="risingFilter.penalizeMatches">
-            Penalize <b>match scores</b> for matching characters
+            <bbcode :text="l('settings.filter.penalizeMatches')"></bbcode>
           </label>
         </div>
 
@@ -771,39 +876,39 @@
             v-model="risingFilter.rewardNonMatches"
           />
           <label class="form-check-label" for="risingFilter.rewardNonMatches">
-            Increase <b>match scores</b> for non-matching characters
+            <bbcode :text="l('settings.filter.rewardNonMatches')"></bbcode>
           </label>
         </div>
       </div>
 
-      <h5>Character Age Match</h5>
-      <div class="mb-3">Leave empty for no limit.</div>
+      <h5>{{ l('settings.ageMatch') }}</h5>
+      <div class="mb-3">{{ l('settings.leaveEmptyNoLimit') }}</div>
 
       <div class="mb-3">
-        <label class="control-label" for="risingFilter.minAge"
-          >Characters younger than (years)</label
-        >
+        <label class="control-label" for="risingFilter.minAge">{{
+          l('settings.minAge')
+        }}</label>
         <input
           id="risingFilter.minAge"
           type="number"
           class="form-control"
           v-model="risingFilter.minAge"
-          placeholder="Enter age"
+          :placeholder="l('settings.enterAge')"
         />
 
-        <label class="control-label" for="risingFilter.maxAge"
-          >Characters older than (years)</label
-        >
+        <label class="control-label" for="risingFilter.maxAge">{{
+          l('settings.maxAge')
+        }}</label>
         <input
           id="risingFilter.maxAge"
           type="number"
           class="form-control"
           v-model="risingFilter.maxAge"
-          placeholder="Enter age"
+          :placeholder="l('settings.enterAge')"
         />
       </div>
 
-      <h5>Type Match</h5>
+      <h5>{{ l('settings.typeMatch') }}</h5>
       <div class="mb-3 filters">
         <div class="form-check" v-for="(value, key) in smartFilterTypes">
           <input
@@ -822,7 +927,7 @@
         </div>
       </div>
 
-      <h5>Automatic Replies</h5>
+      <h5>{{ l('settings.automaticReplies') }}</h5>
       <div class="mb-3 filters">
         <div class="form-check">
           <input
@@ -832,8 +937,7 @@
             v-model="risingFilter.autoReply"
           />
           <label class="form-check-label" for="risingFilter.autoReply">
-            Send an automatic 'no thank you' response to matching characters if
-            they message you
+            {{ l('settings.autoReply') }}
           </label>
         </div>
 
@@ -846,7 +950,7 @@
             :disabled="!risingFilter.autoReply"
           />
           <label class="form-check-label" for="risingFilter.autoReplyCustom">
-            Use a custom message defined below instead of the default message
+            {{ l('settings.autoReplyCustom') }}
           </label>
         </div>
 
@@ -856,24 +960,19 @@
           :classes="'form-control'"
           rows="5"
           :disabled="!risingFilter.autoReplyCustom || !risingFilter.autoReply"
-          placeholder="Put your custom message for automatic replies here"
+          :placeholder="l('settings.autoReplyPlaceholder')"
           maxlength="10000"
         >
         </editor>
 
         <div class="mb-3">
-          You will still see messages unless you have the "Hide private channel
-          messages" option above selected. Even then, if they send a second
-          message it will bypass the restriction and show you their message.
-          These messages are limited to 10000 characters.
+          {{ l('settings.autoReplyNote') }}
         </div>
       </div>
 
-      <h5>Exception List</h5>
+      <h5>{{ l('settings.exceptionList') }}</h5>
       <div class="mb-3">
-        Filters and automatic replies are not applied to these character names.
-        Separate names with a linefeed. Friends and bookmarked characters bypass
-        filtering automatically.
+        {{ l('settings.exceptionList.help') }}
       </div>
 
       <div class="mb-3">
@@ -881,7 +980,7 @@
           class="form-control"
           :value="getExceptionList()"
           @change="v => setExceptionList(v)"
-          placeholder="Enter names"
+          :placeholder="l('settings.enterNames')"
         ></textarea>
       </div>
     </div>
@@ -932,6 +1031,8 @@
   import Modal from '../components/Modal.vue';
   import { Editor } from './bbcode';
   import Tabs from '../components/tabs';
+  import { BBCodeView } from '../bbcode/view';
+  import { StandardBBCodeParser } from '../bbcode/standard';
   import core from './core';
   import { Settings as SettingsInterface } from './interfaces';
   import l from './localize';
@@ -944,8 +1045,15 @@
   import { matchesSmartFilters } from '../learn/filter/smart-filter';
   import { EventBus } from './preview/event-bus';
 
+  const standardParser = new StandardBBCodeParser();
+
   @Component({
-    components: { modal: Modal, editor: Editor, tabs: Tabs }
+    components: {
+      modal: Modal,
+      editor: Editor,
+      tabs: Tabs,
+      bbcode: BBCodeView(standardParser)
+    }
   })
   export default class SettingsView extends CustomDialog {
     l = l;
@@ -989,20 +1097,26 @@
     risingShowPortraitNearInput!: boolean;
     risingShowPortraitInMessage!: boolean;
     risingShowHighQualityPortraits!: boolean;
+    horizonMessagePortraitHighQuality!: boolean;
     horizonShowCustomCharacterColors!: boolean;
     horizonShowDeveloperBadges!: boolean;
     horizonShowGenderMarker!: boolean;
     horizonGenderMarkerOrigColor!: boolean;
     horizonChangeOfflineColor!: boolean;
     horizonNotifyFriendSignIn!: boolean;
+    horizonShowSigninNotifications!: boolean;
+    horizonShowDuplicateStatusNotifications!: boolean;
     horizonHighlightUsers!: string;
+    chatLayoutMode!: 'classic' | 'modern';
+    messageGrouping!: boolean;
+    horizonUseColorPicker: boolean;
 
     horizonCacheDraftMessages!: boolean;
     horizonSaveDraftMessagesToDiskTimer!: string;
 
-    risingFilter!: SmartFilterSettings = {} as any;
+    risingFilter: SmartFilterSettings = {} as any;
 
-    risingAvailableThemes!: ReadonlyArray<string> = [];
+    risingAvailableThemes: ReadonlyArray<string> = [];
     risingCharacterTheme!: string | undefined;
 
     smartFilterTypes = smartFilterTypesOrigin;
@@ -1051,18 +1165,27 @@
       this.risingShowPortraitInMessage = settings.risingShowPortraitInMessage;
       this.risingShowHighQualityPortraits =
         settings.risingShowHighQualityPortraits;
+      this.horizonMessagePortraitHighQuality =
+        settings.horizonMessagePortraitHighQuality;
       this.horizonShowCustomCharacterColors =
         settings.horizonShowCustomCharacterColors;
       this.horizonShowDeveloperBadges = settings.horizonShowDeveloperBadges;
       this.horizonShowGenderMarker = settings.horizonShowGenderMarker;
       this.horizonGenderMarkerOrigColor = settings.horizonGenderMarkerOrigColor;
       this.horizonChangeOfflineColor = settings.horizonChangeOfflineColor;
+      this.chatLayoutMode = settings.chatLayoutMode || 'classic';
+      this.messageGrouping = settings.messageGrouping;
+      this.horizonUseColorPicker = settings.horizonUseColorPicker;
 
       this.horizonCacheDraftMessages = settings.horizonCacheDraftMessages;
       this.horizonSaveDraftMessagesToDiskTimer =
         settings.horizonSaveDraftMessagesToDiskTimer.toString();
 
       this.horizonNotifyFriendSignIn = settings.horizonNotifyFriendSignIn;
+      this.horizonShowSigninNotifications =
+        settings.horizonShowSigninNotifications;
+      this.horizonShowDuplicateStatusNotifications =
+        settings.horizonShowDuplicateStatusNotifications;
       this.horizonHighlightUsers = settings.horizonHighlightUsers.join(',');
       this.risingFilter = settings.risingFilter;
 
@@ -1095,6 +1218,8 @@
       await importKey('pinned');
       await importKey('modes');
       await importKey('conversationSettings');
+      await importKey('hiddenUsers');
+      await importKey('favoriteEIcons');
       core.connection.close(false);
     }
 
@@ -1170,16 +1295,23 @@
         risingShowPortraitNearInput: this.risingShowPortraitNearInput,
         risingShowPortraitInMessage: this.risingShowPortraitInMessage,
         risingShowHighQualityPortraits: this.risingShowHighQualityPortraits,
+        horizonMessagePortraitHighQuality:
+          this.horizonMessagePortraitHighQuality,
         horizonShowCustomCharacterColors: this.horizonShowCustomCharacterColors,
         horizonShowDeveloperBadges: this.horizonShowDeveloperBadges,
         horizonShowGenderMarker: this.horizonShowGenderMarker,
         horizonGenderMarkerOrigColor: this.horizonGenderMarkerOrigColor,
         horizonChangeOfflineColor: this.horizonChangeOfflineColor,
         horizonNotifyFriendSignIn: this.horizonNotifyFriendSignIn,
+        horizonShowSigninNotifications: this.horizonShowSigninNotifications,
+        horizonShowDuplicateStatusNotifications:
+          this.horizonShowDuplicateStatusNotifications,
         horizonHighlightUsers: this.horizonHighlightUsers
           .split(',')
           .map(x => x.trim())
           .filter(x => x.length),
+        chatLayoutMode: this.chatLayoutMode,
+        messageGrouping: this.messageGrouping,
         horizonCacheDraftMessages: this.horizonCacheDraftMessages,
         horizonSaveDraftMessagesToDiskTimer:
           diskDraftTimer === null
@@ -1187,6 +1319,7 @@
             : diskDraftTimer > 5
               ? diskDraftTimer
               : 5,
+        horizonUseColorPicker: this.horizonUseColorPicker,
 
         risingColorblindMode: this.risingColorblindMode,
         risingFilter: {
@@ -1204,7 +1337,8 @@
         risingCharacterTheme:
           this.risingCharacterTheme != 'undefined'
             ? this.risingCharacterTheme
-            : undefined
+            : undefined,
+        soundTheme: core.state.settings.soundTheme
       };
 
       console.log('SETTINGS', minAge, maxAge, core.state.settings);

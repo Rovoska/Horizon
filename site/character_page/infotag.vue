@@ -14,6 +14,7 @@
 
 <script lang="ts">
   import { Component, Prop } from '@f-list/vue-ts';
+  import anyAscii from 'any-ascii';
   import Vue from 'vue';
   import core from '../../chat/core';
   import { CharacterInfotag, Infotag, ListItem } from '../../interfaces';
@@ -43,7 +44,15 @@
       // console.log(`Infotag ${this.infotag.id}: ${this.infotag.name}`, core.state.settings.risingAdScore, this.characterMatch);
       const id = parseInt(this.infotag.id as any, 10);
 
-      if (core.state.settings.risingAdScore && this.characterMatch) {
+      if (
+        core.state.settings.risingAdScore &&
+        this.characterMatch &&
+        // We don't get passed a reference to the character this tag is for,
+        // so we just check if the MatchReport involves a match where both characters are the same.
+        // It's good that we don't use the is_self field from the API here, because we still might
+        // want to test matches with our own characters.
+        this.characterMatch.them.them.id != this.characterMatch.them.you.id
+      ) {
         // console.log('MATCH');
 
         const scores = this.theirInterestIsRelevant(id)
@@ -92,12 +101,28 @@
     }
 
     get value(): string {
+      let shouldFormatAscii =
+        this.infotag.infotag_group !== this.contactGroupId &&
+        core.state.generalSettings &&
+        core.state.generalSettings.horizonForceAsciiProfiles;
       switch (this.infotag.type) {
         case 'text':
-          return this.data.string!;
+          return shouldFormatAscii
+            ? anyAscii(this.data.string)
+            : this.data.string!;
         case 'number':
-          if (this.infotag.allow_legacy && !this.data.number)
-            return this.data.string !== undefined ? this.data.string : '';
+          if (this.infotag.allow_legacy && !this.data.number) {
+            //Prettier makes this an unreadable mess, so lets just describe it:
+            //First check if we have a proper strng value for this legacy field.
+            //If we don't, we return an empty string
+            //Otherwise we then check if we shouldd format to ASCII, in which case
+            //we do that before returning.
+            return this.data.string !== undefined
+              ? shouldFormatAscii
+                ? anyAscii(this.data.string)
+                : this.data.string
+              : '';
+          }
           return this.data.number!.toPrecision();
       }
       const listitem = <ListItem | undefined>(

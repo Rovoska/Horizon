@@ -1,14 +1,57 @@
 <template>
   <modal
     ref="dialog"
-    action="Status message history"
-    buttonText="Select"
+    :action="l('statusHistory.title')"
+    :buttonText="l('action.select')"
     @open="onMounted()"
     @submit="selectStatus"
     dialogClass="w-100 modal-70"
     iconClass="fa-solid fa-clock-rotate-left"
   >
+    <form class="status-picker" v-if="pinned.length > 0">
+      <p class="text-sm-end">
+        {{ l('statusHistory.pinned') }}
+      </p>
+      <div
+        class="row"
+        v-for="(pinnedStatus, index) in pinned"
+        :class="{ 'selected-row': index === selectedPin }"
+      >
+        <div class="form-col radio-col">
+          <input
+            type="radio"
+            :id="'pinned_status_' + index"
+            :name="'pinned_status_' + index"
+            v-model="selectedPin"
+            v-bind:value="index"
+          />
+        </div>
+        <div
+          class="form-col content-col"
+          @click="selectPin(index)"
+          @dblclick="submit"
+        >
+          <span class="before-content"
+            ><i
+              class="fas"
+              :class="{ 'fa-check-circle': index === selectedPin }"
+          /></span>
+
+          <span class="form-check-label" :for="'pinned_status_' + index">
+            <bbcode :text="pinnedStatus"></bbcode>
+          </span>
+
+          <span class="content-action" role="button" @click="unpinStatus(index)"
+            ><i class="fas fa-thumbtack text-success"
+          /></span>
+        </div>
+      </div>
+    </form>
+
     <form class="status-picker" v-if="history.length > 0">
+      <p class="text-sm-end">
+        {{ l('statusHistory.count', history.length, 15) }}
+      </p>
       <div
         class="row"
         v-for="(historicStatus, index) in history"
@@ -33,17 +76,28 @@
               class="fas"
               :class="{ 'fa-check-circle': index === selectedStatus }"
           /></span>
-          <label class="form-check-label" :for="'history_status_' + index">
+          <span class="form-check-label" :for="'history_status_' + index">
             <bbcode :text="historicStatus"></bbcode>
-          </label>
-          <span class="content-action" @click="removeStatusHistoryEntry(index)"
+          </span>
+
+          <span
+            class="content-action"
+            role="button"
+            @click="pinStatusFromHistory(index)"
+            ><i class="fas fa-thumbtack"
+          /></span>
+
+          <span
+            class="content-action"
+            role="button"
+            @click="removeStatusHistoryEntry(index)"
             ><i class="fas fa-times-circle"
           /></span>
         </div>
       </div>
     </form>
     <div v-else>
-      <i>This character has no status message history.</i>
+      <i>{{ l('statusHistory.empty') }}</i>
     </div>
   </modal>
 </template>
@@ -56,11 +110,16 @@
   import { BBCodeView } from '../bbcode/view';
   import * as _ from 'lodash';
   import { Dialog } from '../helpers/dialog';
+  import l from './localize';
+
+  const MAX_PINNED_STATUSES: number = 5;
 
   @Component({
     components: { modal: Modal, bbcode: BBCodeView(core.bbCodeParser) }
   })
   export default class StatusPicker extends CustomDialog {
+    maxPinnedStatuses = MAX_PINNED_STATUSES;
+    l = l;
     @Prop({ required: true })
     readonly callback!: (statusMessage: string) => void;
 
@@ -69,12 +128,18 @@
 
     history: string[] = [];
 
+    pinned: string[] = [];
+
     selectedStatus: number | null = null;
+
+    selectedPin: number | null = null;
 
     @Hook('mounted')
     async onMounted(): Promise<void> {
       this.history = (await core.settingsStore.get('statusHistory')) || [];
+      this.pinned = (await core.settingsStore.get('statusPins')) || [];
       this.selectedStatus = null;
+      this.selectedPin = null;
 
       if (this.curStatus && this.curStatus.trim() !== '') {
         const cleanedStatus = this.curStatus.toLowerCase().trim();
@@ -97,15 +162,30 @@
     selectStatus(): void {
       if (this.selectedStatus !== null) {
         this.callback(this.history[this.selectedStatus]);
+      } else if (this.selectedPin !== null) {
+        this.callback(this.pinned[this.selectedPin]);
+      }
+    }
+
+    async pinStatusFromHistory(pinHistoryIndex: number): Promise<void> {
+      const status = this.history[pinHistoryIndex];
+      console.log(this.pinned.indexOf(status));
+      if (this.pinned.indexOf(status) > -1) return;
+      this.pinned.push(status);
+
+      await core.settingsStore.set('statusPins', this.pinned);
+    }
+
+    async unpinStatus(index: number): Promise<void> {
+      if (Dialog.confirmDialog(l('statusHistory.confirmRemove.pinned'))) {
+        this.pinned.splice(index, 1);
+
+        await core.settingsStore.set('statusPins', this.pinned);
       }
     }
 
     async removeStatusHistoryEntry(index: number): Promise<void> {
-      if (
-        Dialog.confirmDialog(
-          'Are you sure you want to remove this status message?'
-        )
-      ) {
+      if (Dialog.confirmDialog(l('statusHistory.confirmRemove'))) {
         this.history.splice(index, 1);
 
         await core.settingsStore.set('statusHistory', this.history);
@@ -113,7 +193,13 @@
     }
 
     select(index: number): void {
+      this.selectedPin = null;
       this.selectedStatus = index;
+    }
+
+    selectPin(index: number): void {
+      this.selectedStatus = null;
+      this.selectedPin = index;
     }
   }
 </script>
@@ -124,7 +210,7 @@
       display: none;
     }
 
-    label::before {
+    .form-check-label::before {
       display: none !important;
     }
 
@@ -132,8 +218,10 @@
       min-width: 100%;
       display: flex;
 
-      label {
+      .form-check-label {
         flex: 1;
+        display: inline-block;
+        margin-bottom: 0.5rem;
       }
 
       .before-content {
@@ -144,7 +232,7 @@
 
       .content-action {
         float: right;
-        opacity: 0.2;
+        opacity: 0.5;
         margin-bottom: auto;
         margin-top: auto;
         margin-left: 1rem;

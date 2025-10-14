@@ -326,6 +326,9 @@ export namespace Character {
     setOverride(name: string, type: keyof CharacterOverrides, value: any): void;
   }
 
+  /**
+   * Chat character: Name, gender, status, typing indicator, relationships, and overrides.
+   */
   export interface Character {
     readonly name: string;
     readonly gender: Gender | undefined;
@@ -336,9 +339,13 @@ export namespace Character {
     readonly isChatOp: boolean;
     readonly isIgnored: boolean;
     readonly overrides: CharacterOverrides;
+    hasStatusTextChanged(): boolean;
   }
 }
 
+/**
+ * Chat character: Name, gender, status, typing indicator, relationships, and overrides.
+ */
 export type Character = Character.Character;
 
 export namespace Channel {

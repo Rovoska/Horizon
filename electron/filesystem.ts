@@ -173,8 +173,10 @@ export function fixLogs(character: string): void {
     const fd = fs.openSync(full, 'r+');
     const indexPath = path.join(dir, `${file}.idx`);
     if (!fs.existsSync(indexPath)) {
-      fs.unlinkSync(full);
-      continue;
+      const nameBuffer = Buffer.allocUnsafe(file.length + 1);
+      nameBuffer.writeUInt8(file.length, 0);
+      nameBuffer.write(file, 1);
+      fs.writeFileSync(indexPath, nameBuffer);
     }
     const indexFd = fs.openSync(indexPath, 'r+');
     fs.readSync(indexFd, buffer, 0, 1, 0);

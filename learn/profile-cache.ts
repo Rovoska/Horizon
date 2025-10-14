@@ -40,6 +40,9 @@ export interface CharacterMatchSummary {
   autoResponded?: boolean;
 }
 
+/**
+ * The "cache record" holds information about when the character was added to the cache. This information can be useful for deciding when to refresh a character profile or to remove them entirely.
+ */
 export interface CharacterCacheRecord {
   character: ComplexCharacter;
   lastFetched: Date;
@@ -62,6 +65,15 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     _.each(this.cache, cb);
   }
 
+  /**
+   * Query the cache for a player record, returning immediately. Fails with `null` if the character hasn't been cached. Use {@link get | `get` (async)} if you want to reach deeper and get the profile from the disk-backed store and cache it in readily-accessible memory.
+   *
+   * This method does **NOT** query the server for the character.
+   * @param name Character to query the cache for
+   * @returns Character profile if it's cached; null otherwise
+   *
+   * Comment imported from Frolic; may be inaccurate if significant changes occured.
+   */
   getSync(name: string): CharacterCacheRecord | null {
     const key = AsyncCache.nameKey(name);
 
@@ -72,6 +84,19 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     return null;
   }
 
+  /**
+   * Asynchronously gets a character from the in-memory cache, or from the PermanentIndexedStore if it's not in memory. Then register it with the matcher (was matcher data not saved before...?).
+   *
+   * This method does **NOT** query the server for the character.
+   *
+   * This function could use some adjustment to ensure it always runs async, as "potentially async" is bad control flow design. Please remove this comment line when you do so. :)
+   * @param name Character to retrieve
+   * @param skipStore Return negative if the character isn't in the cache
+   * @param _fromChannel Unused
+   * @returns Preferably a character; null if not in cache and `skipStore`; null if profile is not in the store
+   *
+   * Comment imported from Frolic; may be inaccurate if significant changes occured.
+   */
   async get(
     name: string,
     skipStore: boolean = false,
@@ -295,6 +320,14 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     }
   }
 
+  /**
+   * Register the profile with the in-memory cache and (by default) the disk-backed store; putting it through the matcher and smart filters in the process.
+   * @param c Response from "character profile" API request
+   * @param skipStore (Default: false) Don't add the updated character to the store
+   * @returns Character with match details
+   *
+   * Comment imported from Frolic; may be inaccurate if significant changes occured.
+   */
   async register(
     c: ComplexCharacter,
     skipStore: boolean = false

@@ -1,3 +1,10 @@
+/**
+ * The most simple character structure, used primarily for listing your characters on the log-in selector.
+ *
+ * Character name, unique ID, and whether or not the character exists.
+ *
+ * Comment imported from Frolic; may be inaccurate if significant changes occured.
+ */
 export interface SimpleCharacter {
   id: number;
   name: string;
@@ -51,6 +58,13 @@ export interface Infotag {
   infotag_group: number;
 }
 
+/**
+ * Public character page. Why does this extend SimpleCharacter? Investigate usage.
+ *
+ * @see [file://site/character_page/interfaces.ts](site/character_page/interfaces.ts)
+ *
+ * Comment imported from Frolic; may be inaccurate if significant changes occured.
+ */
 export interface Character extends SimpleCharacter {
   id: number;
   name: string;

@@ -68,6 +68,17 @@ import throat from 'throat';
 // Throttle queries so that only two profile requests can run at any given time
 const characterDataThroat = throat(2);
 
+/**
+ * This is the, "I need the data returned right now" version of {@link core.cache.addProfile | `CacheManager.addProfile`}. Where that function adds the profile fetching to a queue (which adds the character profile to the profile cache), this function directly returns the character profile.
+ *
+ * All values are passed to {@link executeCharacterData | `executeCharacterData`}. `id` is unused.
+ * @param name Character name
+ * @param definitions Custom kink definitions to use? Otherwise, {@link Store.shared} is used.
+ * @param skipEvent (Default: false) Do not emit the `character-data` {@link EventBus | `EventBus`} event.
+ * @returns Requested character
+ *
+ * Comment imported from Frolic; may be inaccurate if significant changes occured.
+ */
 // tslint:disable-next-line: ban-ts-ignore
 // @ts-ignore
 async function characterData(
@@ -187,6 +198,14 @@ function contactMethodIconUrl(name: string): string {
   return `${Utils.staticDomain}images/social/${name}.png`;
 }
 
+/**
+ * Fields do not change regularly so a basic cache is a perfectly fine way to do it.
+ *
+ * It would probably be better if this was some sort of class (random raw data management is bad design.)
+ * @returns The cached definitions, or new ones if they weren't cached yet.
+ *
+ * Comment imported from Frolic; may be inaccurate if significant changes occured.
+ */
 async function fieldsGet(): Promise<void> {
   if (Store.shared !== undefined) return; //tslint:disable-line:strict-type-predicates
   try {

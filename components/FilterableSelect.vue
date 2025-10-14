@@ -1,5 +1,9 @@
 <template>
-  <dropdown class="filterable-select" linkClass="form-select" :keepOpen="true">
+  <dropdown
+    class="filterable-select"
+    linkClass="form-select"
+    :keepOpen="multiple"
+  >
     <template slot="title" v-if="multiple">{{ label }}</template>
     <slot v-else slot="title" :option="selected">{{ label }}</slot>
 
@@ -10,6 +14,7 @@
         class="form-control"
         :placeholder="placeholder"
         @mousedown.stop
+        @click.stop
       />
     </div>
     <div class="overflow-auto dropdown-items">

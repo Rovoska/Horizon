@@ -45,15 +45,18 @@
           >
 
           <a href="#" @click.prevent="showAds()" class="btn">
-            <span class="fa fa-ad"></span><span class="btn-text">Ads</span>
+            <span class="fa fa-ad"></span
+            ><span class="btn-text">{{ l('conversation.ads') }}</span>
           </a>
 
           <a href="#" @click.prevent="showChannels()" class="btn">
-            <span class="fa fa-tv"></span><span class="btn-text">Channels</span>
+            <span class="fa fa-tv"></span
+            ><span class="btn-text">{{ l('conversation.channels') }}</span>
           </a>
 
           <a href="#" @click.prevent="showMemo()" class="btn">
-            <span class="fas fa-edit"></span><span class="btn-text">Memo</span>
+            <span class="fas fa-edit"></span
+            ><span class="btn-text">{{ l('conversation.memo') }}</span>
           </a>
         </div>
         <div
@@ -68,7 +71,9 @@
           <span v-show="conversation.character.statusText">
             – <bbcode :text="conversation.character.statusText"></bbcode
           ></span>
-          <div v-show="userMemo"><b>Memo:</b> {{ userMemo }}</div>
+          <div v-show="userMemo">
+            <b>{{ l('conversation.memoLabel') }}</b> {{ userMemo }}
+          </div>
         </div>
       </div>
     </div>
@@ -139,7 +144,7 @@
         <div class="btn-toolbar">
           <dropdown
             :keep-open="false"
-            title="View"
+            :title="l('action.view')"
             :icon-class="{
               fas: true,
               'fa-comments': conversation.mode === 'chat',
@@ -176,15 +181,20 @@
               type="button"
               @click="toggleAutoPostAds()"
             >
-              {{ conversation.adManager.isActive() ? 'Pause' : 'Start' }}
-              Posting Ads
+              {{
+                l(
+                  conversation.adManager.isActive()
+                    ? 'admgr.pausePosting'
+                    : 'admgr.startPosting'
+                )
+              }}
             </button>
             <button
               class="dropdown-item"
               type="button"
               @click="showAdSettings()"
             >
-              Edit Channel Ads...
+              {{ l('admgr.editChannelAds') }}
             </button>
             <div class="dropdown-divider"></div>
             <button
@@ -193,7 +203,7 @@
               type="button"
               @click="toggleNonMatchingAds()"
             >
-              Show Incompatible Ads
+              {{ l('admgr.showIncompatibleAds') }}
             </button>
 
             <template v-slot:split>
@@ -205,7 +215,13 @@
                     'fa-play': !conversation.adManager.isActive()
                   }"
                 ></i>
-                {{ conversation.adManager.isActive() ? 'Pause' : 'Start' }} Ads
+                {{
+                  l(
+                    conversation.adManager.isActive()
+                      ? 'admgr.pauseAds'
+                      : 'admgr.startAds'
+                  )
+                }}
               </a>
             </template>
           </dropdown>
@@ -300,12 +316,13 @@
       @scroll="onMessagesScroll"
       style="flex: 1; overflow: auto; margin-top: 2px"
     >
-      <template v-for="message in messages">
+      <template v-for="(message, i) in messages">
         <message-view
           :message="message"
           :channel="isChannel(conversation) ? conversation.channel : undefined"
           :key="message.id"
           :classes="message == conversation.lastRead ? 'last-read' : ''"
+          :previous="messages[i - 1]"
         >
         </message-view>
         <span
@@ -917,9 +934,11 @@
     getMessageWrapperClasses(): any {
       const filter = core.state.settings.risingFilter;
       const classes: any = {};
+      const layout = core.state.settings.chatLayoutMode || 'classic';
 
       if (this.isPrivate(this.conversation)) {
         classes['filter-channel-messages'] = filter.hidePrivateMessages;
+        classes['layout-' + layout] = true;
         return classes;
       }
 
@@ -938,6 +957,8 @@
           ? filter.hidePrivateChannelMessages
           : filter.hidePublicChannelMessages;
 
+      // Apply chat layout mode class (classic/modern)
+      classes['layout-' + layout] = true;
       return classes;
     }
 
@@ -1304,6 +1325,18 @@
       margin-right: 2px;
     }
 
+    .user-gender {
+      &.gender-male,
+      &.gender-female,
+      &.gender-transgender,
+      &.gender-none,
+      &.gender-shemale,
+      &.gender-male-herm,
+      &.gender-herm,
+      &.gender-cuntboy {
+        text-shadow: none;
+      }
+    }
     .match-found {
       margin-left: 3px;
       padding-left: 2px;
@@ -1317,6 +1350,7 @@
       line-height: 100%;
       padding-top: 2px;
       padding-bottom: 2px;
+      text-shadow: none;
 
       &.perfect {
         background-color: var(--scorePerfectMatchBg);

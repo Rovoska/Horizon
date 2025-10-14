@@ -13,7 +13,7 @@ import * as qs from 'querystring';
 import { getKey } from '../chat/common';
 import { EventBus } from '../chat/preview/event-bus';
 import { init as initCore } from '../chat/core';
-import l from '../chat/localize';
+import l, { setLanguage } from '../chat/localize';
 // import {setupRaven} from '../chat/vue-raven';
 import Socket from '../chat/WebSocket';
 import Connection from '../fchat/connection';
@@ -21,10 +21,11 @@ import { Keys } from '../keys';
 import { GeneralSettings /*, nativeRequire*/ } from './common';
 import { Logs, SettingsStore } from './filesystem';
 import Notifications from './notifications';
-import * as SlimcatImporter from './importer';
+import { handleStartupImport } from './services';
 import Index from './Index.vue';
 import log from 'electron-log'; // tslint:disable-line: match-default-export-name
 import { WordPosSearch } from '../learn/dictionary/word-pos-search';
+import { MenuItemConstructorOptions } from 'electron/main';
 
 log.debug('init.chat');
 
@@ -149,7 +150,7 @@ webContents.on('context-menu', (_, props) => {
     if (props.mediaType === 'none') {
       menuTemplate.push({
         id: 'toggleStickyness',
-        label: 'Toggle Sticky Preview',
+        label: l('action.toggleStickyPreview'),
         click(): void {
           EventBus.$emit('imagepreview-toggle-stickyness', {
             url: props.linkURL
@@ -230,6 +231,46 @@ webContents.on('context-menu', (_, props) => {
     );
   }
 
+  if (props.srcURL.startsWith('https://static.f-list.net/images/eicon/')) {
+    let eiconName = props.titleText;
+    //Electron on Mac allows for header context menu items, so we use that instead of a disabled item split of by a seperator.
+    menuTemplate.unshift(
+      {
+        label: eiconName,
+        enabled: false,
+        type: process.platform === 'darwin' ? 'header' : 'normal'
+      },
+      ...(process.platform === 'darwin'
+        ? []
+        : [
+            {
+              type: 'separator'
+            } as MenuItemConstructorOptions
+          ]),
+      {
+        label: l('action.eicon.copy'),
+        click: () => {
+          electron.clipboard.writeText(eiconName);
+        }
+      },
+      {
+        label: l('action.eicon.copyBbcode'),
+
+        click: () => {
+          electron.clipboard.writeText(`[eicon]${eiconName}[/eicon]`);
+        }
+      },
+      {
+        label: l('eicon.addToFavorites'),
+        click: async () => {
+          EventBus.$emit('eicon-pinned', {
+            eicon: eiconName
+          });
+        }
+      }
+    );
+  }
+
   if (menuTemplate.length > 0)
     remote.Menu.buildFromTemplate(menuTemplate).popup({});
 
@@ -261,6 +302,13 @@ function onSettings(s: GeneralSettings): void {
 
   // spellchecker.setDictionary(s.spellcheckLang, dictDir);
   // for(const word of s.customDictionary) spellchecker.add(word);
+
+  // Apply display language live when settings change
+  try {
+    setLanguage(settings.displayLanguage);
+  } catch (e) {
+    console.warn('Failed to apply display language', e);
+  }
 }
 
 electron.ipcRenderer.on(
@@ -273,21 +321,34 @@ const params = <{ [key: string]: string | undefined }>(
 );
 let settings = <GeneralSettings>JSON.parse(params['settings']!);
 
-// console.log('SETTINGS', settings);
+log.info(
+  '[chat.ts] params[import]:',
+  params['import'],
+  'type:',
+  typeof params['import']
+);
 
-if (params['import'] !== undefined)
-  try {
-    if (
-      SlimcatImporter.canImportGeneral() &&
-      confirm(l('importer.importGeneral'))
-    ) {
-      SlimcatImporter.importGeneral(settings);
-      electron.ipcRenderer.send('save-login', settings.account, settings.host);
-    }
-  } catch {
-    alert(l('importer.error'));
-  }
-onSettings(settings);
+if (params['import'] !== undefined && params['import'] !== '') {
+  log.info('[chat.ts] Calling handleStartupImport');
+  handleStartupImport(settings, params['import'])
+    .then(updatedSettings => {
+      settings = updatedSettings;
+      onSettings(settings);
+    })
+    .catch(err => {
+      log.error('Startup import error:', err);
+    });
+} else {
+  log.info('[chat.ts] Skipping import, calling onSettings directly');
+  onSettings(settings);
+}
+
+// Apply UI language early (fallback handled in setLanguage)
+try {
+  setLanguage(settings.displayLanguage);
+} catch (e) {
+  console.warn('Failed to apply display language', e);
+}
 
 log.debug('init.chat.core');
 

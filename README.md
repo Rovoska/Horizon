@@ -21,6 +21,8 @@
   - [FAQ:](#faq)
 - [Development](#development)
 - [Credits](#credits)
+  - [Code](#code)
+  - [Translation](#translation)
 
 # Download
 
@@ -29,6 +31,8 @@
 [![MacOS (Universal)](https://img.shields.io/badge/macOS%20Universal-000000?style=for-the-badge&logo=macos&logoColor=F0F0F0)](https://github.com/Fchat-Horizon/Horizon/releases/latest/download/F-Chat.Horizon-mac-universal.dmg)
 [![Linux x64](https://img.shields.io/badge/Linux%20x64-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://github.com/Fchat-Horizon/Horizon/releases/latest/download/F-Chat.Horizon-linux-x86_64.AppImage)
 [![Linux arm64](https://img.shields.io/badge/Linux%20arm64-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://github.com/Fchat-Horizon/Horizon/releases/latest/download/F-Chat.Horizon-linux-arm64.AppImage)
+
+Also check out [Frolic Chat](https://github.com/Frolic-chat/Frolic)! It's another F-Chat Rising fork, and we're big fans on it ourselves.
 
 # Horizon
 
@@ -124,12 +128,12 @@ Horizon has excellent Linux support. Read more at [horizon-packages](https://git
 
 ### Supported distros
 
-| Distro                                                                                                                                                                                                                    | Info                                                                                                                                     | Maintainer(s)              |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| ![Gentoo](https://img.shields.io/badge/Gentoo-54487A?style=for-the-badge&logo=gentoo&logoColor=white)                                                                                                                     | [link](https://github.com/Fchat-Horizon/gentoo/tree/0dbb49c0a2010d9a1813b5495fb78e1178494b14)                                            | @CodingWithAnxiety         |
-| ![Arch](https://img.shields.io/badge/Arch%20Linux-1793D1?logo=arch-linux&logoColor=fff&style=for-the-badge) <br> ![Manjaro](https://img.shields.io/badge/Manjaro-35BF5C?style=for-the-badge&logo=Manjaro&logoColor=white) | [![AUR package](https://repology.org/badge/version-for-repo/aur/fchat-horizon.svg)](https://repology.org/project/fchat-horizon/versions) | astrayblackcat, KenwoodFox |
-| ![Debian](https://img.shields.io/badge/Debian-D70A53?style=for-the-badge&logo=debian&logoColor=white) <br> ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)          | [Available under releases](https://github.com/Fchat-Horizon/Horizon/releases/latest)                                                     | The Horizon Developers     |
-| ![Fedora](https://img.shields.io/badge/Fedora-294172?style=for-the-badge&logo=fedora&logoColor=white) <br> ![openSUSE](https://img.shields.io/badge/openSUSE-%2364B345?style=for-the-badge&logo=openSUSE&logoColor=white) | [Available under releases](https://github.com/Fchat-Horizon/Horizon/releases/latest)                                                     | The Horizon Developers     |
+| Distro                                                                                                                                                                                                                    | Info                                                                                                                                     | Maintainer(s)                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| ![Gentoo](https://img.shields.io/badge/Gentoo-54487A?style=for-the-badge&logo=gentoo&logoColor=white)                                                                                                                     | [link](https://github.com/Fchat-Horizon/gentoo/tree/0dbb49c0a2010d9a1813b5495fb78e1178494b14)                                            | @CodingWithAnxiety                             |
+| ![Arch](https://img.shields.io/badge/Arch%20Linux-1793D1?logo=arch-linux&logoColor=fff&style=for-the-badge) <br> ![Manjaro](https://img.shields.io/badge/Manjaro-35BF5C?style=for-the-badge&logo=Manjaro&logoColor=white) | [![AUR package](https://repology.org/badge/version-for-repo/aur/fchat-horizon.svg)](https://repology.org/project/fchat-horizon/versions) | astrayblackcat, KenwoodFox, @CodingWithAnxiety |
+| ![Debian](https://img.shields.io/badge/Debian-D70A53?style=for-the-badge&logo=debian&logoColor=white) <br> ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)          | [Available under releases](https://github.com/Fchat-Horizon/Horizon/releases/latest)                                                     | The Horizon Developers                         |
+| ![Fedora](https://img.shields.io/badge/Fedora-294172?style=for-the-badge&logo=fedora&logoColor=white) <br> ![openSUSE](https://img.shields.io/badge/openSUSE-%2364B345?style=for-the-badge&logo=openSUSE&logoColor=white) | [Available under releases](https://github.com/Fchat-Horizon/Horizon/releases/latest)                                                     | The Horizon Developers                         |
 
 ### Additional installation instructions
 
@@ -229,6 +233,21 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 # Credits
 
+## Code
+
+Our codebase has received contributions from the following people:
+
 <a href="https://github.com/Fchat-Horizon/Horizon/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Fchat-Horizon/Horizon" />
 </a>
+
+## Translation
+
+<!--Sort contributors alphabetically if you add more, please 🐟.-->
+
+- **French**: Azthenor, Fragile, Xav
+- **German**: ForgetfulTragedy, Peel
+- **Hungarian**: Firespark
+- **Italian**: Clovermoth
+- **Spanish**: A Day with a Carrot, Dess
+- **UWUnglish** (we're so sorry): @CodingWithAnxiety, @FatCatClient

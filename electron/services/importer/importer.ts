@@ -2,17 +2,18 @@ import { addMinutes } from 'date-fns';
 import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
-import { Settings } from '../chat/common';
-import { Conversation } from '../chat/interfaces';
-import { isAction } from '../chat/slash_commands';
-import { GeneralSettings } from './common';
+// todo: maybe we should change how we import the following?
+import { Settings } from '../../../chat/common';
+import { Conversation } from '../../../chat/interfaces';
+import { isAction } from '../../../chat/slash_commands';
+import { GeneralSettings } from '../../common';
 import {
   checkIndex,
   getLogDir,
   Message as LogMessage,
   serializeMessage,
   SettingsStore
-} from './filesystem';
+} from '../../filesystem';
 
 function getRoamingDir(): string | undefined {
   const appdata = process.env.APPDATA;
@@ -33,18 +34,36 @@ function getSettingsDir(character: string): string | undefined {
   if (fs.existsSync(charDir)) return charDir;
   charDir = path.join(dir, '!Defaults');
   if (fs.existsSync(charDir)) return charDir;
-  return;
 }
 
+/**
+ * Checks if general settings can be imported from Slimcat.
+ * Windows-specific, checks for Slimcat in %LOCALAPPDATA%/slimCat.
+ *
+ * @returns True if Slimcat's LOCALAPPDATA directory exists
+ */
 export function canImportGeneral(): boolean {
   const dir = getLocalDir();
   return dir !== undefined && fs.existsSync(dir);
 }
 
+/**
+ * Checks if character-specific settings can be imported from Slimcat.
+ * Windows-specific, checks APPDATA roaming directory, falls back to !Defaults folder.
+ *
+ * @param character - Name of the character to check
+ * @returns True if the character's settings directory exists in Slimcat
+ */
 export function canImportCharacter(character: string): boolean {
   return getSettingsDir(character) !== undefined;
 }
 
+/**
+ * Imports general application settings from Slimcat (Windows-specific).
+ * Parses XML configuration files from Slimcat directories and extracts account/host settings.
+ *
+ * @param data - GeneralSettings object to populate with imported values (modified in-place)
+ */
 export function importGeneral(data: GeneralSettings): void {
   let dir = getLocalDir();
   let files: string[] = [];
@@ -287,6 +306,14 @@ const knownOfficialChannels = [
   'Helpdesk'
 ];
 
+/**
+ * Imports character-specific data from Slimcat to Horizon (Windows-specific).
+ * Converts Slimcat's log format, chat history, and settings to Horizon's format.
+ *
+ * @param ownCharacter - Name of the character to import
+ * @param progress - Callback function to report import progress (0.0 to 1.0)
+ * @returns A promise that resolves when the import completes
+ */
 export async function importCharacter(
   ownCharacter: string,
   progress: (progress: number) => void

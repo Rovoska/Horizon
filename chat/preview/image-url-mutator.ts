@@ -52,7 +52,7 @@ export class ImageUrlMutator {
       /^http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?/,
       async (_url: string, match: RegExpMatchArray): Promise<string> => {
         const videoId = match[1];
-        return `https://yewtu.be/embed/${videoId}?autoplay=1`;
+        return `https://i3.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
       }
     );
 

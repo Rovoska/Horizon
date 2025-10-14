@@ -14,8 +14,13 @@ class Character implements Interfaces.Character {
   isChatOp = false;
   isIgnored = false;
   overrides: CharacterOverrides = {};
+  previousStatusText = '';
 
   constructor(public name: string) {}
+
+  hasStatusTextChanged(): boolean {
+    return this.previousStatusText !== this.statusText;
+  }
 }
 
 export interface CharacterOverrides {
@@ -165,7 +170,10 @@ export default function (this: void, connection: Connection): Interfaces.State {
     }
   });
   connection.onMessage('FLN', data => {
-    state.setStatus(state.get(data.character), 'offline', '');
+    //Going offline counts as changing status too for the previous status var
+    let char = state.get(data.character);
+    char.previousStatusText = char.statusText;
+    state.setStatus(char, 'offline', '');
   });
   connection.onMessage('NLN', async data => {
     const character = state.get(data.identity);
@@ -184,7 +192,12 @@ export default function (this: void, connection: Connection): Interfaces.State {
     state.setStatus(character, data.status, '');
   });
   connection.onMessage('STA', data => {
-    state.setStatus(state.get(data.character), data.status, data.statusmsg);
+    //This is so it won't clear the previous status when their client reconnects and sends a STA message
+    let char = state.get(data.character);
+    if (char.statusText.length > 0 && data.statusmsg.length > 0) {
+      char.previousStatusText = char.statusText;
+    }
+    state.setStatus(char, data.status, data.statusmsg);
   });
   connection.onMessage('AOP', data => {
     state.opList.push(data.character);

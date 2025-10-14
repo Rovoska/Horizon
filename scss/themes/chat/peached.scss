@@ -6,6 +6,7 @@
 @import '../../flist_derived';
 @import '../variables/light_derived';
 
+$bookmark-color: color.scale($green-color, $lightness: 10%);
 // Apply variables to theme.
 @import '../chat';
 
@@ -109,17 +110,18 @@ $genders: (
   'cunt-boy': $green-color
 );
 @each $gender, $color in $genders {
-  .gender-#{$gender} {
-    color: $color;
+  .gender-#{$gender},
+  .gender-icon-#{$gender} {
+    --gender-color: #{$color};
+  }
+
+  .gender-icon-#{$gender},
+  .message-event .gender-icon-#{gender} {
+    color: var(--gender-color);
   }
 
   .message-event .gender-#{$gender} {
-    color: color.scale($color, $lightness: 5%);
-  }
-
-  .gender-#{$gender}.user-bookmark,
-  .message-event .gender-#{$gender}.user-bookmark {
-    color: color.scale($green-color, $lightness: 10%);
+    --gender-color: #{color.scale($color, $lightness: 5%)};
   }
 }
 

@@ -7,12 +7,13 @@ $blue-color: #00f !default;
 $yellow-color: #ff0 !default;
 $cyan-color: #0ff !default;
 $purple-color: #93f !default;
-$white-color: $gray-800 !default;
-$black-color: $gray-500 !default;
-$brown-color: #8a6d3b !default;
 $pink-color: #f9c !default;
-$gray-color: $gray-700 !default;
+$brown-color: #8a6d3b !default;
 $orange-color: #f60 !default;
+// gut these 3 are specifically for dark themes
+$white-color: $gray-800 !default;
+$black-color: color.scale($gray-500, $saturation: -70%) !default;
+$gray-color: $gray-700 !default;
 $collapse-header-bg: $card-bg !default;
 $collapse-border: color.scale($border-color, $lightness: -25%) !default;
 $text-dark: $text-muted !default;

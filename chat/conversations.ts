@@ -139,8 +139,8 @@ abstract class Conversation implements Interfaces.Conversation {
     }
   }
 
-  //tslint:disable-next-line:no-async-without-await
-  abstract async addMessage(message: Interfaces.Message): Promise<void>;
+  // Method can be async in implementations
+  abstract addMessage(message: Interfaces.Message): Promise<void>;
 
   loadLastSent(): void {
     this.enteredText = this.lastSent;
@@ -203,6 +203,36 @@ abstract class Conversation implements Interfaces.Conversation {
     this.messages = [];
   }
 
+  async logMessage(
+    message: Interfaces.Message,
+    isAd: boolean = false
+  ): Promise<void> {
+    const loggingSetting = this.settings.logMessages;
+
+    if (loggingSetting === Interfaces.Setting.False) {
+      return;
+    }
+
+    let shouldLog: boolean;
+
+    if (isAd) {
+      // * For ads, always respect global logAds setting
+      // NOTE: Disabling conversation logging should disable ad logging (if enabled), but not enable it (if disabled)
+      //       After all, I think it's a safe assumption that if you don't want to log conversations, you probably don't want to log ads either
+      shouldLog = core.state.settings.logAds;
+    } else if (loggingSetting === Interfaces.Setting.True) {
+      // For regular messages, True forces logging on
+      shouldLog = true;
+    } else {
+      // Default: follow global message setting
+      shouldLog = core.state.settings.logMessages;
+    }
+
+    if (shouldLog) {
+      await core.logs.logMessage(this, message);
+    }
+  }
+
   abstract close(): void;
 
   protected safeAddMessage(message: Interfaces.Message): void {
@@ -235,6 +265,20 @@ abstract class Conversation implements Interfaces.Conversation {
 
   hasAutomatedAds(): boolean {
     return this.adManager.getAds().length > 0;
+  }
+
+  /**
+   * Checks if message contains eicon tags on consecutive lines and prepends a newline if needed.
+   * @param message The message to check.
+   * @return The formatted message.
+   */
+  protected formatEiconMessage(message: string): string {
+    const eIconRegex =
+      /^(?!\n)(?=.*\[eicon\].*\[\/eicon\].*\n.*\[eicon\].*\[\/eicon\])(.*\n\[eicon\].*\[\/eicon\].*)\s*/;
+    if (eIconRegex.test(message)) {
+      return '\n' + message;
+    }
+    return message;
   }
 }
 
@@ -285,12 +329,12 @@ class PrivateConversation
 
     this.safeAddMessage(message);
     if (message.type !== Interfaces.Message.Type.Event) {
-      if (core.state.settings.logMessages)
-        await core.logs.logMessage(this, message);
+      let unreadState = Interfaces.UnreadState.Unread;
+      await this.logMessage(message, false);
       if (
         this.settings.notify !== Interfaces.Setting.False &&
         message.sender !== core.characters.ownCharacter
-      )
+      ) {
         await core.notifications.notify(
           this,
           message.sender.name,
@@ -298,8 +342,10 @@ class PrivateConversation
           characterImage(message.sender.name),
           'attention'
         );
+        unreadState = Interfaces.UnreadState.Mention;
+      }
       if (this !== state.selectedConversation || !state.windowFocused)
-        this.unread = Interfaces.UnreadState.Mention;
+        this.unread = unreadState;
       this.typingStatus = 'clear';
     }
   }
@@ -310,6 +356,9 @@ class PrivateConversation
       1
     );
     delete state.privateMap[this.character.name.toLowerCase()];
+    if (this.typingStatus !== 'clear') {
+      this.setOwnTyping('clear');
+    }
     await state.savePinned();
     if (state.selectedConversation === this) state.show(state.consoleTab);
     clearInterval(this.cacheInterval);
@@ -373,7 +422,7 @@ class PrivateConversation
       return;
     }
 
-    const messageText = this.enteredText;
+    const messageText = this.formatEiconMessage(this.enteredText);
 
     this.clearText();
 
@@ -393,8 +442,7 @@ class PrivateConversation
       );
       this.safeAddMessage(message);
 
-      if (core.state.settings.logMessages)
-        await core.logs.logMessage(this, message);
+      await this.logMessage(message, false);
       this.markRead();
     });
   }
@@ -516,14 +564,13 @@ class ChannelConversation
 
     if (message.type === MessageType.Ad) {
       this.addModeMessage('ads', message);
-      if (core.state.settings.logAds) await core.logs.logMessage(this, message);
+      await this.logMessage(message, true);
     } else {
       this.addModeMessage('chat', message);
       if (message.type !== Interfaces.Message.Type.Event) {
         if (message.type === Interfaces.Message.Type.Warn)
           this.addModeMessage('ads', message);
-        if (core.state.settings.logMessages)
-          await core.logs.logMessage(this, message);
+        await this.logMessage(message, false);
         if (
           this.unread === Interfaces.UnreadState.None &&
           (this !== state.selectedConversation || !state.windowFocused) &&
@@ -562,18 +609,16 @@ class ChannelConversation
     const isAd = this.isSendingAds;
 
     if (isAd && this.adManager.isActive()) {
-      this.errorText =
-        'Cannot post ads manually while ad auto-posting is active';
+      this.errorText = l('admgr.manualPostBlocked');
       return;
     }
 
     if (isAd && Date.now() < this.nextAd) {
-      this.errorText =
-        'You must wait at least ten minutes between ad posts on this channel';
+      this.errorText = l('admgr.waitTenMinutes');
       return;
     }
 
-    const message = this.enteredText;
+    const message = this.formatEiconMessage(this.enteredText);
 
     if (!isAd) {
       this.clearText();
@@ -687,8 +732,7 @@ class ConsoleConversation extends Conversation {
 
   async addMessage(message: Interfaces.Message): Promise<void> {
     this.safeAddMessage(message);
-    if (core.state.settings.logMessages)
-      await core.logs.logMessage(this, message);
+    await this.logMessage(message, false);
     if (this !== state.selectedConversation || !state.windowFocused)
       this.unread = Interfaces.UnreadState.Unread;
   }
@@ -705,6 +749,7 @@ class State implements Interfaces.State {
   channelMap: { [key: string]: ChannelConversation | undefined } = {};
   consoleTab!: ConsoleConversation;
   selectedConversation: Conversation = this.consoleTab;
+  lastConversation: Conversation = this.selectedConversation;
   recent: Interfaces.RecentPrivateConversation[] = [];
   recentChannels: Interfaces.RecentChannelConversation[] = [];
   pinned!: { channels: string[]; private: string[] };
@@ -778,6 +823,7 @@ class State implements Interfaces.State {
 
   show(conversation: Conversation): void {
     if (conversation === this.selectedConversation) return;
+    this.lastConversation = this.selectedConversation;
     this.selectedConversation.onHide();
     conversation.unread = Interfaces.UnreadState.None;
     this.selectedConversation = conversation;
@@ -901,7 +947,7 @@ export async function testSmartFilterForPrivateMessage(
           recipient: fromChar.name,
           message:
             '\n[sub][color=orange][b][AUTOMATED MESSAGE][/b][/color][/sub]\n' +
-            'Sorry, the player of this character is not interested in characters matching your profile.\n' +
+            'Sorry, the player of this character is not interested in characters matching your profile.' +
             `${core.state.settings.risingFilter.hidePrivateMessages ? ' They did not see your message. To bypass this warning, send your message again.' : ''}\n` +
             '\n' +
             '✨ Need a filter for yourself? Try out [url=https://horizn.moe/]F-Chat Horizon[/url]'
@@ -933,10 +979,10 @@ export async function testSmartFilterForPrivateMessage(
     core.state.settings.risingFilter.hidePrivateMessages &&
     firstTime // subsequent messages bypass this filter on purpose
   ) {
-    if (core.state.settings.logMessages && originalMessage && firstTime) {
-      await withNeutralVisibilityPrivateConversation(fromChar, async p =>
-        core.logs.logMessage(p, originalMessage)
-      );
+    if (originalMessage && firstTime) {
+      await withNeutralVisibilityPrivateConversation(fromChar, async p => {
+        await p.logMessage(originalMessage, false);
+      });
     }
 
     return true;
@@ -1219,26 +1265,6 @@ export default function (this: any): Interfaces.State {
       );
       if (conversation !== state.selectedConversation || !state.windowFocused)
         conversation.unread = Interfaces.UnreadState.Mention;
-    } else if (
-      (message.type === MessageType.Message ||
-        message.type === MessageType.Ad) &&
-      isWarn(message.text)
-    ) {
-      const member = conversation.channel.members[message.sender.name];
-      if (
-        (member !== undefined && member.rank > Channel.Rank.Member) ||
-        message.sender.isChatOp
-      ) {
-        await core.notifications.notify(
-          conversation,
-          conversation.name,
-          data.message,
-          characterImage(data.character),
-          'modalert'
-        );
-        if (conversation !== state.selectedConversation || !state.windowFocused)
-          conversation.unread = Interfaces.UnreadState.Mention;
-      }
     }
   });
   connection.onMessage('LRP', async (data, time) => {
@@ -1315,6 +1341,7 @@ export default function (this: any): Interfaces.State {
     }
   });
   connection.onMessage('NLN', async (data, time) => {
+    if (!core.state.settings.horizonShowSigninNotifications) return;
     const message = new EventMessage(
       l('events.login', `[user]${data.identity}[/user]`),
       time
@@ -1340,6 +1367,7 @@ export default function (this: any): Interfaces.State {
       await conv.addMessage(message);
   });
   connection.onMessage('FLN', async (data, time) => {
+    if (!core.state.settings.horizonShowSigninNotifications) return;
     const message = new EventMessage(
       l('events.logout', `[user]${data.character}[/user]`),
       time
@@ -1564,6 +1592,13 @@ export default function (this: any): Interfaces.State {
     }
     const char = core.characters.get(data.character);
     if (!isOfInterest(char)) return;
+
+    if (
+      !core.state.settings.horizonShowDuplicateStatusNotifications &&
+      !char.hasStatusTextChanged()
+    )
+      return;
+
     const status = l(`status.${data.status}`);
     const key =
       data.statusmsg.length > 0 ? 'events.status.message' : 'events.status';

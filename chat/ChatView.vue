@@ -65,7 +65,7 @@
               <i class="fa-solid fa-rectangle-ad fa-fw"></i
               ><a v-show="adsAreRunning()" role="button" class="adControls">
                 <span
-                  title="Stop All Ads"
+                  :title="l('admgr.stopAll')"
                   class="fas fa-fw fa-stop"
                   @click.stop="stopAllAds()"
                 ></span>
@@ -157,7 +157,12 @@
             @click.middle.prevent.stop="conversation.close()"
           >
             <img
-              :src="characterImage(conversation.character.name)"
+              :src="
+                characterImage(
+                  conversation.character.name,
+                  !coreState.settings.horizonMessagePortraitHighQuality
+                )
+              "
               v-if="showAvatars"
             />
             <div class="name">
@@ -237,7 +242,7 @@
                 v-if="conversation.hasAutomatedAds()"
                 class="fas fa-ad ads"
                 :class="{ active: conversation.isSendingAutomatedAds() }"
-                aria-label="Toggle ads"
+                :aria-label="l('chat.toggleAds')"
                 @click.stop="conversation.toggleAutomatedAds()"
               ></span>
               <span

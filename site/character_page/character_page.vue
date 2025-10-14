@@ -14,7 +14,7 @@
     >
       <div style="min-height: 0">
         <div class="alert alert-info" v-show="loading">
-          Loading character information.
+          {{ l('profile.loadingCharacter') }}
         </div>
         <div class="alert alert-danger" v-show="error">{{ error }}</div>
       </div>
@@ -61,12 +61,12 @@
             id="headerBanReason"
             class="alert alert-warning"
           >
-            This character has been banned and is not visible to the public.
-            Reason:
+            {{ l('profile.bannedNotice') }}
+            {{ l('profile.reason') }}
             <br />
             {{ character.ban_reason }}
             <template v-if="character.timeout"
-              ><br />Timeout expires:
+              ><br />{{ l('profile.timeoutExpires') }}
               <date :time="character.timeout"></date>
             </template>
           </div>
@@ -75,8 +75,8 @@
             id="headerBlocked"
             class="alert alert-warning"
           >
-            This character has been blocked and is not visible to the public.
-            Reason:
+            {{ l('profile.blockedNotice') }}
+            {{ l('profile.reason') }}
             <br />
             {{ character.block_reason }}
           </div>
@@ -89,39 +89,39 @@
             id="headerCharacterMemo"
             class="alert alert-info"
           >
-            Memo: {{ character.memo.memo }}
+            {{ l('conversation.memoLabel') }} {{ character.memo.memo }}
           </div>
           <div class="card bg-light">
             <div class="card-header character-card-header">
               <tabs class="card-header-tabs" v-model="tab">
-                <span>Overview</span>
-                <span>Info</span>
+                <span>{{ l('profile.tab.overview') }}</span>
+                <span>{{ l('profile.tab.info') }}</span>
                 <span v-if="!oldApi"
-                  >Groups
+                  >{{ l('profile.tab.groups') }}
                   <span class="tab-count" v-if="groups !== null"
                     >({{ groups.length }})</span
                   ></span
                 >
                 <span
-                  >Images
+                  >{{ l('profile.tab.images') }}
                   <span class="tab-count"
                     >({{ character.character.image_count }})</span
                   ></span
                 >
                 <span v-if="character.settings.guestbook"
-                  >Guestbook
+                  >{{ l('profile.tab.guestbook') }}
                   <span class="tab-count" v-if="guestbook !== null"
                     >({{ guestbook.posts.length }})</span
                   ></span
                 >
                 <span
                   v-if="character.is_self || character.settings.show_friends"
-                  >Friends
+                  >{{ l('profile.tab.friends') }}
                   <span class="tab-count" v-if="friends !== null"
                     >({{ friends.length }})</span
                   ></span
                 >
-                <span>Recon</span>
+                <span>{{ l('profile.tab.recon') }}</span>
               </tabs>
             </div>
             <div class="card-body">
@@ -217,6 +217,7 @@
   import * as _ from 'lodash';
 
   import { Component, Hook, Prop, Watch } from '@f-list/vue-ts';
+  import anyAscii from 'any-ascii';
   import Vue from 'vue';
   import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 
@@ -247,6 +248,7 @@
   import MatchReportView from './match-report.vue';
   import ProfileAnalysis from '../../learn/recommend/ProfileAnalysis.vue';
   import { CharacterImage, SimpleCharacter } from '../../interfaces';
+  import l from '../../chat/localize';
 
   const CHARACTER_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
   const CHARACTER_META_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
@@ -295,13 +297,14 @@
     autoExpandCustoms = false;
 
     /* guestbookPostCount: number | null = null;
-        friendCount: number | null = null;
-        groupCount: number | null = null; */
+          friendCount: number | null = null;
+          groupCount: number | null = null; */
 
     guestbook: Guestbook | null = null;
     friends: SimpleCharacter[] | null = null;
     groups: CharacterGroup[] | null = null;
     images: CharacterImage[] | null = null;
+    l = l;
 
     selfCharacter: Character | undefined;
     characterMatch: MatchReport | undefined;
@@ -535,6 +538,8 @@
 
       standardParser.inlines = this.character.character.inlines;
 
+      this.parseTextToAscii(this.character);
+
       if (cache && cache.meta) {
         this.guestbook = cache.meta.guestbook;
         this.friends = cache.meta.friends;
@@ -605,6 +610,24 @@
         this.updateMeta(this.name);
       } finally {
         this.refreshing = false;
+      }
+    }
+
+    private parseTextToAscii(character: Character): void {
+      if (
+        core.state.generalSettings &&
+        core.state.generalSettings.horizonForceAsciiProfiles
+      ) {
+        character.character.description = anyAscii(
+          character.character.description
+        );
+
+        if (character.character.title) {
+          character.character.title = anyAscii(character.character.title);
+        }
+
+        // We don't do customs and infotags here, so that they are at least sorted before parsing.
+        //Check the character_page/kink.vue and infotag.vue components for that
       }
     }
 

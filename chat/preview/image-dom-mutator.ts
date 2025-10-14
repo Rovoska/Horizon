@@ -335,32 +335,46 @@ export class ImageDomMutator {
     this.add(
       'i.imgur.com',
       `
-                const imageCount = (new URL(window.location.href)).searchParams.get('flist_gallery_image_count');
-
-                ${this.getBaseJsMutatorScript(['video', 'img'])}
-
-                if(imageCount > 1) {
-                    ${this.injectHtmlJs(`<div id="imageCount" style="${imgurOuterStyle}"><div id="imageCountInner" style="${imgurInnerStyle}"></div></div>`)}
-
-                    const imageCountEl = document.getElementById('imageCountInner');
-
-                    if (imageCountEl) {
-                        imageCountEl.innerHTML = '' + (imageCount);
-                    }
-                }
-            `
+    // Clear the existing content
+    document.body.innerHTML = '';
+    
+    // Use the current URL as the image source
+    const img = document.createElement('img');
+    img.src = window.location.href;
+    img.style.cssText = 'max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; margin: 0 auto;';
+    
+    document.body.appendChild(img);
+  `
     );
 
     this.add(
       'imgur.com',
       `
-                const imageCount = $('.post-container video, .post-container img').length;
-
-                ${this.getBaseJsMutatorScript(['.post-container video', '.post-container img'], true)}
-
-                if(imageCount > 1)
-                    $('#flistWrapper').append('<div id="imageCount" style="${imgurOuterStyle}"><div style="${imgurInnerStyle}">+' + (imageCount - 1) + '</div></div>');
-            `
+    // Clear the existing content
+    document.body.innerHTML = '';
+    
+    // Extract image ID from URL
+    const urlPath = window.location.pathname;
+    const imageId = urlPath.split('/').pop();
+    
+    // Create simple img element with direct imgur URL
+    const img = document.createElement('img');
+    img.src = 'https://i.imgur.com/' + imageId + '.jpg';
+    img.style.cssText = 'max-width: 100%; max-height: 100%; width: auto; height: auto; display: block; margin: 0 auto;';
+    
+    // Handle image load error by trying different extensions
+    img.onerror = function() {
+      if (this.src.endsWith('.jpg')) {
+        this.src = 'https://i.imgur.com/' + imageId + '.png';
+      } else if (this.src.endsWith('.png')) {
+        this.src = 'https://i.imgur.com/' + imageId + '.gif';
+      } else if (this.src.endsWith('.gif')) {
+        this.src = 'https://i.imgur.com/' + imageId + '.webp';
+      }
+    };
+    
+    document.body.appendChild(img);
+  `
     );
 
     this.add(

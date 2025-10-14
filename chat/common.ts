@@ -7,10 +7,14 @@ export function profileLink(this: any | never, character: string): string {
   return `https://www.f-list.net/c/${character}`;
 }
 
-export function characterImage(this: any | never, character: string): string {
+export function characterImage(
+  this: any | never,
+  character: string,
+  useOriginalAvatar: boolean = false
+): string {
   const c = core.characters.get(character);
 
-  if (c.overrides.avatarUrl) {
+  if (c.overrides.avatarUrl && !useOriginalAvatar) {
     return c.overrides.avatarUrl;
   }
 
@@ -77,6 +81,7 @@ export class Settings implements ISettings {
   risingShowPortraitNearInput = true;
   risingShowPortraitInMessage = true;
   risingShowHighQualityPortraits = true;
+  horizonMessagePortraitHighQuality: boolean = true;
   horizonShowCustomCharacterColors = true;
   horizonShowDeveloperBadges = true;
   horizonShowGenderMarker = false;
@@ -84,10 +89,16 @@ export class Settings implements ISettings {
   horizonVanillaGenderColors = false;
   horizonChangeOfflineColor = false;
   horizonNotifyFriendSignIn = false;
+  horizonShowDuplicateStatusNotifications = true;
+  horizonShowSigninNotifications = true;
   horizonHighlightUsers: string[] = [];
+
+  chatLayoutMode: 'classic' | 'modern' = 'classic';
+  messageGrouping = true;
 
   horizonCacheDraftMessages = true;
   horizonSaveDraftMessagesToDiskTimer = 60;
+  horizonUseColorPicker = true;
 
   risingFilter = {
     hideAds: false,
@@ -160,6 +171,7 @@ export class ConversationSettings implements Conversation.Settings {
     lastAdTimestamp: 0
   };
   horizonHighlightUsers: string[] = [];
+  logMessages = Conversation.Setting.Default;
 }
 
 export function formatTime(
@@ -174,8 +186,21 @@ export function formatTime(
       (core.state as any).generalSettings.use12HourTime) ||
     false;
 
-  const timeOnlyFormat = use12 ? 'hh:mm a' : 'HH:mm';
-  if (!noDate && isToday(date)) return format(date, timeOnlyFormat);
+  const showSeconds =
+    (core &&
+      core.state &&
+      (core.state as any).generalSettings &&
+      (core.state as any).generalSettings.showSeconds) ||
+    false;
+
+  const timeOnlyFormat = use12
+    ? showSeconds
+      ? 'hh:mm:ss a'
+      : 'hh:mm a'
+    : showSeconds
+      ? 'HH:mm:ss'
+      : 'HH:mm';
+  if (noDate || isToday(date)) return format(date, timeOnlyFormat);
   const absoluteFormat = `yyyy-MM-dd ${timeOnlyFormat}`;
   return format(date, absoluteFormat);
 }

@@ -101,7 +101,7 @@
     recommendations: ProfileRecommendation[] = [];
     analyzing = false;
 
-    isMinimized = false;
+    isMinimized = true;
 
     @Prop({ required: true })
     readonly characterName: string;
@@ -112,7 +112,7 @@
     @Hook('beforeMount')
     async beforeMount(): Promise<void> {
       this.isMinimized = !!(await core.settingsStore.get(
-        'hideProfileComparisonSummary'
+        'hideProfileAnalysis'
       ));
     }
 
@@ -141,10 +141,7 @@
     async toggleMinimize(): Promise<void> {
       this.isMinimized = !this.isMinimized;
 
-      await core.settingsStore.set(
-        'hideProfileComparisonSummary',
-        this.isMinimized
-      );
+      await core.settingsStore.set('hideProfileAnalysis', this.isMinimized);
     }
   }
 </script>
