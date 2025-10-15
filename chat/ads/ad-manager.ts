@@ -35,6 +35,7 @@ export class AdManager {
   private firstPost?: Date;
   private interval?: Timer;
   private adMap: number[] = [];
+  private minPostDelaySeconds = core.connection.vars.lfrp_flood;
 
   constructor(conversation: Conversation) {
     this.conversation = conversation;
@@ -125,18 +126,24 @@ export class AdManager {
     await this.sendAdToChannel(msg, chanConv);
 
     // post next ad every 12 - 22 minutes
+    const variance = Math.random() * AdManager.POST_VARIANCE;
     const nextInMs =
       Math.max(0, chanConv.nextAd - Date.now()) +
       this.determineNextAdDelayMs(chanConv) +
-      Math.random() * AdManager.POST_VARIANCE;
+      variance;
 
     this.adIndex = this.adIndex + 1;
+
+    const minDelayWithVariance =
+      this.minPostDelaySeconds > core.connection.vars.lfrp_flood
+        ? this.minPostDelaySeconds + variance / 1000
+        : Math.max(this.minPostDelaySeconds, core.connection.vars.lfrp_flood);
 
     this.nextPostDue = new Date(
       Math.max(
         Date.now() + nextInMs,
         (chanConv.settings.adSettings.lastAdTimestamp || 0) +
-          core.connection.vars.lfrp_flood * 1000
+          minDelayWithVariance * 1000
       )
     );
 
@@ -195,6 +202,10 @@ export class AdManager {
     minPostDelaySeconds = core.connection.vars.lfrp_flood
   ): void {
     const chanConv = <Conversation.ChannelConversation>this.conversation;
+    log.debug('adManager.start.delaySecs', minPostDelaySeconds);
+    log.debug('adManager.start.timeoutMs', timeoutMs);
+
+    this.minPostDelaySeconds = minPostDelaySeconds;
 
     const initialWait = Math.max(
       Math.random() * AdManager.START_VARIANCE,

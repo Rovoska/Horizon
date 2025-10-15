@@ -41,7 +41,7 @@
   "admgr.comingNext": "Coming Next",
   "admgr.confirmRemoveAd": "Are you sure you wish to remove this ad?",
   "admgr.copyChannelAds": "Copy Channel Ads to Ad Editor",
-  "admgr.delay": "Delay between posts",
+  "admgr.delay": "Minimum delay between posts",
   "admgr.disable": "Disable",
   "admgr.editChannelAds": "Edit Channel Ads…",
   "admgr.editor": "Ad Editor",

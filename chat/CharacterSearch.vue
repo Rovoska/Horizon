@@ -95,9 +95,9 @@
         class="search-result"
         :class="'status-' + record.character.status"
       >
-        <template v-if="record.character.status === 'looking'" v-once>
+        <template v-if="record.character.status === 'looking'">
           <div class="d-flex">
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0" v-once>
               <img
                 :src="characterImage(record.character.name)"
                 class="character-avatar user"
