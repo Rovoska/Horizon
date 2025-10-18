@@ -20,7 +20,7 @@ import l from '../chat/localize';
  * The maximum number of tabs that can be opened in the application. In production, this is set to 3, while in development it is set to 5.
  * This does not change tha amount of connections to the live server, it's used so that we can connect more sessions to the test server during development.
  */
-const maxTabCount = 7;
+const maxTabCount = 6;
 
 /**
  * Hint to the renderer process about which importer to trigger on startup.
