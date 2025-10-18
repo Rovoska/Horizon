@@ -624,6 +624,7 @@ export const speciesMapping: SpeciesMap = {
     'erune',
     'vastayan?',
     'rakshasa',
+    'sergal',
     gen('(beast|anthro|furry)')
   ],
 
@@ -1263,7 +1264,6 @@ export const speciesMapping: SpeciesMap = {
   [Species.Fish]: [
     'shark',
     'great white',
-    'sergal',
     'fish',
     'salmon',
     'eel',
