@@ -777,6 +777,11 @@
         const c = await core.cache.profileCache.get(this.conversation.name);
         this.userMemo = c?.character?.memo?.memo || '';
       }
+      const editor = <Editor>this.$refs['textBox'];
+
+      if (editor !== null && editor.preview) {
+        editor.togglePreview();
+      }
     }
 
     @Watch('conversation.messages')

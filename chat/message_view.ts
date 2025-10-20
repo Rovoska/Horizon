@@ -109,7 +109,7 @@ const userPostfix: { [key: number]: string | undefined } = {
             ? createElement(IconView, {
                 props: {
                   character: message.sender,
-                  useOriginalAvatar: core.state.settings
+                  useOriginalAvatar: core.state?.settings
                     ? !core.state.settings.horizonMessagePortraitHighQuality
                     : true
                 },
@@ -166,7 +166,7 @@ const userPostfix: { [key: number]: string | undefined } = {
               avatar: core.connection.character
                 ? core.state.settings.risingShowPortraitInMessage
                 : false,
-              useOriginalAvatar: core.state.settings
+              useOriginalAvatar: core.connection.character
                 ? !core.state.settings.horizonMessagePortraitHighQuality
                 : true,
               character: message.sender,

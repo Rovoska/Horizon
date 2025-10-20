@@ -252,6 +252,10 @@
     @Hook('mounted')
     async mounted(): Promise<void> {
       this.characters = await core.logs.getAvailableCharacters();
+      //On Windows, sort is case-sensitive by default, so we need to force case-insensitive sorting for Linux and macOS.
+      this.characters = this.characters
+        .slice()
+        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
       window.addEventListener('resize', this.resizeListener);
     }
 
@@ -270,9 +274,11 @@
       this.conversations = (
         await core.logs.getConversations(this.selectedCharacter)
       ).slice();
-      this.conversations.sort((x, y) =>
-        x.name < y.name ? -1 : x.name > y.name ? 1 : 0
-      );
+      this.conversations.sort((x, y) => {
+        const xName = x.name.replace(/^#/, '').toLowerCase();
+        const yName = y.name.replace(/^#/, '').toLowerCase();
+        return xName < yName ? -1 : xName > yName ? 1 : 0;
+      });
     }
 
     async loadDates(): Promise<void> {

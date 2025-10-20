@@ -420,7 +420,9 @@ $bookmark-color: #66cc33 !default;
     gap: 8px;
     padding: 1px 4px;
     position: relative;
-    border-left: solid 2px transparent;
+    &:not(.message-score) {
+      border-left: solid 2px transparent;
+    }
     .expanded {
       max-height: none;
     }

@@ -52,7 +52,7 @@ Set-Location electron
 Remove-Item -Recurse -Force app, dist -ErrorAction SilentlyContinue
 pnpm install
 node ..\webpack production
-node build\build.mjs --os windows --format nsis msi --arch x64 arm64
+node build\build.mjs --os windows --format nsis --arch x64 arm64
 
 # Prepare release directory
 # * Create release directory if it doesn't exist
@@ -61,6 +61,5 @@ New-Item -ItemType Directory -Path $ReleasePath -Force | Out-Null
 # Copy artifacts
 # * Copy built executables to the release directory
 Copy-Item "$DistPath\*.exe" -Destination "$ReleasePath\" -ErrorAction SilentlyContinue
-Copy-Item "$DistPath\*.msi" -Destination "$ReleasePath\" -ErrorAction SilentlyContinue
 
 # TODO: Allow specifying the branch to build from   

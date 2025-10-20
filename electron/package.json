@@ -1,6 +1,6 @@
 {
   "name": "horizon-electron",
-  "version": "1.34.1",
+  "version": "1.34.2",
   "author": "The F-List Team and Horizon Contributors",
   "description": "Horizon",
   "homepage": "https://horizn.moe",
@@ -29,7 +29,7 @@
       "oneClick": false,
       "perMachine": false,
       "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
+      "allowToChangeInstallationDirectory": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Horizon"
@@ -74,6 +74,11 @@
           "Categories": "Network;Chat;"
         }
       }
+    },
+    "rpm": {
+      "fpm": [
+        "--rpm-rpmbuild-define=_build_id_links none"
+      ]
     }
   },
   "scripts": {

@@ -69,6 +69,22 @@ class FListImagePreviewDomMutator {
   }
 
   detectImage(selectors, body) {
+    // Check for og:image or twitter:image meta tags
+    const imageMeta =
+      document.querySelector('meta[property="og:image"]') ||
+      document.querySelector('meta[name="twitter:image"]');
+
+    if (imageMeta) {
+      const imageUrl = imageMeta.getAttribute('content');
+      if (imageUrl) {
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        this.debug('detectImage.ogFound', imageUrl);
+        return img;
+      }
+    }
+
+    // Fallback to original behavior (First image found)
     let selected = [];
 
     for (const selector of selectors) {

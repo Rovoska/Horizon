@@ -77,7 +77,7 @@
             />
           </div>
         </div>
-        <div class="character-grid">
+        <div class="character-grid d-grid justify-content-center">
           <button
             v-for="character in filteredCharacters"
             :key="character.id"
@@ -550,8 +550,7 @@
   }
 
   .character-grid {
-    display: flex;
-    flex-wrap: wrap;
+    grid-template-columns: repeat(auto-fill, 96px);
     gap: 12px;
     max-height: 45vh;
     overflow-y: auto;
@@ -565,7 +564,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
       background: rgba(var(--bs-black-rgb), 0.02);
       border: none;
       border-radius: 8px;

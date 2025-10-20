@@ -96,7 +96,7 @@
               : l('editor.preview', `${this.shortcutModifierKey}+Shift+P`)
           "
         >
-          <i class="fa fa-eye"></i>
+          <i class="fa" :class="preview ? 'fa-eye-slash' : 'fa-eye'"></i>
         </div>
       </div>
       <button
@@ -106,6 +106,14 @@
         style="margin-left: 10px"
         @click="showToolbar = false"
       ></button>
+    </div>
+    <div
+      @click="previewBBCode"
+      v-if="preview && !hasToolbar"
+      class="btn btn-light btn-sm bbcode-editor-preview active"
+      :title="l('editor.closePreview', `${this.shortcutModifierKey}+Shift+P`)"
+    >
+      <i class="fa fa-eye-slash"></i>
     </div>
     <div
       class="bbcode-editor-text-area bg-light"
@@ -128,7 +136,7 @@
         @keydown="onKeyDown"
       ></textarea>
       <textarea ref="sizer" class="hidden-scrollbar"></textarea>
-      <div class="bbcode-preview" v-show="preview">
+      <div class="bbcode-preview bg-body" v-show="preview">
         <div class="bbcode-preview-warnings">
           <div class="alert alert-danger" v-show="previewWarnings.length">
             <li v-for="warning in previewWarnings">{{ warning }}</li>
@@ -396,6 +404,11 @@
       withInject?: string,
       collapseAfterWrap: boolean = false
     ): void {
+      if (this.undoIndex === 0 && this.text !== this.undoStack[0]) {
+        if (this.undoStack.length >= 30) this.undoStack.pop();
+        this.undoStack.unshift(this.text);
+      }
+
       const selection = this.getSelection();
       if (selection.length > 0) {
         const replacement =
@@ -655,9 +668,17 @@
     onPaste(e: ClipboardEvent): void {
       const data = e.clipboardData!.getData('text/plain');
       if (!this.isShiftPressed && urlRegex.test(data)) {
-        e.preventDefault();
-        console.log('bbcode.url.paste', data);
+        const selection = this.getSelection();
+        if (selection.text.length === 0) {
+          //This regex tests for [url= so you don't wind up pasting another pair of URL tags
+          const match = /.*\[url=$/.exec(this.text.substring(0, selection.end));
+          if (match !== null) {
+            return;
+          }
+        }
 
+        console.log('bbcode.url.paste', data);
+        e.preventDefault();
         //we only replace the brackets instead of trying to force the whole path to be escaped because
         //these two characters give us trouble with BBCode and the rest can just be picked up by the browser anyway
         this.applyText(
@@ -730,6 +751,7 @@
     overflow-y: auto;
     div.bbcode {
       padding: 0.2em 0.45em;
+      min-height: 60px;
     }
   }
 

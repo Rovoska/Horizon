@@ -1,5 +1,5 @@
 import * as remote from '@electron/remote';
-import fs from 'fs';
+import fs from 'node:fs';
 import { ipcRenderer } from 'electron';
 import l from '../../../chat/localize';
 import * as VanillaImporter from './vanilla-importer';
@@ -7,6 +7,23 @@ import { SlimcatImporter } from '../index';
 import { GeneralSettings } from '../../common';
 
 type ImporterHint = 'auto' | 'vanilla' | 'advanced' | 'slimcat' | undefined;
+
+/**
+ * Checks if the user already has Horizon logs.
+ * If the log directory contains any subdirectories (character folders), we assume they have logs.
+ *
+ * @param logDirectory - Path to the Horizon log directory
+ * @returns true if logs exist, false otherwise
+ */
+function hasExistingHorizonLogs(logDirectory: string): boolean {
+  try {
+    if (!fs.existsSync(logDirectory)) return false;
+    const entries = fs.readdirSync(logDirectory, { withFileTypes: true });
+    return entries.some(entry => entry.isDirectory());
+  } catch {
+    return false;
+  }
+}
 
 function normalizeImportHint(v: string | undefined): ImporterHint {
   if (v === 'true') return 'slimcat';
@@ -44,7 +61,10 @@ function doVanillaGeneralImport(
     settings = Object.assign(new GeneralSettings(), settings, importedSettings);
 
   const summaries = VanillaImporter.importAll(rctx, destinationDir, {
-    includePinnedEicons: true
+    includePinnedEicons: true,
+    // ! we should avoid overwriting any existing logs during startup import
+    // This shouldn't even be offered if you have logs already, but better safe than sorry.
+    overwrite: false
   });
   const importedCharacters = Array.from(summaries.entries()).filter(
     ([, s]) => s.logsCopied > 0 || s.settingsCopied > 0
@@ -136,7 +156,11 @@ export async function handleStartupImport(
     );
 
     if (!finalHint) return settings;
-    if (finalHint === 'vanilla' && settings.hasDismissedVanillaImport)
+    if (
+      finalHint === 'vanilla' &&
+      (settings.hasDismissedVanillaImport ||
+        hasExistingHorizonLogs(settings.logDirectory))
+    )
       return settings;
 
     if (finalHint === 'vanilla' && ctx) {

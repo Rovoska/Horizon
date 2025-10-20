@@ -21,12 +21,13 @@ $blue-color: $r34-blue;
 $yellow-color: $r34-yellow;
 $purple-color: $r34-purple;
 $cyan-color: $r34-cyan;
-$white-color: color.scale($gray-400, $lightness: -20%);
+$white-color: color.scale($r34-gray, $lightness: -10%);
 $black-color: $black;
 $brown-color: $r34-brown;
 $pink-color: $r34-pink;
 $gray-color: color.scale($r34-gray, $lightness: -20%);
 $orange-color: $r34-orange;
+$bookmark-color: color.scale($green-color, $lightness: -20%);
 
 @import '../chat';
 
@@ -73,17 +74,18 @@ $genders: (
 );
 
 @each $gender, $color in $genders {
-  .gender-#{$gender} {
-    color: $color;
+  .gender-#{$gender},
+  .gender-icon-#{$gender} {
+    --gender-color: #{$color};
+  }
+
+  .gender-icon-#{$gender},
+  .message-event .gender-icon-#{gender} {
+    color: var(--gender-color);
   }
 
   .message-event .gender-#{$gender} {
-    color: color.scale($color, $lightness: -5%);
-  }
-
-  .gender-#{$gender}.user-bookmark,
-  .message-event .gender-#{$gender}.user-bookmark {
-    color: color.scale($green-color, $lightness: -20%);
+    --gender-color: #{color.scale($color, $lightness: 5%)};
   }
 }
 

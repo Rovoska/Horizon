@@ -578,7 +578,7 @@
 
     countPendingResults(names?: string[], results = this.results): number {
       // console.log('COUNTPENDINGRESULTS', names);
-
+      if (!this.shouldShowMatch) return 0;
       return _.reduce(
         results,
         (accum: number, result: SearchResult) => {

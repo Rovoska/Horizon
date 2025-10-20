@@ -96,7 +96,7 @@ function generateEnvVars(targetKey) {
 function generateVolumeMappings(project) {
   const volumes = [
     `-v ${process.cwd()}:/project`,
-    `-v ${project}-node-modules:/project/node_modules`,
+    `-v ${process.cwd()}/node_modules:/project/node_modules`,
     `-v ~/.cache/electron:/root/.cache/electron`,
     `-v ~/.cache/electron-builder:/root/.cache/electron-builder`
   ];
