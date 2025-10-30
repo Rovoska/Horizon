@@ -76,6 +76,13 @@
     if (getKey(e) === Keys.Escape && dialogStack.length > 0)
       dialogStack[dialogStack.length - 1].hideWithCheck();
   });
+  if (process.platform === 'darwin') {
+    window.addEventListener('keydown', e => {
+      if (e.metaKey && e.key == 'w' && dialogStack.length > 0) {
+        dialogStack[dialogStack.length - 1].hideWithCheck();
+      }
+    });
+  }
   window.addEventListener(
     'backbutton',
     e => {

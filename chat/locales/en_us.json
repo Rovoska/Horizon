@@ -11,6 +11,7 @@
   "action.edit": "Edit",
   "action.eicon.copy": "Copy EIcon name",
   "action.eicon.copyBbcode": "Copy EIcon BBCode",
+  "action.hide": "Hide Horizon",
   "action.incognito": "Open in Incognito mode",
   "action.markAsRead": "Mark all as read",
   "action.newTab": "Open new tab",
