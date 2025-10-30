@@ -15,7 +15,7 @@
       id="img"
       :title="character.name"
       :alt="character.name"
-      v-once
+      @error="onImageError"
   /></a>
 </template>
 
@@ -31,6 +31,7 @@
   export default class IconView extends Vue {
     Utils = Utils;
     characterImage = characterImage;
+    imageError = false;
 
     @Prop({ required: true })
     readonly character!: Character;
@@ -84,6 +85,11 @@
       EventBus.$emit('imagepreview-toggle-stickyness', {
         url: this.getCharacterUrl()
       });
+    }
+
+    onImageError(): void {
+      this.imageError = true;
+      this.character.overrides.avatarUrl = undefined;
     }
   }
 </script>
