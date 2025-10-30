@@ -14,9 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Channel member lists now feature extensive filter options. Sorting has been moved to this pop-over menu as well. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d9228c052920fefd1ed62d42b7fcbd934b3bd618)
   - You can even enable persistent filters under "Character settings > Smart filters".
   - Thank you, @Matthew-X!
-- Added a conversation-level setting to disable it from showing up as "unread" when new messages appear. Unless you get pinged, of course. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/41513f066de4e9adc2396a8b57b38d7bbf5225dc)
+- Added a conversation-level setting to disable that specific conversation from showing up as "unread" when new messages appear. Unless you get pinged, of course. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/41513f066de4e9adc2396a8b57b38d7bbf5225dc)
 - Added a new light mode theme: "Snowed In". [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/207aa9b7d45d4f8f41a9703b124ca58d5fd51be3)
 - Added settings to determine how long a profile's data can be stored on your computer, and how many profiles can be kept in active system memory at once. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5526219900318b636abf59e41ec5c31e65556b87)
+  - There was technically always a setting for the former, you just could not access it from any menu and would need to edit the settings file manually. The default value (30 days) remains unchanged though.
+- Added "Hide" and "Hide Others" menu items for MacOS, and made Cmd + W close the active dialog. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/0e7caeb38db6065154ae802acce23c388bb5e1e4)
 
 ### Changed
 
@@ -29,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fixed an old 3.0 issue where "toast" messages, like setting a channel to public, displaying unparsed BBCode. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d6b79cc521eb38e7cf70a980e2e949f9aec25689)
+- Fixed an old 3.0 issue where "toast" messages, like setting a channel to public, would display unparsed BBCode. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d6b79cc521eb38e7cf70a980e2e949f9aec25689)
 - Fixed themes not correctly showing as the root element's class name if using the "Sync with system theme". For setting custom CSS on a per-theme level. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5a860a2c7d53cf239c627475930dd08cea2e3f2a)
 
 ### Development
