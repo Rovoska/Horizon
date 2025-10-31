@@ -78,12 +78,14 @@
 
       <dropdown
         class="input-group"
+        wrapClass="dropup"
         style="margin-top: 5px; flex-shrink: 0"
         :keep-open="true"
         :title="''"
         link-style="''"
         :link-class="dropdownLinkClass"
         icon-class="fas fa-filter"
+        :dropup="true"
       >
         <div class="p-2" style="margin: 0px 5px" @click.stop>
           <div style="margin-bottom: 8px">
