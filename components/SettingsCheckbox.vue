@@ -42,7 +42,7 @@
   interface Props {
     value?: boolean;
     name: string;
-    disabled: {
+    disabled?: {
       type: boolean;
       default: false;
     };
