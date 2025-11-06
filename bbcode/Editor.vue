@@ -96,7 +96,7 @@
               : l('editor.preview', `${this.shortcutModifierKey}+Shift+P`)
           "
         >
-          <i class="fa" :class="preview ? 'fa-eye-slash' : 'fa-eye'"></i>
+          <i class="fa" :class="preview ? 'fa-eye' : 'far fa-eye'"></i>
         </div>
       </div>
       <button
@@ -537,15 +537,19 @@
     //They fire when the editor element is focused, not the text box.
     onKeyDownGlobal(e: KeyboardEvent): void {
       const key = getKey(e);
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && key === Keys.KeyP) {
+      if (
+        ((e.metaKey || e.ctrlKey) && e.shiftKey && key === Keys.KeyP) ||
+        ((key === Keys.Enter || key === Keys.Space) && this.preview)
+      ) {
         e.stopPropagation();
         e.preventDefault();
         this.togglePreview();
+        return;
       }
-      if ((key === Keys.Enter || key === Keys.Space) && this.preview) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.togglePreview();
+
+      const input = <HTMLTextAreaElement>this.$refs['input'];
+      if (input) {
+        input.focus();
       }
     }
 
