@@ -590,6 +590,7 @@
   "settings.clickOpensMessage": "Clicking users opens messages (instead of their profile)",
   "settings.closeToTray": "Close to tray",
   "settings.colorBookmarks": "Show friends/bookmarks in a different colour",
+  "settings.characterFriendsOnly": "Display only this character's friends in the sidebar",
   "settings.colorblindMode": "Colorblind mode",
   "settings.comingsoon": "Coming soon.",
   "settings.customCss": "Custom user stylesheet",

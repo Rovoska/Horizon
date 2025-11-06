@@ -133,6 +133,33 @@ class State implements Interfaces.State {
 
     Vue.set(char.overrides, type, newValue);
   }
+  async refreshFriends(characterFriendsOnly: bool): void {
+    if (!characterFriendsOnly) {
+      this.friendList = (
+        await core.connection.queryApi<{
+          friends: { source: string; dest: string; last_online: number }[];
+        }>('friend-list.php')
+      ).friends.map(x => x.dest);
+    } else {
+      let id = this.ownProfile.character.id;
+      this.friendList = (
+        await core.connection.queryApi<{
+          friends: Character[];
+        }>('character-friends.php', { id })
+      ).friends.map(x => x.name);
+    }
+    this.friends = [
+      ...new Set(
+        this.friendList
+          .map(x => state.get(x))
+          .filter(x => x.status !== 'offline')
+      )
+    ]; //deduplicate apparently this is performant
+    for (const key in state.characters) {
+      const character = state.characters[key]!;
+      character.isFriend = state.friendList.indexOf(character.name) !== -1;
+    }
+  }
 
   async resolveOwnProfile(): Promise<void> {
     await methods.fieldsGet();
@@ -161,7 +188,10 @@ export default function (this: void, connection: Connection): Interfaces.State {
         friends: { source: string; dest: string; last_online: number }[];
       }>('friend-list.php')
     ).friends.map(x => x.dest);
-    if (isReconnect && <Character | undefined>state.ownCharacter !== undefined)
+    if (
+      isReconnect &&
+      <Character | undefined>state.core.ownCharacter !== undefined
+    )
       reconnectStatus = {
         status: state.ownCharacter.status,
         statusmsg: state.ownCharacter.statusText
@@ -176,6 +206,7 @@ export default function (this: void, connection: Connection): Interfaces.State {
     }
   });
   connection.onEvent('connected', async isReconnect => {
+    state.refreshFriends(core.state.settings.characterFriendsOnly);
     if (!isReconnect) return;
     connection.send('STA', reconnectStatus);
     for (const key in state.characters) {
@@ -251,7 +282,8 @@ export default function (this: void, connection: Connection): Interfaces.State {
     const char = state.get(data.character);
     char.isChatOp = false;
   });
-  connection.onMessage('RTB', data => {
+  connection.onMessage('RTB', async data => {
+    console.log('got rtb:', data);
     if (
       data.type !== 'trackadd' &&
       data.type !== 'trackrem' &&
@@ -260,6 +292,7 @@ export default function (this: void, connection: Connection): Interfaces.State {
     )
       return;
     const character = state.get(data.name);
+    const id = state.ownProfile.character.id;
     switch (data.type) {
       case 'trackadd':
         state.bookmarkList.push(data.name);
@@ -273,16 +306,38 @@ export default function (this: void, connection: Connection): Interfaces.State {
           state.bookmarks.splice(state.bookmarks.indexOf(character), 1);
         break;
       case 'friendadd':
-        if (character.isFriend) return;
-        state.friendList.push(data.name);
-        character.isFriend = true;
+        if (core.state.settings.characterFriendsOnly) {
+          state.friendList = (
+            await connection.queryApi<{
+              friends: Character[];
+            }>('character-friends.php', { id })
+          ).friends.map(x => x.name);
+          if (state.friendList.indexOf(data.name) == -1) {
+            return;
+          }
+        } else {
+          state.friendList.push(data.name);
+        }
         if (character.status !== 'offline') state.friends.push(character);
+        character.isFriend = true;
         break;
       case 'friendremove':
-        state.friendList.splice(state.friendList.indexOf(data.name), 1);
-        character.isFriend = false;
-        if (character.status !== 'offline')
+        if (core.state.characterFriendsOnly) {
+          state.friendList = (
+            await connection.queryApi<{
+              friends: Character[];
+            }>('character-friends.php', { id })
+          ).friends.map(x => x.name);
+          if (state.friendList.indexOf(data.name) == -1) {
+            return;
+          }
+        } else {
+          state.friendList.splice(state.friendList.indexOf(data.name), 1);
+        }
+        if (character.status !== 'offline') {
           state.friends.splice(state.friends.indexOf(character), 1);
+        }
+        character.isFriend = false;
     }
   });
   return state;
