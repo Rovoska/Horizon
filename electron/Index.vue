@@ -92,11 +92,9 @@
                 @keypress.enter="login()"
                 :disabled="loggingIn"
               />
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" @click="resetHost()">
-                  <span class="fas fa-undo-alt"></span>
-                </button>
-              </div>
+              <button class="btn btn-outline-secondary" @click="resetHost()">
+                <span class="fas fa-undo-alt"></span>
+              </button>
             </div>
             <div style="height: 8px"></div>
             <label class="control-label" for="proxy">{{
@@ -109,11 +107,9 @@
                 v-model="settings.proxy"
                 @keypress.enter="login()"
               />
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" @click="resetProxy()">
-                  <span class="fas fa-undo-alt"></span>
-                </button>
-              </div>
+              <button class="btn btn-outline-secondary" @click="resetProxy()">
+                <span class="fas fa-undo-alt"></span>
+              </button>
             </div>
           </div>
           <div class="mb-3">
@@ -854,7 +850,7 @@
         }
 
         return {
-          [`theme-${core.state.settings.risingCharacterTheme || this.settings.theme}`]: true,
+          [`theme-${core.state.settings.risingCharacterTheme || this.getSyncedTheme()}`]: true,
           colorblindMode: core.state.settings.risingColorblindMode,
           vanillaTextColors: this.settings.horizonVanillaTextColors,
           vanillaGenderColors: this.settings.horizonVanillaGenderColors,
@@ -864,7 +860,7 @@
             false
         };
       } catch (err) {
-        return { [`theme-${this.settings.theme}`]: true };
+        return { [`theme-${this.getSyncedTheme()}`]: true };
       }
     }
 

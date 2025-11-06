@@ -41,7 +41,7 @@ const COLORS = {
 const OS_CONFIGS = {
   macos: {
     aliases: ['mac'],
-    formats: ['dmg', 'zip'],
+    formats: ['dmg', 'zip', 'dir'],
     arches: ['x64', 'arm64', 'universal']
   },
   linux: {
@@ -78,7 +78,7 @@ Examples:
   node build/build.mjs --os macos --no-docker        # Disable Docker for macOS (already disabled by default)
 
 Supported formats by OS:
-  macOS:   dmg, zip
+  macOS:   dmg, zip, dir
   Linux:   deb, rpm, tar.gz, AppImage
   Windows: exe, msi, nsis, portable
 

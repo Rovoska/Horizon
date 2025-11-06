@@ -1052,6 +1052,13 @@
           this.close();
         }
       });
+      if (process.platform === 'darwin') {
+        window.addEventListener('keydown', e => {
+          if (e.metaKey && e.key == 'w') {
+            this.close();
+          }
+        });
+      }
 
       this.$watch(
         () => this.settings.logDirectory,

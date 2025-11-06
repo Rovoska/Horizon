@@ -374,13 +374,14 @@
         if (core.state.settings.notifications)
           await core.notifications.requestPermission();
       });
-      core.connection.onEvent('connected', () => {
+      core.connection.onEvent('connected', async () => {
         log.debug('connection.connected', {
           character: core.characters.ownCharacter?.name
         });
 
         (<Modal>this.$refs['reconnecting']).hide();
         this.error = '';
+        await core.cache.start((core.state as any).generalSettings, true);
         this.connecting = false;
         this.connected = true;
         core.notifications.playSound('login');
@@ -388,7 +389,6 @@
 
         // tslint:disable-next-line:no-floating-promises
         core.siteSession.onConnectionEstablished();
-        core.cache.start((core.state as any).generalSettings, true);
       });
       core.watch(
         () => core.conversations.hasNew,

@@ -145,12 +145,7 @@
           <dropdown
             :keep-open="false"
             :title="l('action.view')"
-            :icon-class="{
-              fas: true,
-              'fa-comments': conversation.mode === 'chat',
-              'fa-ad': conversation.mode === 'ads',
-              'fa-asterisk': conversation.mode === 'both'
-            }"
+            :icon-class="viewModeIconClass"
             wrap-class="btn-group views"
             link-class="btn btn-secondary dropdown-toggle"
             v-show="conversation.channel.mode == 'both'"
@@ -391,9 +386,10 @@
           style="cursor: pointer"
           @click.stop="conversation.infoText = ''"
         ></span>
-        <span style="flex: 1; margin-left: 5px">{{
-          conversation.infoText
-        }}</span>
+        <bbcode-ui
+          :text="conversation.infoText"
+          style="flex: 1; margin-left: 5px"
+        ></bbcode-ui>
       </div>
       <div v-show="conversation.errorText" class="chat-info-text">
         <span
@@ -401,9 +397,11 @@
           style="cursor: pointer"
           @click.stop="conversation.errorText = ''"
         ></span>
-        <span class="redText" style="flex: 1; margin-left: 5px">{{
-          conversation.errorText
-        }}</span>
+        <bbcode-ui
+          :text="conversation.errorText"
+          class="redText"
+          style="flex: 1; margin-left: 5px"
+        ></bbcode-ui>
       </div>
       <div class="bbcode-editor-controls">
         <div
@@ -551,6 +549,9 @@
   // import { CharacterMemo } from '../site/character_page/interfaces';
   import { MemoManager } from './character/memo';
   import { CharacterMemo } from '../site/character_page/interfaces';
+  import { UserInterfaceBBCodeParser } from '../bbcode/user-interface';
+
+  const UIBbcodeParser = new UserInterfaceBBCodeParser();
 
   @Component({
     components: {
@@ -561,6 +562,7 @@
       logs: Logs,
       'message-view': MessageView,
       bbcode: BBCodeView(core.bbCodeParser),
+      'bbcode-ui': BBCodeView(UIBbcodeParser),
       'command-help': CommandHelp,
       'ad-view': CharacterAdView,
       'channel-list': CharacterChannelList,
@@ -1135,6 +1137,20 @@
       const conv = <Conversation.ChannelConversation>this.conversation;
       const member = conv.channel.members[core.connection.character];
       return member !== undefined && member.rank > Channel.Rank.Member;
+    }
+
+    get viewModeIconClass(): string {
+      const baseClasses = ['fas'];
+
+      if (this.conversation.mode === 'chat') {
+        baseClasses.push('fa-comments');
+      } else if (this.conversation.mode === 'ads') {
+        baseClasses.push('fa-ad');
+      } else if (this.conversation.mode === 'both') {
+        baseClasses.push('fa-asterisk');
+      }
+
+      return baseClasses.join(' ');
     }
   }
 </script>

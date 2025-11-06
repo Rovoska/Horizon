@@ -75,6 +75,12 @@ export class CacheManager {
 
   protected isActiveTab = true;
 
+  private hasStarted = false;
+
+  get hasCacheStarted(): boolean {
+    return this.hasStarted;
+  }
+
   setTabActive(isActive: boolean): void {
     this.isActiveTab = isActive;
 
@@ -238,14 +244,38 @@ export class CacheManager {
    *
    * But under what scenarios do we actually need to process without fetching?
    * @param character Character name to fetch, or a character object to finish
-   *
+   * @param fromDiskOnly If true, only attempt to load from disk cache; do not fetch from server
+   * @param deleteAfterFetch If true, delete the profile from cache immediately after fetching
    * Comment imported from Frolic; may be inaccurate if significant changes occured.
    */
-  async addProfile(character: string | ComplexCharacter): Promise<void> {
+  async addProfile(
+    character: string | ComplexCharacter,
+    fromDiskOnly: boolean = false,
+    deleteAfterFetch: boolean = false
+  ): Promise<void> {
     if (typeof character === 'string') {
       // console.log('Learn discover', character);
 
+      if (fromDiskOnly) {
+        const diskChar = await this.profileCache.get(character);
+        if (deleteAfterFetch && diskChar) {
+          this.profileCache.delete(character);
+        }
+        return;
+      }
       await this.queueForFetching(character);
+      if (deleteAfterFetch) {
+        // Wait until fetched, then delete
+        const checkAndDelete = async () => {
+          const p = await this.profileCache.get(character);
+          if (p) {
+            this.profileCache.delete(character);
+          } else {
+            setTimeout(checkAndDelete, 1000);
+          }
+        };
+        await checkAndDelete();
+      }
       return;
     }
 
@@ -310,6 +340,10 @@ export class CacheManager {
     if (!skipFlush) {
       await this.profileStore.flushProfiles(settings.risingCacheExpiryDays);
     }
+
+    this.hasStarted = true;
+
+    this.profileCache.setMaxCacheSize(settings.horizonCacheMemoryCount);
 
     EventBus.$on('character-data', async (data: CharacterDataEvent) => {
       // this promise is intentionally NOT chained
@@ -658,6 +692,8 @@ export class CacheManager {
     if (this.profileStore) {
       await this.profileStore.stop();
     }
+
+    this.hasStarted = false;
 
     // should do some $off here?
   }

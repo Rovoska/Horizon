@@ -329,7 +329,9 @@ class PrivateConversation
 
     this.safeAddMessage(message);
     if (message.type !== Interfaces.Message.Type.Event) {
-      let unreadState = Interfaces.UnreadState.Unread;
+      let unreadState = this.settings.muted
+        ? Interfaces.UnreadState.None
+        : Interfaces.UnreadState.Unread;
       await this.logMessage(message, false);
       if (
         this.settings.notify !== Interfaces.Setting.False &&
@@ -576,7 +578,9 @@ class ChannelConversation
           (this !== state.selectedConversation || !state.windowFocused) &&
           this.mode !== 'ads'
         )
-          this.unread = Interfaces.UnreadState.Unread;
+          this.unread = this.settings.muted
+            ? Interfaces.UnreadState.None
+            : Interfaces.UnreadState.Unread;
       } else this.addModeMessage('ads', message);
     }
     this.addModeMessage('both', message);

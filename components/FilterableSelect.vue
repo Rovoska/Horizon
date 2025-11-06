@@ -3,12 +3,12 @@
     class="filterable-select"
     linkClass="form-select"
     :keepOpen="multiple"
+    :gap="0"
   >
     <template slot="title" v-if="multiple">{{ label }}</template>
     <slot v-else slot="title" :option="selected">{{ label }}</slot>
 
     <div class="p-2">
-      <!-- changed from style="padding: 10px" to utility class -->
       <input
         v-model="filter"
         class="form-control"
@@ -18,7 +18,6 @@
       />
     </div>
     <div class="overflow-auto dropdown-items">
-      <!-- added overflow-auto class -->
       <template v-if="multiple">
         <a
           href="#"
@@ -72,7 +71,6 @@
     @Prop
     readonly title?: string;
     filter = '';
-    // noinspection TypeScriptValidateTypes
     selected: object | object[] | undefined =
       this.value !== undefined
         ? this.value
@@ -100,7 +98,6 @@
     }
 
     get filtered(): object[] {
-      // tslint:disable-next-line:no-unsafe-any
       return this.options.filter(x => this.filterFunc(this.filterRegex, x));
     }
 
@@ -126,7 +123,7 @@
 
     button {
       display: flex;
-      text-align: start; /* changed from left to start */
+      text-align: start;
     }
   }
 </style>

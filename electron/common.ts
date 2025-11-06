@@ -41,6 +41,7 @@ export class GeneralSettings {
   customDictionary: string[] = [];
   hwAcceleration = true;
   risingCacheExpiryDays = 30;
+  horizonCacheMemoryCount = 350;
   risingSystemLogLevel: log.LevelOption = 'info';
   risingDisableWindowsHighContrast = false;
   browserPath = '';

@@ -37,7 +37,7 @@
             />
             <div class="btn-group search-buttons">
               <div
-                class="btn btn-light expressions"
+                class="btn btn-light favorites"
                 @click.prevent.stop="searchWithString('category:favorites')"
                 :class="{ active: search === 'category:favorites' }"
                 :title="l('eicon.category.favorites')"
@@ -740,6 +740,10 @@
             border-bottom: 1px solid var(--bs-secondary);
           }
 
+          .favorites {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+          }
           .expressions {
             border-top-left-radius: 0;
             border-top-right-radius: 0;

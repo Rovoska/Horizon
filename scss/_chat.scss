@@ -503,7 +503,7 @@ $bookmark-color: #66cc33 !default;
     &.message-warn.message-own {
       //this doesn't look very pretty, but the point is to be obvious, so we'll leave this commented for now
       //background-color: var(--bs-danger-bg-subtle);
-      color: $light;
+
       //I always want the border to be lighter for this, not have it somehow be a theme thing.
       border-left-color: color.change(mix(#ffffff, $danger, 4 * 8%));
       .message-time {

@@ -142,6 +142,7 @@ export namespace Conversation {
     readonly adSettings: AdSettings;
     readonly horizonHighlightUsers: ReadonlyArray<string>;
     readonly logMessages: Setting;
+    readonly muted: boolean;
   }
 
   export interface AdSettings {
@@ -228,6 +229,8 @@ export interface ExtendedSearchData extends SearchData {
   species: SearchSpecies[];
 }
 
+export type AvailableSort = 'normal' | 'status' | 'gender' | 'compatibility';
+
 export namespace Settings {
   export type Keys = {
     settings: Settings;
@@ -297,6 +300,10 @@ export namespace Settings {
     readonly horizonShowCustomCharacterColors: boolean;
     readonly horizonShowDeveloperBadges: boolean;
     readonly horizonShowGenderMarker: boolean;
+    readonly horizonAutoGenderFilter: boolean;
+    readonly horizonSavedGenderFilters: ReadonlyArray<string>;
+    readonly horizonSavedMembersSort: AvailableSort;
+    readonly horizonPersistentMemberFilters: boolean;
     readonly horizonGenderMarkerOrigColor: boolean;
     readonly horizonChangeOfflineColor: boolean;
     readonly horizonNotifyFriendSignIn: boolean;

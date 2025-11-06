@@ -161,12 +161,6 @@
                     :characterMatch="characterMatch"
                   ></character-infotags>
                 </div>
-                <div role="tabpanel" v-show="tab === '2'" v-if="!oldApi">
-                  <character-groups
-                    :character="character"
-                    ref="tab2"
-                  ></character-groups>
-                </div>
                 <div role="tabpanel" v-show="tab === '3'">
                   <character-images
                     :character="character"
@@ -236,7 +230,6 @@
   import DateDisplay from '../../components/date_display.vue';
   import Tabs from '../../components/tabs';
   import FriendsView from './friends.vue';
-  import GroupsView from './groups.vue';
   import GuestbookView from './guestbook.vue';
   import ImagesView from './images.vue';
   import InfotagsView from './infotags.vue';
@@ -266,7 +259,6 @@
       tabs: Tabs,
       'character-friends': FriendsView,
       'character-guestbook': GuestbookView,
-      'character-groups': GroupsView,
       'character-infotags': InfotagsView,
       'character-images': ImagesView,
       'character-kinks': CharacterKinksView,

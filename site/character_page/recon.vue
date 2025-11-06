@@ -1,11 +1,20 @@
 <template>
   <div class="recon row">
     <div class="conversation" v-if="conversation && conversation.length > 0">
-      <div class="col-sm-10" style="margin-top: 5px">
-        <h4>Latest Messages</h4>
+      <h4>Latest Messages</h4>
 
-        <template v-for="message in conversation">
-          <message-view :message="message" :key="message.id"> </message-view>
+      <div
+        :class="getMessageWrapperClasses()"
+        class="col-sm-10"
+        style="margin-top: 5px"
+      >
+        <template v-for="(message, i) in conversation">
+          <message-view
+            :message="message"
+            :key="message.id"
+            :previous="conversation[i - 1]"
+          >
+          </message-view>
         </template>
       </div>
     </div>
@@ -102,6 +111,13 @@
         _.filter(messages, m => !matcher.exec(m.text)),
         5
       );
+    }
+
+    getMessageWrapperClasses(): any {
+      const classes: any = {};
+      const layout = core.state.settings.chatLayoutMode || 'classic';
+      classes['layout-' + layout] = true;
+      return classes;
     }
   }
 </script>

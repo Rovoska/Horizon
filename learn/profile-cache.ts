@@ -41,6 +41,12 @@ export interface CharacterMatchSummary {
 }
 
 /**
+ * The default value for the profile cache's queue maximum length.
+ * If more entries are added to the cache, the least recently used one(s) will be flushed.
+ * */
+export const PROFILE_CACHE_MAX_ENTRIES: number = 350;
+
+/**
  * The "cache record" holds information about when the character was added to the cache. This information can be useful for deciding when to refresh a character profile or to remove them entirely.
  */
 export interface CharacterCacheRecord {
@@ -54,11 +60,120 @@ export interface CharacterCacheRecord {
 
 export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
   protected store?: PermanentIndexedStore;
-
   protected lastFetch = Date.now();
+
+  //tracks the order we've been accessing things in, look up "LRU cache"
+  private accessOrder: string[] = [];
+
+  private maxCacheSize: number = PROFILE_CACHE_MAX_ENTRIES;
 
   setStore(store: PermanentIndexedStore): void {
     this.store = store;
+  }
+
+  /**
+   * Sets the maximum size of the in-memory cache.
+   * If the new size is smaller than the current cache size,
+   * excess items will be removed from the cache.
+   *
+   * This value is used in the {@link clampQueueValues | `clampQueueValues`} method to enforce the cache size limit.
+   *
+   * @param size - The maximum number of items that the cache can hold. If set to 0 or a negative number, the cache size is unlimited.
+   */
+  public setMaxCacheSize(size: number): void {
+    this.maxCacheSize = Math.max(size, PROFILE_CACHE_MAX_ENTRIES);
+    this.clampQueueValues();
+  }
+
+  /**
+   * Moves the specified key to the end of the access order queue.
+   * This is mostly intended for marking an item as the most recently accessed.
+   *
+   * @param key - The key to move to the end of the access order queue.
+   * @private
+   */
+  private moveToQueueEnd(key: string): void {
+    this.removeFromAccessOrder(key);
+    this.accessOrder.push(key);
+  }
+
+  /**
+   * Removes a key from the access order array (if it exists).
+   * @param key - The key to remove from the access order
+   * @private
+   */
+  private removeFromAccessOrder(key: string): void {
+    const index = this.accessOrder.indexOf(key);
+    if (index > -1) {
+      this.accessOrder.splice(index, 1);
+    }
+  }
+
+  /**
+   * Helper method to properly clean up a cache record before removal.
+   * Garbage collection is assisted by nullifying references to large objects.
+   *
+   * @param record - The cache record to clean up
+   * @private
+   */
+  private cleanupRecord(record: CharacterCacheRecord): void {
+    // Clear character references to help garbage collection
+    if (record.character) {
+      // Don't directly modify the character object, just remove our reference
+      (record as any).character = null;
+    }
+
+    // Clear meta data references
+    if (record.meta) {
+      if (record.meta.images) {
+        (record.meta as any).images = null;
+      }
+      if (record.meta.groups) {
+        (record.meta as any).groups = null;
+      }
+      if (record.meta.friends) {
+        (record.meta as any).friends = null;
+      }
+      if (record.meta.guestbook) {
+        (record.meta as any).guestbook = null;
+      }
+      (record as any).meta = null;
+    }
+
+    // Clear match data (though this is smaller)
+    (record as any).match = null;
+  }
+
+  /**
+   * Ensures the cache size stays within our threshold by evicting the least recently used entries.
+   * Eviction occurs by removing entries from the front of the access order queue (least recently used)
+   * until the cache size is at or below the maximum allowed size.
+   *
+   * Does nothing if `maxCacheSize` is not set or is less than 1 (i.e., unlimited).
+   *
+   * See also {@link setMaxCacheSize | `setMaxCacheSize`}.
+   *
+   * @private
+   * @returns {void}
+   */
+  private clampQueueValues(): void {
+    if (!this.maxCacheSize || this.maxCacheSize < 1) return;
+
+    while (this.accessOrder.length > this.maxCacheSize) {
+      const key = this.accessOrder.shift()!;
+      const record = this.cache[key];
+
+      if (record) {
+        log.debug('cache.evict', { name: record.character.character.name });
+
+        // Clean up the record before deletion
+        this.cleanupRecord(record);
+
+        // Remove from cache
+        delete this.cache[key];
+      }
+    }
+    log.silly('cache.evict.size', this.accessOrder.length);
   }
 
   onEachInMemory(cb: (c: CharacterCacheRecord, key: string) => void): void {
@@ -78,6 +193,8 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     const key = AsyncCache.nameKey(name);
 
     if (key in this.cache) {
+      // back to the end of the queue; don't forget, you're here forever
+      this.moveToQueueEnd(key);
       return this.cache[key];
     }
 
@@ -105,17 +222,14 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     const key = AsyncCache.nameKey(name);
 
     if (key in this.cache) {
+      // back to the end of the queue; don't forget, you're here forever
+      this.moveToQueueEnd(key);
       return this.cache[key];
     }
 
     if (!this.store || skipStore) {
       return null;
     }
-
-    // if (false) {
-    //     log.info(`Retrieve '${name}' for channel '${fromChannel}, gap: ${(Date.now() - this.lastFetch)}ms`);
-    //     this.lastFetch = Date.now();
-    // }
 
     const pd = await this.store.getProfile(name);
 
@@ -138,14 +252,21 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
       guestbook: pd.guestbook
     };
 
-    /* cacheRecord.counts = {
-            lastCounted: pd.lastCounted,
-            groupCount: pd.groupCount,
-            friendCount: pd.friendCount,
-            guestbookCount: pd.guestbookCount
-        }; */
-
     return cacheRecord;
+  }
+
+  delete(name: string): void {
+    const key = AsyncCache.nameKey(name);
+
+    // Clean up the record before deletion
+    const record = this.cache[key];
+    if (record) {
+      this.cleanupRecord(record);
+    }
+
+    this.removeFromAccessOrder(key);
+    delete this.cache[key];
+    log.debug('cache.profile.deleted', { name });
   }
 
   // async registerCount(name: string, counts: CountRecord): Promise<void> {
@@ -317,6 +438,9 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
           characterColor
         );
       }
+    } else {
+      //Let's hope this won't wind up killing memory too
+      core.characters.setOverride(c.character.name, 'characterColor', null);
     }
   }
 
@@ -330,7 +454,8 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
    */
   async register(
     c: ComplexCharacter,
-    skipStore: boolean = false
+    skipStore: boolean = false,
+    shouldMatch: boolean = true
   ): Promise<CharacterCacheRecord> {
     const k = AsyncCache.nameKey(c.character.name);
     const match = ProfileCache.match(c);
@@ -342,9 +467,6 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
 
     this.updateOverrides(c);
 
-    // const totalScoreDimensions = match ? Matcher.countScoresTotal(match) : 0;
-    // const dimensionsAtScoreLevel = match ? (Matcher.countScoresAtLevel(match, score) || 0) : 0;
-    // const dimensionsAboveScoreLevel = match ? (Matcher.countScoresAboveLevel(match, Math.max(score, Scoring.WEAK_MATCH))) : 0;
     const risingFilter = core.state.settings.risingFilter;
     const isFiltered = matchesSmartFilters(c.character, risingFilter);
 
@@ -371,11 +493,11 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
 
     if (k in this.cache) {
       const rExisting = this.cache[k];
-
       rExisting.character = c;
       rExisting.lastFetched = new Date();
       rExisting.match = matchDetails;
 
+      this.moveToQueueEnd(k);
       return rExisting;
     }
 
@@ -387,6 +509,9 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
     };
 
     this.cache[k] = rNew;
+
+    this.accessOrder.push(k);
+    this.clampQueueValues();
 
     return rNew;
   }

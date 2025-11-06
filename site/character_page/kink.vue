@@ -22,7 +22,7 @@
       kink.description
     }}</span>
     <template v-if="kink.hasSubkinks">
-      <div class="subkink-list" :class="{ closed: this.listClosed }">
+      <div class="subkink-list" :class="{ closed: listClosed }">
         <kink
           v-for="subkink in kink.subkinks"
           :kink="subkink"
@@ -46,91 +46,112 @@
 </template>
 
 <script lang="ts">
-  import { Component, Prop, Watch, Hook } from '@f-list/vue-ts';
+  import {
+    defineComponent,
+    ref,
+    computed,
+    watch,
+    onMounted,
+    PropType
+  } from 'vue';
   import anyAscii from 'any-ascii';
-  import Vue from 'vue';
   import core from '../../chat/core';
   import { DisplayKink } from './interfaces';
   import { kinkComparisonSwaps } from '../../learn/matcher-types';
 
-  @Component({ name: 'kink' })
-  export default class KinkView extends Vue {
-    @Prop({ required: true })
-    readonly kink!: DisplayKink;
-    @Prop({ required: true })
-    readonly highlights!: { [key: number]: boolean };
-    @Prop({ required: true })
-    readonly comparisons!: { [key: number]: string | undefined };
-
-    @Prop({ required: false })
-    // tslint:disable-next-line: vue-props
-    expandedCustom = false;
-
-    listClosed = true;
-    initialListClosedState = true;
-    showTooltip = false;
-
-    @Watch('expandedCustom')
-    onExpandedCustomChange(): void {
-      if (this.expandedCustom) {
-        this.initialListClosedState = this.listClosed;
-        this.listClosed = false;
-      } else {
-        this.listClosed = this.initialListClosedState;
+  export default defineComponent({
+    name: 'kink',
+    props: {
+      kink: {
+        type: Object as PropType<DisplayKink>,
+        required: true
+      },
+      highlights: {
+        type: Object as PropType<{ [key: number]: boolean }>,
+        required: true
+      },
+      comparisons: {
+        type: Object as PropType<{ [key: number]: string | undefined }>,
+        required: true
+      },
+      expandedCustom: {
+        type: Boolean,
+        default: false
       }
-    }
-    @Hook('mounted')
-    mounted(): void {
-      if (
-        this.kink.isCustom &&
-        core.state.generalSettings &&
-        core.state.generalSettings.horizonForceAsciiProfiles
-      ) {
-        this.kink.description = anyAscii(this.kink.description);
-        this.kink.name = anyAscii(this.kink.name);
-      }
-    }
+    },
+    setup(props) {
+      const listClosed = ref(true);
+      const initialListClosedState = ref(true);
+      const showTooltip = ref(false);
 
-    toggleExpandedCustoms(): void {
-      this.expandedCustom = !this.expandedCustom;
-    }
+      watch(
+        () => props.expandedCustom,
+        newValue => {
+          if (newValue) {
+            initialListClosedState.value = listClosed.value;
+            listClosed.value = false;
+          } else {
+            listClosed.value = initialListClosedState.value;
+          }
+        }
+      );
 
-    toggleSubkinks(): void {
-      if (!this.kink.hasSubkinks) return;
+      onMounted(() => {
+        if (
+          props.kink.isCustom &&
+          core.state.generalSettings &&
+          core.state.generalSettings.horizonForceAsciiProfiles
+        ) {
+          props.kink.description = anyAscii(props.kink.description);
+          props.kink.name = anyAscii(props.kink.name);
+        }
+      });
 
-      this.listClosed = !this.listClosed;
-      this.initialListClosedState = this.listClosed;
-    }
+      const toggleSubkinks = () => {
+        if (!props.kink.hasSubkinks) return;
 
-    get kinkClasses(): { [key: string]: boolean } {
-      const classes: { [key: string]: boolean } = {
-        'stock-kink': !this.kink.isCustom,
-        'custom-kink': this.kink.isCustom,
-        highlighted: !this.kink.isCustom && this.highlights[this.kink.id],
-        subkink: this.kink.hasSubkinks,
-        'expanded-custom-kink': this.expandedCustom
+        listClosed.value = !listClosed.value;
+        initialListClosedState.value = listClosed.value;
       };
-      classes[`kink-id-${this.kink.key}`] = true;
-      classes[`kink-group-${this.kink.group}`] = true;
 
-      const theirKinkId =
-        this.kink.id in kinkComparisonSwaps
-          ? kinkComparisonSwaps[this.kink.id]
-          : this.kink.id;
+      const kinkClasses = computed(() => {
+        const classes: { [key: string]: boolean } = {
+          'stock-kink': !props.kink.isCustom,
+          'custom-kink': props.kink.isCustom,
+          highlighted: !props.kink.isCustom && props.highlights[props.kink.id],
+          subkink: props.kink.hasSubkinks,
+          'expanded-custom-kink': props.expandedCustom
+        };
+        classes[`kink-id-${props.kink.key}`] = true;
+        classes[`kink-group-${props.kink.group}`] = true;
 
-      if (
-        !this.kink.isCustom &&
-        typeof this.comparisons[theirKinkId] !== 'undefined'
-      ) {
-        classes['comparison-result'] = true;
-        classes[`comparison-${this.comparisons[theirKinkId]}`] = true;
-      }
+        const theirKinkId =
+          props.kink.id in kinkComparisonSwaps
+            ? kinkComparisonSwaps[props.kink.id]
+            : props.kink.id;
 
-      return classes;
+        if (
+          !props.kink.isCustom &&
+          typeof props.comparisons[theirKinkId] !== 'undefined'
+        ) {
+          classes['comparison-result'] = true;
+          classes[`comparison-${props.comparisons[theirKinkId]}`] = true;
+        }
+
+        return classes;
+      });
+
+      const customId = computed(() => {
+        return props.kink.isCustom ? props.kink.id : undefined;
+      });
+
+      return {
+        listClosed,
+        showTooltip,
+        toggleSubkinks,
+        kinkClasses,
+        customId
+      };
     }
-
-    get customId(): number | undefined {
-      return this.kink.isCustom ? this.kink.id : undefined;
-    }
-  }
+  });
 </script>

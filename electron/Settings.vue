@@ -675,6 +675,50 @@
                 </div>
 
                 <h5>
+                  {{ l('settings.cache') }}
+                </h5>
+
+                <div class="mb-3">
+                  <label class="control-label" for="cacheExpiryDays">
+                    {{ l('settings.cache.expiryDays') }}</label
+                  >
+                  <div class="input-group">
+                    <input
+                      class="form-control"
+                      id="cacheExpiryDays"
+                      type="number"
+                      min="0"
+                      max="1000"
+                      v-model="settings.risingCacheExpiryDays"
+                    />
+                    <span class="input-group-text" id="basic-addon3">{{
+                      l('unit.days')
+                    }}</span>
+                  </div>
+                  <small class="form-text text-muted">{{
+                    l('settings.cache.expiryDays.description')
+                  }}</small>
+                </div>
+                <div class="mb-3">
+                  <label class="control-label" for="cacheMemoryCount">
+                    {{ l('settings.cache.memoryCount') }}
+                  </label>
+                  <div class="input-group">
+                    <input
+                      class="form-control"
+                      id="cacheMemoryCount"
+                      type="number"
+                      min="350"
+                      max="1000"
+                      v-model="settings.horizonCacheMemoryCount"
+                    />
+                  </div>
+                  <small class="form-text text-muted">{{
+                    l('settings.cache.memoryCount.description')
+                  }}</small>
+                </div>
+
+                <h5>
                   {{ l('settings.browserOptionTitle') }}
                 </h5>
                 <div class="warning" v-if="isMac">
@@ -935,6 +979,13 @@
           this.close();
         }
       });
+      if (process.platform === 'darwin') {
+        window.addEventListener('keydown', e => {
+          if (e.metaKey && e.key == 'w') {
+            this.close();
+          }
+        });
+      }
     }
 
     minimize(): void {

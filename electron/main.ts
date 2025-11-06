@@ -658,7 +658,6 @@ async function onReady(): Promise<void> {
             id: 'fixLogs'
           },
 
-          { type: 'separator' },
           {
             label: 'Show/hide current profile',
             click: (_m: electron.MenuItem, w: electron.BrowserWindow) => {
@@ -669,6 +668,15 @@ async function onReady(): Promise<void> {
           },
 
           { type: 'separator' },
+          ...(process.platform === 'darwin'
+            ? [
+                { role: 'hide', label: l('action.hide') },
+                { role: 'hideothers' },
+                { role: 'unhide' },
+                { type: 'separator' }
+              ]
+            : []),
+
           { role: 'minimize' },
           { role: 'quit', label: l('action.quit') }
         ] as MenuItemConstructorOptions[]

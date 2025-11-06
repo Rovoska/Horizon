@@ -379,7 +379,7 @@ export class ImageDomMutator {
 
     this.add(
       'rule34.xxx',
-      `${this.getBaseJsMutatorScript(['video', '#image'])}
+      `${this.getBaseJsMutatorScript(['video', '#image', '.thumb'])}
                 const content = document.querySelector('#content');
 
                 if (content) content.remove();
@@ -467,7 +467,8 @@ export class ImageDomMutator {
     skipElementRemove: boolean = false,
     safeTags: string[] = [],
     delayPreprocess: boolean = false,
-    scheduled: boolean = false
+    scheduled: boolean = false,
+    useOpenGraph: boolean = true
   ): string {
     const js = this.scripts.processor; // ./assets/browser.processor.raw.js
 
@@ -477,7 +478,8 @@ export class ImageDomMutator {
       delayPreprocess,
       selectors: elSelector,
       schedule: scheduled,
-      debug: this.debug
+      debug: this.debug,
+      useOpenGraph
     };
 
     const settingsJson = JSON.stringify(settings, null, 0);

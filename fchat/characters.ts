@@ -25,9 +25,25 @@ class Character implements Interfaces.Character {
 
 export interface CharacterOverrides {
   avatarUrl?: string;
-  characterColor?: string;
+  characterColor?: CharacterColor;
   gender?: Interfaces.Gender;
   status?: Interfaces.Status;
+}
+
+export enum CharacterColor {
+  red,
+  orange,
+  yellow,
+  green,
+  cyan,
+  purple,
+  blue,
+  pink,
+  black,
+  brown,
+  white,
+  gray,
+  none
 }
 
 class State implements Interfaces.State {
@@ -86,10 +102,36 @@ class State implements Interfaces.State {
     type: 'status',
     value: Interfaces.Status | undefined
   ): void;
+  setOverride(
+    name: string,
+    type: 'characterColor',
+    value: string | undefined | null
+  ): void;
   setOverride(name: string, type: keyof CharacterOverrides, value: any): void {
     const char = this.get(name);
+    let newValue: any;
 
-    Vue.set(char.overrides, type, value);
+    if (type === 'characterColor') {
+      if (value === 'none' || value === undefined || value === null) {
+        newValue = CharacterColor.none;
+      } else {
+        // This will work well, provided the bbcode colors never get expanded.
+        // Funny joke. we all know they won't.
+        const colorKey = value.toLowerCase() as keyof typeof CharacterColor;
+        newValue =
+          CharacterColor[colorKey] !== undefined
+            ? CharacterColor[colorKey]
+            : CharacterColor.none;
+      }
+    } else {
+      newValue = value;
+    }
+
+    if (char.overrides[type] === newValue) {
+      return;
+    }
+
+    Vue.set(char.overrides, type, newValue);
   }
 
   async resolveOwnProfile(): Promise<void> {

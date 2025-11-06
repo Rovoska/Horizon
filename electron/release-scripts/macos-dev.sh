@@ -44,5 +44,4 @@ pnpm build:dev:mac
 mkdir -p "$RELEASE_PATH"
 
 # & Copy artifacts (both dmg and zip files)
-cp "$DIST_PATH"/*.dmg "$RELEASE_PATH"/ 2>/dev/null || true
 cp "$DIST_PATH"/*.zip "$RELEASE_PATH"/ 2>/dev/null || true

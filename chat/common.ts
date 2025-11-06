@@ -1,6 +1,11 @@
 import { isToday, format } from 'date-fns';
 import { Keys } from '../keys';
-import { Character, Conversation, Settings as ISettings } from './interfaces';
+import {
+  AvailableSort,
+  Character,
+  Conversation,
+  Settings as ISettings
+} from './interfaces';
 import core from './core';
 
 export function profileLink(this: any | never, character: string): string {
@@ -85,6 +90,10 @@ export class Settings implements ISettings {
   horizonShowCustomCharacterColors = true;
   horizonShowDeveloperBadges = true;
   horizonShowGenderMarker = false;
+  horizonAutoGenderFilter = false;
+  horizonSavedGenderFilters: string[] = [];
+  horizonSavedMembersSort: AvailableSort = 'status';
+  horizonPersistentMemberFilters = false;
   horizonGenderMarkerOrigColor = false;
   horizonVanillaGenderColors = false;
   horizonChangeOfflineColor = false;
@@ -172,6 +181,7 @@ export class ConversationSettings implements Conversation.Settings {
   };
   horizonHighlightUsers: string[] = [];
   logMessages = Conversation.Setting.Default;
+  muted = false;
 }
 
 export function formatTime(

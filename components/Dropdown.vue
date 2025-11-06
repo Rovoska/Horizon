@@ -1,5 +1,5 @@
 <template>
-  <div :class="wrapClass" @focusout="blur">
+  <div :class="wrapClass" @focusout="blur" ref="wrapRef">
     <slot name="split"></slot>
     <a
       :class="linkClass"
@@ -10,16 +10,16 @@
       :style="linkStyle"
       role="button"
       tabindex="-1"
-      ref="button"
+      ref="buttonRef"
     >
       <i :class="iconClass" v-if="!!iconClass"></i>
       <slot name="title">{{ title }}</slot>
     </a>
     <div
       class="dropdown-menu"
-      ref="menu"
+      ref="menuRef"
       @mousedown.prevent.stop
-      @click.prevent.stop="menuClick()"
+      @click="menuClick"
     >
       <slot></slot>
     </div>
@@ -27,58 +27,144 @@
 </template>
 
 <script lang="ts">
-  import Vue from 'vue';
-  import { Component, Prop, Watch } from '@f-list/vue-ts';
+  import { defineComponent, ref, watch, nextTick } from 'vue';
 
-  @Component
-  export default class Dropdown extends Vue {
-    isOpen = false;
-    @Prop({ default: 'btn btn-secondary dropdown-toggle' })
-    readonly linkClass!: string;
-    @Prop({ default: 'dropdown' })
-    readonly wrapClass!: string;
-    @Prop
-    readonly iconClass?: string;
-    @Prop
-    readonly keepOpen?: boolean;
-    @Prop
-    readonly title?: string;
-    @Prop({ default: 'width:100%;text-align:left;align-items:center' })
-    readonly linkStyle!: string;
-
-    @Watch('isOpen')
-    onToggle(): void {
-      const menu = this.$refs['menu'] as HTMLElement;
-      const button = this.$refs['button'] as HTMLElement;
-      if (!this.isOpen) {
-        menu.style.cssText = '';
-        return;
+  export default defineComponent({
+    name: 'Dropdown',
+    props: {
+      linkClass: {
+        type: String,
+        default: 'btn btn-secondary dropdown-toggle'
+      },
+      wrapClass: {
+        type: String,
+        default: 'dropdown'
+      },
+      iconClass: {
+        type: String,
+        required: false
+      },
+      keepOpen: {
+        type: Boolean,
+        required: false
+      },
+      title: {
+        type: String,
+        required: false
+      },
+      linkStyle: {
+        type: String,
+        default: 'width:100%;text-align:left;align-items:center'
+      },
+      dropup: {
+        type: Boolean,
+        default: false
+      },
+      gap: {
+        type: Number,
+        default: 3
       }
-      menu.style.display = 'block';
-      const offset = menu.getBoundingClientRect();
-      menu.style.position = 'fixed';
-      menu.style.minWidth = `${button.clientWidth}px`;
-      menu.style.left =
-        offset.right < window.innerWidth
-          ? `${offset.left}px`
-          : `${window.innerWidth - offset.width}px`;
-      menu.style.top =
-        offset.bottom < window.innerHeight
-          ? `${offset.top}px`
-          : `${offset.top - offset.height - (<HTMLElement>this.$el).offsetHeight}px`;
-    }
+    },
+    setup(props) {
+      const isOpen = ref(false);
+      const menuRef = ref<HTMLElement>();
+      const buttonRef = ref<HTMLElement>();
+      const wrapRef = ref<HTMLElement>();
 
-    blur(event: FocusEvent): void {
-      let elm = <HTMLElement | null>event.relatedTarget;
-      while (elm) {
-        if (elm === this.$refs['menu']) return;
-        elm = elm.parentElement;
-      }
-      this.isOpen = false;
-    }
+      const positionMenu = async () => {
+        await nextTick();
+        const menu = menuRef.value;
+        const button = buttonRef.value;
+        const wrap = wrapRef.value;
 
-    menuClick(): void {
-      if (!this.keepOpen) this.isOpen = false;
+        if (!menu || !button || !wrap) return;
+
+        if (!isOpen.value) {
+          menu.style.cssText = '';
+          return;
+        }
+
+        menu.style.display = 'block';
+        menu.style.position = 'fixed';
+
+        //Calculate combined width of split slot (if any) and button
+        const buttonRect = button.getBoundingClientRect();
+
+        //Find split slot element (first child that's not the button or dropdown menu)
+        const splitElement = Array.from(wrap.children).find(
+          child => child !== button && child !== menu
+        ) as HTMLElement;
+
+        //Set min width based on if we have a split element
+        let minWidth: number;
+        if (splitElement) {
+          const splitWidth = splitElement.getBoundingClientRect().width;
+          minWidth = splitWidth + buttonRect.width;
+        } else {
+          minWidth = buttonRect.width;
+        }
+
+        menu.style.minWidth = `${minWidth}px`;
+
+        const menuRect = menu.getBoundingClientRect();
+
+        //horizontal positioning. align to leftmost element (split or button)
+        const leftmostLeft = splitElement
+          ? splitElement.getBoundingClientRect().left
+          : buttonRect.left;
+        menu.style.left =
+          menuRect.right < window.innerWidth
+            ? `${leftmostLeft}px`
+            : `${window.innerWidth - menuRect.width}px`;
+
+        // Handle vertical positioning based on dropup prop
+        if (props.dropup) {
+          menu.style.top = `${buttonRect.top - menuRect.height - props.gap}px`;
+        } else {
+          // Auto-detect if there's space below, otherwise open upward
+          const spaceBelow = window.innerHeight - buttonRect.bottom;
+          const spaceAbove = buttonRect.top;
+
+          if (spaceBelow >= menuRect.height || spaceBelow > spaceAbove) {
+            menu.style.top = `${buttonRect.bottom + props.gap}px`;
+          } else {
+            menu.style.top = `${buttonRect.top - menuRect.height - props.gap}px`;
+          }
+        }
+      };
+
+      watch(isOpen, positionMenu);
+
+      const blur = (event: FocusEvent) => {
+        let elm = event.relatedTarget as HTMLElement | null;
+        while (elm) {
+          if (elm === menuRef.value) return;
+          elm = elm.parentElement;
+        }
+        isOpen.value = false;
+      };
+
+      const menuClick = (event: Event) => {
+        if (
+          props.keepOpen &&
+          (event.target instanceof HTMLInputElement ||
+            event.target instanceof HTMLButtonElement ||
+            (event.target as HTMLElement).closest('input, button'))
+        ) {
+          return;
+        }
+
+        if (!props.keepOpen) isOpen.value = false;
+      };
+
+      return {
+        isOpen,
+        menuRef,
+        buttonRef,
+        wrapRef,
+        blur,
+        menuClick
+      };
     }
-  }
+  });
 </script>
