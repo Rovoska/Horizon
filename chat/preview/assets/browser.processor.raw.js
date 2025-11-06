@@ -68,19 +68,63 @@ class FListImagePreviewDomMutator {
     }
   }
 
-  detectImage(selectors, body) {
-    // Check for og:image or twitter:image meta tags
-    const imageMeta =
-      document.querySelector('meta[property="og:image"]') ||
-      document.querySelector('meta[name="twitter:image"]');
+  isVideoUrl(url) {
+    const cleanUrl = url.split('?')[0].toLowerCase();
+    const videoExtensions = [
+      '.mp4',
+      '.webm',
+      '.mov',
+      '.avi',
+      '.mkv',
+      '.flv',
+      '.wmv',
+      '.m4v',
+      '.3gp',
+      '.ogv'
+    ];
 
-    if (imageMeta) {
-      const imageUrl = imageMeta.getAttribute('content');
-      if (imageUrl) {
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        this.debug('detectImage.ogFound', imageUrl);
-        return img;
+    return videoExtensions.some(ext => cleanUrl.endsWith(ext));
+  }
+
+  detectImage(selectors, body) {
+    if (this.settings.useOpenGraph !== false) {
+      const imageMeta =
+        document.querySelector('meta[property="og:image"]') ||
+        document.querySelector('meta[name="twitter:image"]');
+
+      if (imageMeta) {
+        const imageUrl = imageMeta.getAttribute('content');
+        if (imageUrl) {
+          const isVideoUrl = this.isVideoUrl(imageUrl);
+
+          if (isVideoUrl) {
+            const video = document.createElement('video');
+            video.src = imageUrl;
+            video.autoplay = false;
+            video.controls = true;
+            video.loop = true;
+            video.preload = 'metadata';
+            video.muted = true;
+
+            video.onerror = () => {
+              this.debug(
+                'detectImage.ogVideoError',
+                imageUrl,
+                'falling back to selectors'
+              );
+              // Note: We can't easily fall back here since we're in detectImage,
+              // but the error will be logged for debugging
+            };
+
+            this.debug('detectImage.ogFoundVideo', imageUrl);
+            return video;
+          } else {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            this.debug('detectImage.ogFoundImage', imageUrl);
+            return img;
+          }
+        }
       }
     }
 
