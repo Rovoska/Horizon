@@ -227,6 +227,7 @@
     text: string = (this.value !== undefined ? this.value : '') as string;
     element!: HTMLTextAreaElement;
     sizer!: HTMLTextAreaElement;
+    editorContainer!: HTMLElement;
     maxHeight!: number;
     minHeight!: number;
     showToolbar = false;
@@ -398,6 +399,11 @@
       this.element.setSelectionRange(start, end);
     }
 
+    private isEIconSelectorOpen(): boolean {
+      const eIconSelector = this.$refs['eIconSelector'] as any;
+      return eIconSelector?.dialog?.isShown === true;
+    }
+
     applyText(
       startText: string,
       endText: string,
@@ -536,6 +542,10 @@
     //By "global" we mean global to the editor, not for the entire page.
     //They fire when the editor element is focused, not the text box.
     onKeyDownGlobal(e: KeyboardEvent): void {
+      if (this.isEIconSelectorOpen()) {
+        return;
+      }
+
       const key = getKey(e);
       if (
         ((e.metaKey || e.ctrlKey) && e.shiftKey && key === Keys.KeyP) ||
@@ -763,7 +773,7 @@
     resize: none;
     &:focus {
       outline: none;
-      .bbcode-editor-preview {
+      .bbcode-editor-text-area {
         outline: 2px ridge var(--bs-primary-border-subtle);
       }
     }
