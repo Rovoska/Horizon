@@ -22,6 +22,223 @@ contextBridge.exposeInMainWorld('rising', {
 
 const previewInitiationTime = Date.now();
 
+//Block external navigation
+(() => {
+  try {
+    //Helper function to check if URL should be blocked
+    function isBlockedUrl(url) {
+      const blockedProtocols = [
+        'discord://',
+        'steam://',
+        'skype:',
+        'mailto:',
+        'tel:',
+        'sms:',
+        'facetime:',
+        'facetime-audio:',
+        'zoom:',
+        'teams:',
+        'slack:',
+        'whatsapp:',
+        'telegram:',
+        'spotify:',
+        'itunes:',
+        'itunesmusic:',
+        'app:',
+        'x-apple:',
+        'com.apple.',
+        'com.microsoft.',
+        'com.spotify.',
+        'vscode:',
+        'vscode-insiders:',
+        'github-desktop:',
+        'unity:',
+        'blender:',
+        'obsidian:',
+        'notion:'
+      ];
+
+      const blockedDomains = [
+        'discord.gg/',
+        'discord.com/invite/',
+        'discordapp.com/invite/',
+        'steamcommunity.com/groups/',
+        'steamcommunity.com/chat/',
+        'web.whatsapp.com',
+        'web.telegram.org',
+        'teams.microsoft.com/l/chat',
+        'zoom.us/j/',
+        'meet.google.com/',
+        'whereby.com/'
+      ];
+
+      const lowerUrl = url.toLowerCase();
+
+      if (blockedProtocols.some(protocol => lowerUrl.startsWith(protocol))) {
+        return true;
+      }
+
+      if (blockedDomains.some(domain => lowerUrl.includes(domain))) {
+        return true;
+      }
+
+      const urlShorteners = [
+        'bit.ly',
+        'tinyurl.com',
+        't.co',
+        'short.link',
+        'ow.ly',
+        'is.gd',
+        'buff.ly',
+        'adf.ly',
+        'goo.gl',
+        'shor.by',
+        'cutt.ly',
+        'rebrandly.com',
+        'tiny.cc',
+        'link.ly',
+        'shortened.link',
+        'shorturl.at',
+        'clck.ru',
+        'v.gd',
+        'x.co',
+        'po.st'
+      ];
+
+      return urlShorteners.some(shortener => lowerUrl.includes(shortener));
+    }
+
+    //Override window.open to prevent external apps from opening
+    window.open = function (url, target, features) {
+      console.log('ImagePreview: Blocked window.open to', url);
+      return null;
+    };
+
+    const originalLocationAssign = window.location.assign;
+    const originalLocationReplace = window.location.replace;
+    const originalLocationReload = window.location.reload;
+
+    let originalHref = window.location.href;
+    Object.defineProperty(window.location, 'href', {
+      get: function () {
+        return originalHref;
+      },
+      set: function (url) {
+        if (typeof url === 'string' && isBlockedUrl(url)) {
+          console.log('ImagePreview: Blocked location.href redirect to', url);
+          return;
+        }
+        originalHref = url;
+        //Allow setting for legitimate URLs
+        return url;
+      }
+    });
+
+    window.location.assign = function (url) {
+      if (typeof url === 'string' && isBlockedUrl(url)) {
+        console.log('ImagePreview: Blocked location.assign to', url);
+        return;
+      }
+      return originalLocationAssign.call(this, url);
+    };
+
+    window.location.replace = function (url) {
+      if (typeof url === 'string' && isBlockedUrl(url)) {
+        console.log('ImagePreview: Blocked location.replace to', url);
+        return;
+      }
+      return originalLocationReplace.call(this, url);
+    };
+
+    //Monitor for programmatic redirects via setTimeout/setInterval
+    const originalSetTimeout = window.setTimeout;
+    const originalSetInterval = window.setInterval;
+
+    window.setTimeout = function (callback, delay, ...args) {
+      //Wrap callback to check for redirects
+      const wrappedCallback = function () {
+        try {
+          if (typeof callback === 'string') {
+            //Check if the string contains redirect code
+            if (callback.includes('location') && callback.includes('discord')) {
+              console.log(
+                'ImagePreview: Blocked setTimeout redirect:',
+                callback
+              );
+              return;
+            }
+          }
+          return typeof callback === 'string'
+            ? eval(callback)
+            : callback.apply(this, args);
+        } catch (e) {
+          console.log(
+            'ImagePreview: Prevented potential redirect in setTimeout'
+          );
+        }
+      };
+      return originalSetTimeout.call(this, wrappedCallback, delay);
+    };
+
+    //Block clicks on links that could trigger external apps
+    document.addEventListener(
+      'click',
+      function (e) {
+        const target = e.target.closest('a');
+        if (target && target.href) {
+          const href = target.href;
+          if (isBlockedUrl(href)) {
+            console.log('ImagePreview: Blocked click on external link', href);
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }
+      },
+      true
+    );
+
+    //Monitor for meta refresh redirects
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+          if (
+            node.tagName === 'META' &&
+            node.getAttribute('http-equiv') === 'refresh'
+          ) {
+            const content = node.getAttribute('content');
+            if (content && content.includes('url=')) {
+              const url = content.split('url=')[1];
+              if (isBlockedUrl(url)) {
+                console.log(
+                  'ImagePreview: Blocked meta refresh redirect to',
+                  url
+                );
+                node.remove();
+              }
+            }
+          }
+        });
+      });
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        observer.observe(document.head || document.documentElement, {
+          childList: true,
+          subtree: true
+        });
+      });
+    } else {
+      observer.observe(document.head || document.documentElement, {
+        childList: true,
+        subtree: true
+      });
+    }
+  } catch (err) {
+    console.error('ImagePreview: Error setting up navigation blocking', err);
+  }
+})();
+
 // window.onload = () => console.log('window.onload', `${(Date.now() - previewInitiationTime)/1000}s`);
 // window.onloadstart = () => console.log('window.onloadstart', `${(Date.now() - previewInitiationTime)/1000}s`);
 // window.onloadend = () => console.log('window.onloadend', `${(Date.now() - previewInitiationTime)/1000}s`);
