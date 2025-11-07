@@ -16,6 +16,11 @@
       <div class="alert alert-danger" v-show="error">
         {{ error }}
       </div>
+
+      <div class="alert alert-info">
+        {{ l('tips') + ': ' + tip() }}
+      </div>
+
       <h3
         class="card-header"
         style="margin-top: 0; display: flex; align-items: center"
@@ -176,6 +181,7 @@
   import { errorToString, characterImage } from './common';
   import core from './core';
   import l from './localize';
+  import tip from './tips';
   import Logs from './Logs.vue';
   import { init as profileApiInit } from './profile_api';
   import { AdManager } from './ads/ad-manager';
@@ -272,6 +278,7 @@
     connecting = false;
     connected = false;
     l = l;
+    tip = tip;
     copyPlain = false;
 
     @Hook('mounted')
