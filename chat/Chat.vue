@@ -16,7 +16,7 @@
       <div class="alert alert-danger" v-show="error">
         {{ error }}
       </div>
-      <tips> </tips>
+      <tips v-if="showTips === true"> </tips>
       <h3
         class="card-header"
         style="margin-top: 0; display: flex; align-items: center"
@@ -534,6 +534,10 @@
 
     getChatView(): ChatView | undefined {
       return this.$refs['chatview'] as ChatView;
+    }
+
+    get showTips(): boolean {
+      return core.state.generalSettings?.horizonShowTips ?? false;
     }
   }
 </script>

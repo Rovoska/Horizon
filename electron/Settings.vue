@@ -62,6 +62,21 @@
                     </label>
                   </div>
                 </div>
+
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input
+                      type="checkbox"
+                      id="showTips"
+                      v-model="settings.horizonShowTips"
+                      class="form-check-input"
+                    />
+                    <label class="form-check-label" for="showTips">
+                      {{ l('settings.showTips') }}
+                    </label>
+                  </div>
+                </div>
+
                 <h5>
                   {{ l('settings.spellcheck.language') }}
                 </h5>

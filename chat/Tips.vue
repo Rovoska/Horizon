@@ -29,11 +29,11 @@
       const show = ref(true);
 
       function handleNext() {
-        console.log(nextTip());
+        nextTip();
       }
 
       function handlePrevious() {
-        console.log(previousTip());
+        previousTip();
       }
       return {
         show,

@@ -52,6 +52,7 @@ export class GeneralSettings {
   horizonVanillaTextColors: boolean = false;
   horizonVanillaGenderColors: boolean = false;
   horizonBbcodeGlow: boolean = false;
+  horizonShowTips: boolean = true;
   soundTheme = 'default';
   soundThemeSoundVolumes: { [theme: string]: { [sound: string]: number } } = {};
   horizonAutoLogin: boolean = false;

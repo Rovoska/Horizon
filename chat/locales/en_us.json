@@ -770,6 +770,7 @@
   "settings.showPortraitInMessage": "Show character portrait with each message",
   "settings.showPortraitNearInput": "Show character portrait by text input",
   "settings.showSigninNotifications": "Show a message in the console when friends or bookmarks sign in or out",
+  "settings.showTips": "Show tips and tricks on the character select screen.",
   "settings.smoothMosaics": "Attempt to synchronise [eicon] mosaics",
   "settings.soundTheme": "Sound Theme",
   "settings.soundTheme.by": "By {0}",
