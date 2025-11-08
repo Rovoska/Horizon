@@ -1369,7 +1369,7 @@ export class Matcher {
 
     const speciesId = Matcher.species(c);
 
-    return speciesId === Species.Human;
+    return (speciesId === Species.Human || speciesId === Species.Humanoid);
   }
 
   static species(c: Character): Species | null {
