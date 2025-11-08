@@ -1,10 +1,12 @@
 import { FisherYatesShuffle } from './common';
 import l from './localize';
+import Vue from 'vue';
+
 /**
  * The amount of tips we have. Based on this number (minus one),
  * we will fetch tips from the localization files.
  */
-const TIP_COUNT = 2;
+const TIP_COUNT = 10;
 /*
  * The modifier key for keyboard shortcuts based on the user's platform.
  */
@@ -24,7 +26,7 @@ let tips: number[] = [];
  *   currentTipIndex = (currentTipIndex + 1) % tips.length;
  * }
  */
-let currentTipIndex: number = 0;
+export const currentTipIndex = Vue.observable({ value: 0 });
 
 /**
  * Generate the initial list of tips and shuffle them.
@@ -43,9 +45,9 @@ function generateTips() {
 export function nextTip(): number {
   validateTips();
   if (tips.length) {
-    currentTipIndex = (currentTipIndex + 1) % tips.length;
+    currentTipIndex.value = (currentTipIndex.value + 1) % tips.length;
   }
-  return tips[currentTipIndex];
+  return tips[currentTipIndex.value];
 }
 
 /**
@@ -56,9 +58,10 @@ export function nextTip(): number {
 export function previousTip(): number {
   validateTips();
   if (tips.length) {
-    currentTipIndex = (currentTipIndex - 1 + tips.length) % tips.length;
+    currentTipIndex.value =
+      (currentTipIndex.value - 1 + tips.length) % tips.length;
   }
-  return tips[currentTipIndex];
+  return tips[currentTipIndex.value];
 }
 
 /**
@@ -66,7 +69,7 @@ export function previousTip(): number {
  */
 export function shuffleTips() {
   FisherYatesShuffle(tips);
-  currentTipIndex = 0;
+  currentTipIndex.value = 0;
 }
 
 /**
@@ -84,5 +87,5 @@ function validateTips() {
  */
 export default function tip(): string {
   validateTips();
-  return l(`tips.${tips[currentTipIndex]}`, MODIFIER_KEY);
+  return l(`tips.${tips[currentTipIndex.value]}`, MODIFIER_KEY);
 }

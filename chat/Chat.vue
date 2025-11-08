@@ -16,11 +16,7 @@
       <div class="alert alert-danger" v-show="error">
         {{ error }}
       </div>
-
-      <div class="alert alert-info">
-        {{ l('tips') + ': ' + tip() }}
-      </div>
-
+      <tips> </tips>
       <h3
         class="card-header"
         style="margin-top: 0; display: flex; align-items: center"
@@ -181,8 +177,8 @@
   import { errorToString, characterImage } from './common';
   import core from './core';
   import l from './localize';
-  import tip from './tips';
   import Logs from './Logs.vue';
+  import Tips from './Tips.vue';
   import { init as profileApiInit } from './profile_api';
   import { AdManager } from './ads/ad-manager';
   import { EventBus } from './preview/event-bus';
@@ -258,7 +254,7 @@
   }
 
   @Component({
-    components: { chat: ChatView, modal: Modal, logs: Logs }
+    components: { chat: ChatView, modal: Modal, logs: Logs, tips: Tips }
   })
   export default class Chat extends Vue {
     @Prop({ required: true })
@@ -278,7 +274,6 @@
     connecting = false;
     connected = false;
     l = l;
-    tip = tip;
     copyPlain = false;
 
     @Hook('mounted')
