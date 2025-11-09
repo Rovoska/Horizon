@@ -31,38 +31,20 @@ const Tabs = defineComponent({
     }
   },
   emits: ['input'],
-  setup(props: TabsProps, { emit, slots }) {
+  setup(props: TabsProps, { emit }) {
     const internalValue = ref<string | undefined>(props.value);
-    const selected = ref<string | undefined>(props.value);
 
     const children = computed(() => {
-      let result: { [key: string]: string | VNode | undefined };
+      let result: { [key: string]: string };
+      const tabs = props.tabs || [];
 
-      if (slots.default !== undefined) {
+      if (Array.isArray(tabs)) {
         result = {};
-        const defaultSlots = slots.default();
-        if (defaultSlots) {
-          defaultSlots.forEach((child, i) => {
-            if (child.context !== undefined) {
-              const key =
-                child.key !== undefined && typeof child.key === 'string'
-                  ? child.key
-                  : String(i);
-              result[key] = child;
-            }
-          });
-        }
+        tabs.forEach((tab, index) => {
+          result[String(index)] = tab;
+        });
       } else {
-        const tabs = props.tabs || [];
-
-        if (Array.isArray(tabs)) {
-          result = {};
-          tabs.forEach((tab, index) => {
-            result[String(index)] = tab;
-          });
-        } else {
-          result = tabs;
-        }
+        result = tabs;
       }
 
       return result;
@@ -73,9 +55,7 @@ const Tabs = defineComponent({
     watch(
       () => props.value,
       newValue => {
-        if (internalValue.value !== newValue) {
-          selected.value = internalValue.value = newValue;
-        }
+        internalValue.value = newValue;
       }
     );
 
@@ -92,22 +72,12 @@ const Tabs = defineComponent({
             emit('input', firstKey);
           }
         }
-
-        if (
-          selected.value !== internalValue.value &&
-          selected.value !== undefined &&
-          children.value[selected.value] !== undefined
-        ) {
-          internalValue.value = selected.value;
-          emit('input', selected.value);
-        }
       },
       { immediate: true }
     );
 
     const handleTabClick = (key: string) => {
       internalValue.value = key;
-      selected.value = key;
       emit('input', key);
     };
 
