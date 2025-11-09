@@ -761,6 +761,10 @@ class State implements Interfaces.State {
   modes!: { [key: string]: Channel.Mode | undefined };
   windowFocused = document.hasFocus();
 
+  navigationHistory: Conversation[] = [];
+  navigationHistoryIndex: number = -1;
+  private isNavigatingHistory: boolean = false;
+
   get hasNew(): boolean {
     return (
       this.privateConversations.some(
@@ -831,7 +835,49 @@ class State implements Interfaces.State {
     this.selectedConversation.onHide();
     conversation.unread = Interfaces.UnreadState.None;
     this.selectedConversation = conversation;
+
+    // Track navigation history for mouse back/forward
+    if (!this.isNavigatingHistory) {
+      // Remove forward history when navigating to a new conversation
+      this.navigationHistory.splice(this.navigationHistoryIndex + 1);
+
+      // Add current conversation and limit history to 50 entries
+      this.navigationHistory.push(conversation);
+      if (this.navigationHistory.length > 50) {
+        this.navigationHistory.shift();
+      } else {
+        this.navigationHistoryIndex++;
+      }
+    }
+
     EventBus.$emit('select-conversation', { conversation });
+  }
+
+  // Navigate through conversation history (negative = back, positive = forward)
+  private navigateHistory(direction: number): boolean {
+    const newIndex = this.navigationHistoryIndex + direction;
+    if (newIndex < 0 || newIndex >= this.navigationHistory.length) return false;
+
+    this.isNavigatingHistory = true;
+    this.navigationHistoryIndex = newIndex;
+    const conversation = this.navigationHistory[newIndex];
+
+    this.lastConversation = this.selectedConversation;
+    this.selectedConversation.onHide();
+    conversation.unread = Interfaces.UnreadState.None;
+    this.selectedConversation = conversation;
+    EventBus.$emit('select-conversation', { conversation });
+
+    this.isNavigatingHistory = false;
+    return true;
+  }
+
+  navigateBack(): boolean {
+    return this.navigateHistory(-1);
+  }
+
+  navigateForward(): boolean {
+    return this.navigateHistory(1);
   }
 
   async reloadSettings(): Promise<void> {

@@ -412,11 +412,16 @@
     privateCanGlow = !this.channelConversations?.length;
     channelCanGlow = !this.privateConversations?.length;
 
+    mouseButtonListener!: (e: MouseEvent) => void;
+
     @Hook('mounted')
     onMounted(): void {
       this.keydownListener = (e: KeyboardEvent) => this.onKeyDown(e);
       window.addEventListener('keydown', this.keydownListener);
       this.setFontSize(core.state.settings.fontSize);
+
+      this.mouseButtonListener = (e: MouseEvent) => this.onMouseButton(e);
+      window.addEventListener('mouseup', this.mouseButtonListener);
 
       this.$watch('conversations.channelConversations', newVal => {
         if (newVal?.length) {
@@ -522,6 +527,18 @@
       window.removeEventListener('keydown', this.keydownListener);
       window.removeEventListener('focus', this.focusListener);
       window.removeEventListener('blur', this.blurListener);
+      window.removeEventListener('mouseup', this.mouseButtonListener);
+    }
+
+    onMouseButton(e: MouseEvent): void {
+      // Mouse button 3 = back, 4 = forward
+      const navigated =
+        e.button === 3
+          ? this.conversations.navigateBack()
+          : e.button === 4
+            ? this.conversations.navigateForward()
+            : false;
+      if (navigated) e.preventDefault();
     }
 
     needsReply(conversation: Conversation): boolean {
