@@ -19,6 +19,17 @@ html {
   }
 }
 
+// i'd prefer to do this with variables, but... like, the rest of this is the same, so...
+// ahhhh who gives a fuck?
+#connect-character-select {
+  --chat-tip-bg: linear-gradient(180deg, #183d64 0%, #102a44 100%);
+  --chat-tip-border: #091a2d;
+  --chat-tip-color: #ffffff;
+  --chat-tip-secondary: rgba(255, 255, 255, 0.85);
+  --chat-tip-button-color: rgba(255, 255, 255, 0.85);
+  --chat-tip-button-hover-color: #ffffff;
+}
+
 .redText,
 .redNameText {
   color: #f00;

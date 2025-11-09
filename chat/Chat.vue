@@ -16,7 +16,6 @@
       <div class="alert alert-danger" v-show="error">
         {{ error }}
       </div>
-      <tips v-if="showTips === true"> </tips>
       <h3
         class="card-header"
         style="margin-top: 0; display: flex; align-items: center"
@@ -127,11 +126,20 @@
             <div class="char-name">{{ character.name }}</div>
           </button>
         </div>
-        <div style="text-align: right; margin-top: 10px">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+          "
+        >
+          <tips v-if="showTips === true" style="flex: 1"></tips>
           <button
             class="btn btn-primary"
             @click="connect"
             :disabled="connecting"
+            style="margin-left: auto"
           >
             <div
               v-if="connecting"
