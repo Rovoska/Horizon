@@ -15,7 +15,7 @@
           margin-right: 0;
         "
       >
-        <transition name="bounce">
+        <transition name="slide">
           <div v-show="isShown" class="modal-content" style="max-height: 100%">
             <div class="modal-header" style="flex-shrink: 0">
               <h5 class="modal-title">
@@ -188,13 +188,13 @@
   .modal-title .fa-fw {
     margin-right: 0.5rem;
   }
-  .bounce-enter-active {
-    animation: bounce-in 0.3s;
+  .slide-enter-active {
+    animation: slide-in 0.3s;
   }
-  .bounce-leave-active {
-    animation: bounce-in 0.2s reverse;
+  .slide-leave-active {
+    animation: spread-out 0.2s;
   }
-  @keyframes bounce-in {
+  @keyframes slide-in {
     0% {
       opacity: 0;
       transform: translateY(-7vh);
@@ -204,6 +204,18 @@
     }
     100% {
       transform: translateY(0vh);
+    }
+  }
+
+  @keyframes spread-out {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(1.03);
     }
   }
   .dimmer-enter-active,
@@ -217,8 +229,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .bounce-enter-active,
-    .bounce-leave-active {
+    .slide-enter-active,
+    .slide-leave-active {
       animation: none;
     }
     .dimmer-enter-active,
