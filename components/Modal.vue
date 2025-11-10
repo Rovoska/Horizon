@@ -1,5 +1,5 @@
 <template>
-  <span v-show="isShown">
+  <span v-show="!hasFinishedHiding">
     <div
       class="modal"
       @mousedown.self="hideWithCheck()"
@@ -15,52 +15,56 @@
           margin-right: 0;
         "
       >
-        <div class="modal-content" style="max-height: 100%">
-          <div class="modal-header" style="flex-shrink: 0">
-            <h5 class="modal-title">
-              <i v-if="iconClass" :class="iconClass" class="fa-fw"></i>
-              <slot name="title">{{ action }}</slot>
-            </h5>
-            <a
-              type="button"
-              class="btn-close btn"
-              @click="hide"
-              :aria-label="l('action.close')"
-              v-show="!keepOpen"
+        <transition name="bounce">
+          <div v-show="isShown" class="modal-content" style="max-height: 100%">
+            <div class="modal-header" style="flex-shrink: 0">
+              <h5 class="modal-title">
+                <i v-if="iconClass" :class="iconClass" class="fa-fw"></i>
+                <slot name="title">{{ action }}</slot>
+              </h5>
+              <a
+                type="button"
+                class="btn-close btn"
+                @click="hide"
+                :aria-label="l('action.close')"
+                v-show="!keepOpen"
+              >
+                <i class="fa fa-times fa-lg"></i>
+              </a>
+            </div>
+            <div
+              class="modal-body hidden-scrollbar"
+              style="overflow-x: auto; -webkit-overflow-scrolling: auto"
+              tabindex="-1"
             >
-              <i class="fa fa-times fa-lg"></i>
-            </a>
+              <slot></slot>
+            </div>
+            <div class="modal-footer" v-if="buttons">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                @click="hideWithCheck"
+                v-if="showCancel"
+              >
+                {{ l('action.cancel') }}
+              </button>
+              <button
+                type="button"
+                class="btn"
+                :class="buttonClass"
+                @click="submit"
+                :disabled="shouldBeDisabled()"
+              >
+                {{ submitText }}
+              </button>
+            </div>
           </div>
-          <div
-            class="modal-body hidden-scrollbar"
-            style="overflow-x: auto; -webkit-overflow-scrolling: auto"
-            tabindex="-1"
-          >
-            <slot></slot>
-          </div>
-          <div class="modal-footer" v-if="buttons">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              @click="hideWithCheck"
-              v-if="showCancel"
-            >
-              {{ l('action.cancel') }}
-            </button>
-            <button
-              type="button"
-              class="btn"
-              :class="buttonClass"
-              @click="submit"
-              :disabled="shouldBeDisabled()"
-            >
-              {{ submitText }}
-            </button>
-          </div>
-        </div>
+        </transition>
       </div>
     </div>
-    <div class="modal-backdrop show"></div>
+    <transition name="dimmer" v-on:after-leave="hasFinishedHiding = true"
+      ><div v-show="isShown" class="modal-backdrop show"></div
+    ></transition>
   </span>
 </template>
 
@@ -117,6 +121,7 @@
     @Prop
     readonly iconClass?: string;
     isShown = false;
+    hasFinishedHiding = true;
 
     keepOpen = false;
     forcedDisabled = false;
@@ -145,6 +150,7 @@
         return;
       }
       this.isShown = true;
+      this.hasFinishedHiding = false;
       dialogStack.push(this);
       this.$emit('open');
       isShowing = true;
@@ -181,5 +187,43 @@
 
   .modal-title .fa-fw {
     margin-right: 0.5rem;
+  }
+  .bounce-enter-active {
+    animation: bounce-in 0.3s;
+  }
+  .bounce-leave-active {
+    animation: bounce-in 0.2s reverse;
+  }
+  @keyframes bounce-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-7vh);
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0vh);
+    }
+  }
+  .dimmer-enter-active,
+  .dimmer-leave-active {
+    transition: opacity 0.3s;
+  }
+
+  .dimmer-enter,
+  .dimmer-leave-to {
+    opacity: 0 !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bounce-enter-active,
+    .bounce-leave-active {
+      animation: none;
+    }
+    .dimmer-enter-active,
+    .dimmer-leave-active {
+      transition: none;
+    }
   }
 </style>
