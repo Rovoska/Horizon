@@ -53,10 +53,12 @@ class State implements Interfaces.State {
   ownProfile: CharacterProfile = <any>undefined; /*tslint:disable-line:no-any*/ //hack
 
   friends: Character[] = [];
+  characterFriends: Character[] = [];
   bookmarks: Character[] = [];
   ignoreList: string[] = [];
   opList: string[] = [];
   friendList: string[] = [];
+  characterFriendList: string[] = [];
   bookmarkList: string[] = [];
 
   get(name: string): Character {
@@ -133,21 +135,14 @@ class State implements Interfaces.State {
 
     Vue.set(char.overrides, type, newValue);
   }
-  async refreshFriends(characterFriendsOnly: bool): void {
-    if (!characterFriendsOnly) {
-      this.friendList = (
-        await core.connection.queryApi<{
-          friends: { source: string; dest: string; last_online: number }[];
-        }>('friend-list.php')
-      ).friends.map(x => x.dest);
-    } else {
-      let id = this.ownProfile.character.id;
-      this.friendList = (
-        await core.connection.queryApi<{
-          friends: Character[];
-        }>('character-friends.php', { id })
-      ).friends.map(x => x.name);
-    }
+  async refreshFriends(showPerCharacterFriends: boolean): Promise<void> {
+    // Always fetch global friends
+    this.friendList = (
+      await core.connection.queryApi<{
+        friends: { source: string; dest: string; last_online: number }[];
+      }>('friend-list.php')
+    ).friends.map(x => x.dest);
+
     this.friends = [
       ...new Set(
         this.friendList
@@ -155,6 +150,28 @@ class State implements Interfaces.State {
           .filter(x => x.status !== 'offline')
       )
     ]; //deduplicate apparently this is performant
+
+    // If per-character friends is enabled, also fetch character-specific friends
+    if (showPerCharacterFriends) {
+      const id = this.ownProfile.character.id;
+      this.characterFriendList = (
+        await core.connection.queryApi<{
+          friends: Character[];
+        }>('character-friends.php', { id })
+      ).friends.map(x => x.name);
+
+      this.characterFriends = [
+        ...new Set(
+          this.characterFriendList
+            .map(x => state.get(x))
+            .filter(x => x.status !== 'offline')
+        )
+      ];
+    } else {
+      this.characterFriendList = [];
+      this.characterFriends = [];
+    }
+
     for (const key in state.characters) {
       const character = state.characters[key]!;
       character.isFriend = state.friendList.indexOf(character.name) !== -1;
@@ -188,10 +205,7 @@ export default function (this: void, connection: Connection): Interfaces.State {
         friends: { source: string; dest: string; last_online: number }[];
       }>('friend-list.php')
     ).friends.map(x => x.dest);
-    if (
-      isReconnect &&
-      <Character | undefined>state.core.ownCharacter !== undefined
-    )
+    if (isReconnect && <Character | undefined>state.ownCharacter !== undefined)
       reconnectStatus = {
         status: state.ownCharacter.status,
         statusmsg: state.ownCharacter.statusText
@@ -206,7 +220,7 @@ export default function (this: void, connection: Connection): Interfaces.State {
     }
   });
   connection.onEvent('connected', async isReconnect => {
-    state.refreshFriends(core.state.settings.characterFriendsOnly);
+    state.refreshFriends(core.state.settings.showPerCharacterFriends);
     if (!isReconnect) return;
     connection.send('STA', reconnectStatus);
     for (const key in state.characters) {
@@ -306,38 +320,52 @@ export default function (this: void, connection: Connection): Interfaces.State {
           state.bookmarks.splice(state.bookmarks.indexOf(character), 1);
         break;
       case 'friendadd':
-        if (core.state.settings.characterFriendsOnly) {
-          state.friendList = (
+        // Always add to global friends
+        state.friendList.push(data.name);
+        character.isFriend = true;
+        if (character.status !== 'offline') state.friends.push(character);
+
+        // If per-character friends is enabled, also update that list
+        if (core.state.settings.showPerCharacterFriends) {
+          state.characterFriendList = (
             await connection.queryApi<{
               friends: Character[];
             }>('character-friends.php', { id })
           ).friends.map(x => x.name);
-          if (state.friendList.indexOf(data.name) == -1) {
-            return;
-          }
-        } else {
-          state.friendList.push(data.name);
+
+          state.characterFriends = [
+            ...new Set(
+              state.characterFriendList
+                .map(x => state.get(x))
+                .filter(x => x.status !== 'offline')
+            )
+          ];
         }
-        if (character.status !== 'offline') state.friends.push(character);
-        character.isFriend = true;
         break;
       case 'friendremove':
-        if (core.state.characterFriendsOnly) {
-          state.friendList = (
-            await connection.queryApi<{
-              friends: Character[];
-            }>('character-friends.php', { id })
-          ).friends.map(x => x.name);
-          if (state.friendList.indexOf(data.name) == -1) {
-            return;
-          }
-        } else {
-          state.friendList.splice(state.friendList.indexOf(data.name), 1);
-        }
+        // Always remove from global friends
+        state.friendList.splice(state.friendList.indexOf(data.name), 1);
+        character.isFriend = false;
         if (character.status !== 'offline') {
           state.friends.splice(state.friends.indexOf(character), 1);
         }
-        character.isFriend = false;
+
+        // If per-character friends is enabled, also update that list
+        if (core.state.settings.showPerCharacterFriends) {
+          state.characterFriendList = (
+            await connection.queryApi<{
+              friends: Character[];
+            }>('character-friends.php', { id })
+          ).friends.map(x => x.name);
+
+          state.characterFriends = [
+            ...new Set(
+              state.characterFriendList
+                .map(x => state.get(x))
+                .filter(x => x.status !== 'offline')
+            )
+          ];
+        }
     }
   });
   return state;
