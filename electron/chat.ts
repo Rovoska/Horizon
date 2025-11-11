@@ -252,7 +252,7 @@ webContents.on('context-menu', (_, props) => {
 
   const lookupWord = props.selectionText || wordPosSearch.getLastClickedWord();
 
-  if (lookupWord) {
+  if (connection.isOpen && connection.character && lookupWord) {
     menuTemplate.unshift(
       {
         label: `Look up '${lookupWord}'`,
@@ -268,7 +268,10 @@ webContents.on('context-menu', (_, props) => {
     );
   }
 
-  if (props.srcURL.startsWith('https://static.f-list.net/images/eicon/')) {
+  if (
+    connection.isOpen &&
+    props.srcURL.startsWith('https://static.f-list.net/images/eicon/')
+  ) {
     let eiconName = props.titleText;
     //Electron on Mac allows for header context menu items, so we use that instead of a disabled item split of by a seperator.
     menuTemplate.unshift(

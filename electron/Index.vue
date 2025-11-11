@@ -470,14 +470,6 @@
     @Hook('mounted')
     onMounted(): void {
       log.debug('init.chat.mounted');
-
-      EventBus.$on('word-definition', (data: any) => {
-        this.wordDefinitionLookup = data.lookupWord;
-
-        if (!!data.lookupWord) {
-          (<Modal>this.$refs.wordDefinitionViewer).show();
-        }
-      });
     }
 
     @Hook('created')
@@ -722,6 +714,14 @@
             newValue => parent.send('has-new', webContents.id, newValue)
           );
           Raven.setUserContext({ username: core.connection.character });
+
+          EventBus.$on('word-definition', (data: any) => {
+            this.wordDefinitionLookup = data.lookupWord;
+
+            if (!!data.lookupWord) {
+              (<Modal>this.$refs.wordDefinitionViewer).show();
+            }
+          });
         });
         core.connection.onEvent('closed', () => {
           if (this.character === undefined) return;
