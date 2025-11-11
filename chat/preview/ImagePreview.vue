@@ -330,6 +330,145 @@
         }
       });
 
+      //Block external navigation to prevent other apps from opening
+      webview.addEventListener('new-window', (event: any) => {
+        this.debugLog('ImagePreview blocked new-window', event.url);
+        event.preventDefault();
+      });
+
+      webview.addEventListener('will-navigate', (event: any) => {
+        const url = event.url;
+        this.debugLog('ImagePreview will-navigate', url);
+
+        //Block Discord invites and other external protocols - this catches redirects!
+        if (this.isBlockedUrl(url)) {
+          this.debugLog(
+            'ImagePreview blocked external protocol navigation (including redirects)',
+            url
+          );
+          event.preventDefault();
+          //Also hide the preview if we detect a redirect to blocked content
+          this.hide();
+          return;
+        }
+
+        //Allow navigation only to the original URL or image/video content
+        const currentUrl = webview.src;
+        if (url !== currentUrl && !this.isMediaUrl(url)) {
+          this.debugLog(
+            'ImagePreview blocked non-media navigation',
+            url,
+            'from',
+            currentUrl
+          );
+          event.preventDefault();
+        }
+      });
+
+      //Block external protocol handling - this is critical for redirect protection
+      webview.addEventListener('will-redirect', (event: any) => {
+        const url = event.url;
+        this.debugLog('ImagePreview will-redirect', url);
+
+        if (this.isBlockedUrl(url)) {
+          this.debugLog('ImagePreview blocked external protocol redirect', url);
+          event.preventDefault();
+          //Hide the preview when we detect redirect to blocked content
+          this.hide();
+          return;
+        }
+      });
+
+      //Additional protection: monitor any navigation attempts
+      webview.addEventListener('did-start-navigation', (event: any) => {
+        const url = event.url;
+        this.debugLog('ImagePreview did-start-navigation', url);
+
+        if (this.isBlockedUrl(url)) {
+          this.debugLog(
+            'ImagePreview blocked navigation start to external protocol',
+            url
+          );
+          //Stop the webview and hide preview
+          webview.stop();
+          this.hide();
+          return;
+        }
+      });
+
+      //Monitor for completed navigation to check final URL
+      webview.addEventListener('did-navigate', (event: any) => {
+        const url = webview.getURL();
+        this.debugLog('ImagePreview did-navigate to', url, event);
+
+        if (this.isBlockedUrl(url)) {
+          this.debugLog(
+            'ImagePreview detected blocked URL after navigation',
+            url
+          );
+          webview.stop();
+          this.hide();
+          return;
+        }
+      });
+
+      //Monitor page title changes for external app indicators
+      webview.addEventListener('page-title-updated', (event: any) => {
+        const title = event.title;
+        const currentUrl = webview.getURL();
+
+        //Common patterns in pages that redirect to external apps
+        const suspiciousTitlePatterns = [
+          'Discord',
+          'Join',
+          'Invite',
+          'Steam',
+          'Zoom',
+          'Teams',
+          'Slack',
+          'WhatsApp',
+          'Telegram',
+          'Skype',
+          'FaceTime',
+          'Opening',
+          'Redirecting',
+          'Download',
+          'Install',
+          'App Store',
+          'Microsoft Store'
+        ];
+
+        if (
+          title &&
+          suspiciousTitlePatterns.some(pattern => title.includes(pattern))
+        ) {
+          if (this.isBlockedUrl(currentUrl)) {
+            this.debugLog(
+              'ImagePreview detected suspicious title, blocking',
+              title,
+              currentUrl
+            );
+            webview.stop();
+            this.hide();
+          }
+        }
+      });
+
+      //Safety mechanism: periodically check the current URL for delayed redirects
+      setInterval(() => {
+        if (this.visible && webview) {
+          const currentUrl = webview.getURL();
+          if (currentUrl && this.isBlockedUrl(currentUrl)) {
+            this.debugLog(
+              'ImagePreview safety check detected blocked URL',
+              currentUrl
+            );
+            webview.stop();
+            this.hide();
+          }
+        }
+      }, 500); // Check every 500ms
+
       // const webContentsId = webview.getWebContentsId();
       //
       // remote.webContents.fromId(webContentsId).session.on(
@@ -394,6 +533,133 @@
 
       const characterName = decodeURIComponent(match[2].replace(/\+/g, '%20'));
       return `flist-character://${characterName}`;
+    }
+
+    isMediaUrl(url: string): boolean {
+      const cleanUrl = url.split('?')[0].toLowerCase();
+      const mediaExtensions = [
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.gif',
+        '.webp',
+        '.svg',
+        '.bmp',
+        '.ico',
+        '.mp4',
+        '.webm',
+        '.mov',
+        '.avi',
+        '.mkv',
+        '.flv',
+        '.wmv',
+        '.m4v',
+        '.3gp',
+        '.ogv'
+      ];
+
+      return (
+        mediaExtensions.some(ext => cleanUrl.endsWith(ext)) ||
+        cleanUrl.includes('blob:') ||
+        cleanUrl.includes('data:image') ||
+        cleanUrl.includes('data:video')
+      );
+    }
+
+    isBlockedUrl(url: string): boolean {
+      const blockedProtocols = [
+        'discord://',
+        'steam://',
+        'skype:',
+        'mailto:',
+        'tel:',
+        'sms:',
+        'facetime:',
+        'facetime-audio:',
+        'zoom:',
+        'teams:',
+        'slack:',
+        'whatsapp:',
+        'telegram:',
+        'spotify:',
+        'itunes:',
+        'itunesmusic:',
+        'app:',
+        'x-apple:',
+        'com.apple.',
+        'com.microsoft.',
+        'com.spotify.',
+        'vscode:',
+        'vscode-insiders:',
+        'github-desktop:',
+        'unity:',
+        'blender:',
+        'obsidian:',
+        'notion:'
+      ];
+
+      const blockedDomains = [
+        'discord.gg/',
+        'discord.com/invite/',
+        'discordapp.com/invite/',
+        'steamcommunity.com/groups/',
+        'steamcommunity.com/chat/',
+        'web.whatsapp.com',
+        'web.telegram.org',
+        'teams.microsoft.com/l/chat',
+        'zoom.us/j/',
+        'meet.google.com/',
+        'whereby.com/'
+      ];
+
+      const lowerUrl = url.toLowerCase();
+
+      if (blockedProtocols.some(protocol => lowerUrl.startsWith(protocol))) {
+        return true;
+      }
+
+      if (blockedDomains.some(domain => lowerUrl.includes(domain))) {
+        return true;
+      }
+
+      const urlShorteners = [
+        'bit.ly',
+        'tinyurl.com',
+        't.co',
+        'short.link',
+        'ow.ly',
+        'is.gd',
+        'buff.ly',
+        'adf.ly',
+        'goo.gl',
+        'shor.by',
+        'cutt.ly',
+        'rebrandly.com',
+        'tiny.cc',
+        'link.ly',
+        'shortened.link',
+        'shorturl.at',
+        'clck.ru',
+        'v.gd',
+        'po.st'
+      ];
+
+      return urlShorteners.some(shortener => lowerUrl.includes(shortener));
+    }
+
+    isSuspiciousRedirect(url: string): boolean {
+      const lowerUrl = url.toLowerCase();
+
+      const redirectParams = [
+        'redirect',
+        'url',
+        'goto',
+        'target',
+        'destination',
+        'forward',
+        'next'
+      ];
+      return redirectParams.some(param => lowerUrl.includes(param + '='));
     }
 
     updatePreviewSize(width: number, height: number): void {
@@ -480,6 +746,21 @@
 
     show(initialUrl: string): void {
       const url = this.jsMutator.mutateUrl(initialUrl);
+
+      // Block URLs that could trigger external applications
+      if (this.isBlockedUrl(url)) {
+        this.debugLog('ImagePreview: show blocked external URL', url);
+        return;
+      }
+
+      // Block suspicious URLs that might redirect to external applications
+      if (this.isSuspiciousRedirect(url)) {
+        this.debugLog(
+          'ImagePreview: show blocked suspicious redirect URL',
+          url
+        );
+        return;
+      }
 
       this.debugLog(
         'ImagePreview: show',
