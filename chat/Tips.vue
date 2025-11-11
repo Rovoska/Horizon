@@ -7,7 +7,16 @@
   >
     <div ref="tipContent" class="tip-content">
       <div class="tip-label text-info-emphasis">{{ l('tips') }}</div>
-      <div class="tip-text"><bbcode :text="tip" /></div>
+      <div class="tip-text">
+        <transition
+          :name="transitionName"
+          mode="out-in"
+          @after-leave="calculateHeight"
+          @after-enter="calculateHeight"
+        >
+          <bbcode style="display: inline-block" :text="tip" :key="tip" />
+        </transition>
+      </div>
     </div>
     <div class="tip-controls">
       <div class="tip-nav">
@@ -51,10 +60,17 @@
       const tipContainer = ref(null);
       const tipContent = ref(null);
       const containerHeight = ref(null);
+      const transitionDirection = ref('down'); // 'up' or 'down'
       const currentTip = computed(() => tip());
-      let observer = null;
 
-      const calculateHeight = () => {
+      const transitionName = computed(() => {
+        return transitionDirection.value === 'up'
+          ? 'tip-text-up'
+          : 'tip-text-down';
+      });
+
+      const calculateHeight = async () => {
+        await nextTick();
         if (!tipContent.value) return;
         const { scrollHeight } = tipContent.value;
         const { paddingTop, paddingBottom } = window.getComputedStyle(
@@ -68,28 +84,33 @@
         );
       };
 
-      onMounted(() =>
-        nextTick(() => {
-          calculateHeight();
-          observer = new ResizeObserver(calculateHeight);
-          observer.observe(tipContent.value);
-        })
-      );
+      const handleNext = () => {
+        transitionDirection.value = 'up';
+        nextTip();
+      };
 
-      onBeforeUnmount(() => observer?.disconnect());
+      const handlePrevious = () => {
+        transitionDirection.value = 'down';
+        previousTip();
+      };
 
-      watch(currentTip, () => nextTick(calculateHeight));
-      watch(show, val => val && nextTick(calculateHeight));
+      watch(currentTip, calculateHeight);
+
+      onMounted(() => {
+        calculateHeight();
+      });
 
       return {
         show,
-        handleNext: nextTip,
-        handlePrevious: previousTip,
+        handleNext,
+        handlePrevious,
         l,
         tip: currentTip,
         tipContainer,
         tipContent,
-        containerHeight
+        containerHeight,
+        transitionName,
+        calculateHeight
       };
     }
   });
@@ -176,5 +197,35 @@ NOTE: dear god help me why is this so long?
     &--dismiss {
       height: 38px;
     }
+  }
+
+  .tip-text-down-enter-active,
+  .tip-text-down-leave-active {
+    transition: all 0.2s;
+  }
+
+  .tip-text-down-enter-from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  .tip-text-down-leave-to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  .tip-text-up-enter-active,
+  .tip-text-up-leave-active {
+    transition: all 0.2s;
+  }
+
+  .tip-text-up-enter-from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  .tip-text-up-leave-to {
+    transform: translateY(-100%);
+    opacity: 0;
   }
 </style>

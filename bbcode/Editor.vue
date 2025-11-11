@@ -35,40 +35,42 @@
       v-if="hasToolbar"
       style="flex: 1 51%"
     >
-      <div
-        class="popover popover-top color-selector"
-        v-show="colorPopupVisible"
-        v-on-clickaway="dismissColorSelector"
-      >
-        <div class="popover-body">
-          <div
-            class="color-typing-hint"
-            v-if="awaitingColorKey && awaitingBuffer"
-            :class="{ 'no-match': awaitingNoMatch }"
-          >
-            <div class="buffer">{{ awaitingBuffer.toLowerCase() }}</div>
-            <div class="matches">
-              <span
-                v-for="m in awaitingMatches"
-                :key="m"
-                :class="['chip', m]"
-                >{{ m }}</span
-              >
+      <transition name="color-popover">
+        <div
+          class="popover popover-top color-selector"
+          v-show="colorPopupVisible"
+          v-on-clickaway="dismissColorSelector"
+        >
+          <div class="popover-body">
+            <div
+              class="color-typing-hint"
+              v-if="awaitingColorKey && awaitingBuffer"
+              :class="{ 'no-match': awaitingNoMatch }"
+            >
+              <div class="buffer">{{ awaitingBuffer.toLowerCase() }}</div>
+              <div class="matches">
+                <span
+                  v-for="m in awaitingMatches"
+                  :key="m"
+                  :class="['chip', m]"
+                  >{{ m }}</span
+                >
+              </div>
+            </div>
+            <div class="btn-group" role="group" :aria-label="l('common.color')">
+              <button
+                v-for="btnCol in buttonColors"
+                type="button"
+                class="btn text-color"
+                :class="btnCol"
+                :title="btnCol"
+                @click.prevent.stop="applyAndClearColor(btnCol)"
+                tabindex="0"
+              ></button>
             </div>
           </div>
-          <div class="btn-group" role="group" :aria-label="l('common.color')">
-            <button
-              v-for="btnCol in buttonColors"
-              type="button"
-              class="btn text-color"
-              :class="btnCol"
-              :title="btnCol"
-              @click.prevent.stop="applyAndClearColor(btnCol)"
-              tabindex="0"
-            ></button>
-          </div>
         </div>
-      </div>
+      </transition>
 
       <div class="btn-group toolbar-buttons" style="flex-wrap: wrap">
         <div v-if="!!characterName" class="character-btn">
@@ -923,5 +925,15 @@
         }
       }
     }
+  }
+  .color-popover-enter-active,
+  .color-popover-leave-active {
+    transition: all 0.1s ease-in;
+  }
+
+  .color-popover-enter,
+  .color-popover-leave-to {
+    transform: translateY(100%);
+    opacity: 0;
   }
 </style>
