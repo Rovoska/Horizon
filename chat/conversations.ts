@@ -364,6 +364,7 @@ class PrivateConversation
     await state.savePinned();
     if (state.selectedConversation === this) state.show(state.consoleTab);
     clearInterval(this.cacheInterval);
+    state.removeFromNavigationHistory(this);
   }
 
   async sort(newIndex: number): Promise<void> {
@@ -598,6 +599,7 @@ class ChannelConversation
   close(): void {
     core.connection.send('LCH', { channel: this.channel.id });
     clearInterval(this.cacheInterval);
+    state.removeFromNavigationHistory(this);
   }
 
   async sort(newIndex: number): Promise<void> {
@@ -862,14 +864,20 @@ class State implements Interfaces.State {
     this.navigationHistoryIndex = newIndex;
     const conversation = this.navigationHistory[newIndex];
 
-    this.lastConversation = this.selectedConversation;
-    this.selectedConversation.onHide();
-    conversation.unread = Interfaces.UnreadState.None;
-    this.selectedConversation = conversation;
-    EventBus.$emit('select-conversation', { conversation });
+    conversation.show();
 
     this.isNavigatingHistory = false;
     return true;
+  }
+
+  removeFromNavigationHistory(conversation: Conversation) {
+    state.navigationHistory.splice(
+      state.navigationHistory.indexOf(conversation),
+      1
+    );
+    state.navigationHistoryIndex = state.navigationHistory.indexOf(
+      state.selectedConversation
+    );
   }
 
   navigateBack(): boolean {
