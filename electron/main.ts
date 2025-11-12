@@ -715,7 +715,12 @@ async function onReady(): Promise<void> {
             : []),
 
           { role: 'minimize' },
-          { role: 'quit', label: l('action.quit') }
+          {
+            role: 'quit',
+            label: l('action.quit'),
+            accelerator:
+              process.platform !== 'darwin' ? 'CmdOrCtrl+Shift+Q' : undefined
+          }
         ] as MenuItemConstructorOptions[]
       },
       {
