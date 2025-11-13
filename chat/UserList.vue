@@ -39,7 +39,13 @@
           :isMarkerShown="shouldShowMarker"
         ></user>
       </div>
-      <h4 v-if="friends.length > 0">{{ l('users.friends') }}</h4>
+      <h4 v-if="friends.length > 0">
+        {{
+          l(
+            `users.${this.showPerCharacterFriends && this.characterFriends.length > 0 ? 'friends.nonCharacter' : 'friends'}`
+          )
+        }}
+      </h4>
       <div
         v-for="character in friends"
         :key="'friend-' + character.name"
