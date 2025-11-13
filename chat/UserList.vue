@@ -420,8 +420,13 @@
       }
     }
 
+    //Making these settings a getter performs better with larger lists
     get showPerCharacterFriends(): boolean {
       return core.state.settings.showPerCharacterFriends;
+    }
+
+    get hideNonCharacterFriends(): boolean {
+      return core.state.settings.hideNonCharacterFriends;
     }
 
     get characterFriends(): Character[] {
@@ -453,9 +458,17 @@
     }
 
     get bookmarks(): Character[] {
-      const friendNames = new Set(
-        core.characters.friends.map(friend => friend.name.toLowerCase())
-      );
+      let friendNames =
+        this.showPerCharacterFriends &&
+        core.state.settings.hideNonCharacterFriends
+          ? new Set(
+              core.characters.characterFriends.map(characterFriend =>
+                characterFriend.name.toLowerCase()
+              )
+            )
+          : new Set(
+              core.characters.friends.map(friend => friend.name.toLowerCase())
+            );
       let bookmarks = core.characters.bookmarks
         .slice()
         .filter(x => !friendNames.has(x.name.toLowerCase()));
