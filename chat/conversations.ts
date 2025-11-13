@@ -871,9 +871,8 @@ class State implements Interfaces.State {
   }
 
   removeFromNavigationHistory(conversation: Conversation) {
-    state.navigationHistory.splice(
-      state.navigationHistory.indexOf(conversation),
-      1
+    state.navigationHistory = state.navigationHistory.filter(
+      c => c !== conversation
     );
     state.navigationHistoryIndex = state.navigationHistory.indexOf(
       state.selectedConversation
