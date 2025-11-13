@@ -173,12 +173,7 @@ export default function (this: void, connection: Connection): Interfaces.State {
       friends: { source: string; dest: string; last_online: number }[];
     }>('friend-list.php');
     state.friendList = friendResponse.friends.map(x => x.dest);
-    const ownName = (state.ownCharacter as Character | undefined)?.name;
-    state.characterFriendList = ownName
-      ? friendResponse.friends
-          .filter(x => x.source === ownName)
-          .map(x => x.dest)
-      : [];
+    state.characterFriendList = [];
     if (isReconnect && <Character | undefined>state.ownCharacter !== undefined)
       reconnectStatus = {
         status: state.ownCharacter.status,
