@@ -487,7 +487,6 @@
     @Hook('created')
     async created(): Promise<void> {
       await this.startAndUpgradeCache();
-      window.core = core;
 
       if (this.settings.account.length > 0) this.saveLogin = true;
 
