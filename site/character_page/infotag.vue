@@ -12,10 +12,9 @@
   </div>
 </template>
 
-<script lang="ts">
-  import { Component, Prop } from '@f-list/vue-ts';
+<script setup lang="ts">
+  import { computed } from 'vue';
   import anyAscii from 'any-ascii';
-  import Vue from 'vue';
   import core from '../../chat/core';
   import { CharacterInfotag, Infotag, ListItem } from '../../interfaces';
   import { formatContactLink, formatContactValue } from './contact_utils';
@@ -25,111 +24,103 @@
   import { CssClassMap } from './match-report.vue';
   import { TagId } from '../../learn/matcher-types';
 
-  @Component
-  export default class InfotagView extends Vue {
-    @Prop({ required: true })
-    readonly infotag!: Infotag;
-    @Prop({ required: true })
-    readonly data!: CharacterInfotag;
-    @Prop({ required: true })
-    private readonly characterMatch!: MatchReport;
+  const props = defineProps<{
+    infotag: Infotag;
+    data: CharacterInfotag;
+    characterMatch: MatchReport;
+  }>();
 
-    readonly contactGroupId = CONTACT_GROUP_ID;
+  const contactGroupId = CONTACT_GROUP_ID;
 
-    get tagClasses(): CssClassMap {
-      const styles: CssClassMap = {
-        infotag: true
-      };
+  const theirInterestIsRelevant = (id: number): boolean => {
+    return (
+      id === TagId.FurryPreference ||
+      id === TagId.SubDomRole ||
+      id === TagId.Position ||
+      id === TagId.PostLength
+    );
+  };
 
-      // console.log(`Infotag ${this.infotag.id}: ${this.infotag.name}`, core.state.settings.risingAdScore, this.characterMatch);
-      const id = parseInt(this.infotag.id as any, 10);
+  const yourInterestIsRelevant = (id: number): boolean => {
+    return (
+      id === TagId.Gender ||
+      id === TagId.Age ||
+      id === TagId.Species ||
+      id === TagId.BodyType
+    );
+  };
 
-      if (
-        core.state.settings.risingAdScore &&
-        this.characterMatch &&
-        // We don't get passed a reference to the character this tag is for,
-        // so we just check if the MatchReport involves a match where both characters are the same.
-        // It's good that we don't use the is_self field from the API here, because we still might
-        // want to test matches with our own characters.
-        this.characterMatch.them.them.id != this.characterMatch.them.you.id
-      ) {
-        // console.log('MATCH');
+  const tagClasses = computed((): CssClassMap => {
+    const styles: CssClassMap = {
+      infotag: true
+    };
 
-        const scores = this.theirInterestIsRelevant(id)
-          ? this.characterMatch.them.scores
-          : this.yourInterestIsRelevant(id)
-            ? this.characterMatch.you.scores
-            : null;
+    // // console.log(`Infotag ${props.infotag.id}: ${props.infotag.name}`, core.state.settings.risingAdScore, props.characterMatch);
+    const id = parseInt(props.infotag.id as any, 10);
 
-        // console.log('SCORES', scores);
+    if (
+      core.state.settings.risingAdScore &&
+      props.characterMatch &&
+      // We don't get passed a reference to the character this tag is for,
+      // so we just check if the MatchReport involves a match where both characters are the same.
+      // It's good that we don't use the is_self field from the API here, because we still might
+      // want to test matches with our own characters.
+      props.characterMatch.them.them.id != props.characterMatch.them.you.id
+    ) {
+      const scores = theirInterestIsRelevant(id)
+        ? props.characterMatch.them.scores
+        : yourInterestIsRelevant(id)
+          ? props.characterMatch.you.scores
+          : null;
 
-        if (scores) {
-          const score = scores[id];
+      if (scores) {
+        const score = scores[id];
 
-          styles[score.getRecommendedClass()] = true;
-          styles['match-score'] = true;
+        styles[score.getRecommendedClass()] = true;
+        styles['match-score'] = true;
+      }
+    }
+
+    return styles;
+  });
+
+  const contactLink = computed((): string | undefined => {
+    return formatContactLink(props.infotag, props.data.string!);
+  });
+
+  const contactValue = computed((): string => {
+    return formatContactValue(props.infotag, props.data.string!);
+  });
+
+  const value = computed((): string => {
+    let shouldFormatAscii =
+      props.infotag.infotag_group !== contactGroupId &&
+      core.state.generalSettings &&
+      core.state.generalSettings.horizonForceAsciiProfiles;
+    switch (props.infotag.type) {
+      case 'text':
+        return shouldFormatAscii
+          ? anyAscii(props.data.string!)
+          : props.data.string!;
+      case 'number':
+        if (props.infotag.allow_legacy && !props.data.number) {
+          //Prettier makes this an unreadable mess, so lets just describe it:
+          //First check if we have a proper strng value for this legacy field.
+          //If we don't, we return an empty string
+          //Otherwise we then check if we shouldd format to ASCII, in which case
+          //we do that before returning.
+          return props.data.string !== undefined
+            ? shouldFormatAscii
+              ? anyAscii(props.data.string)
+              : props.data.string
+            : '';
         }
-      }
-
-      return styles;
+        return props.data.number!.toPrecision();
     }
-
-    theirInterestIsRelevant(id: number): boolean {
-      return (
-        id === TagId.FurryPreference ||
-        id === TagId.SubDomRole ||
-        id === TagId.Position ||
-        id === TagId.PostLength
-      );
-    }
-
-    yourInterestIsRelevant(id: number): boolean {
-      return (
-        id === TagId.Gender ||
-        id === TagId.Age ||
-        id === TagId.Species ||
-        id === TagId.BodyType
-      );
-    }
-
-    get contactLink(): string | undefined {
-      return formatContactLink(this.infotag, this.data.string!);
-    }
-
-    get contactValue(): string {
-      return formatContactValue(this.infotag, this.data.string!);
-    }
-
-    get value(): string {
-      let shouldFormatAscii =
-        this.infotag.infotag_group !== this.contactGroupId &&
-        core.state.generalSettings &&
-        core.state.generalSettings.horizonForceAsciiProfiles;
-      switch (this.infotag.type) {
-        case 'text':
-          return shouldFormatAscii
-            ? anyAscii(this.data.string)
-            : this.data.string!;
-        case 'number':
-          if (this.infotag.allow_legacy && !this.data.number) {
-            //Prettier makes this an unreadable mess, so lets just describe it:
-            //First check if we have a proper strng value for this legacy field.
-            //If we don't, we return an empty string
-            //Otherwise we then check if we shouldd format to ASCII, in which case
-            //we do that before returning.
-            return this.data.string !== undefined
-              ? shouldFormatAscii
-                ? anyAscii(this.data.string)
-                : this.data.string
-              : '';
-          }
-          return this.data.number!.toPrecision();
-      }
-      const listitem = <ListItem | undefined>(
-        Store.shared.listItems[this.data.list!]
-      );
-      if (typeof listitem === 'undefined') return '';
-      return listitem.value;
-    }
-  }
+    const listitem = <ListItem | undefined>(
+      Store.shared.listItems[props.data.list!]
+    );
+    if (typeof listitem === 'undefined') return '';
+    return listitem.value;
+  });
 </script>
