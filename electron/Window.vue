@@ -737,6 +737,7 @@
 
         return {
           ['platform-' + this.platform]: true,
+          'force-reduced-motion': this.settings?.reducedMotion || false,
           bbcodeGlow: this.settings?.horizonBbcodeGlow || false,
           disableWindowsHighContrast:
             this.settings?.risingDisableWindowsHighContrast || false

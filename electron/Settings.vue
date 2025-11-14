@@ -626,10 +626,23 @@
                     </label>
                   </div>
                 </div>
-                <div v-else class="warning">
-                  <h5>{{ l('settings.comingsoon') }}</h5>
-                  <hr />
-                  <p>{{ l('settings.charactersToGeneral.generalInfo') }}</p>
+
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="reducedMotion"
+                      v-model="settings.reducedMotion"
+                    />
+                    <label class="form-check-label" for="reducedMotion">
+                      {{ l('settings.reducedMotion') }}
+                    </label>
+                  </div>
+
+                  <small class="form-text text-muted">{{
+                    l('settings.reducedMotion.description')
+                  }}</small>
                 </div>
               </div>
               <!-- Advanced -->

@@ -40,6 +40,7 @@ export class GeneralSettings {
   updateCheck = true;
   customDictionary: string[] = [];
   hwAcceleration = true;
+  reducedMotion = false;
   risingCacheExpiryDays = 30;
   horizonCacheMemoryCount = 350;
   risingSystemLogLevel: log.LevelOption = 'info';

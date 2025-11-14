@@ -850,17 +850,24 @@
         }
 
         return {
-          [`theme-${core.state.settings.risingCharacterTheme || this.getSyncedTheme()}`]: true,
-          colorblindMode: core.state.settings.risingColorblindMode,
+          [`theme-${core.state.settings?.risingCharacterTheme || this.getSyncedTheme()}`]: true,
+          [`${this.getSyncedTheme()}`]: true,
+          colorblindMode: core.state.settings?.risingColorblindMode || false,
           vanillaTextColors: this.settings.horizonVanillaTextColors,
           vanillaGenderColors: this.settings.horizonVanillaGenderColors,
+          ['force-reduced-motion']: this.settings.reducedMotion || false,
           bbcodeGlow: this.settings.horizonBbcodeGlow,
           disableWindowsHighContrast:
-            core.state.generalSettings?.risingDisableWindowsHighContrast ||
-            false
+            this.settings.risingDisableWindowsHighContrast || false
         };
       } catch (err) {
-        return { [`theme-${this.getSyncedTheme()}`]: true };
+        return {
+          [`theme-${this.getSyncedTheme()}`]: true,
+
+          ['force-reduced-motion']: this.settings.reducedMotion || false,
+          disableWindowsHighContrast:
+            this.settings.risingDisableWindowsHighContrast || false
+        };
       }
     }
 
