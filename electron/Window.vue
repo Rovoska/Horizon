@@ -295,11 +295,12 @@
         }, this.transitionDuration + 50); // Add small buffer
       });
       electron.ipcRenderer.on('window-closing', () => {
-        this.destroyAllTabs();
-        // Signal that cleanup is complete
-        setTimeout(() => {
-          electron.ipcRenderer.send('cleanup-complete');
-        }, this.transitionDuration + 50); // Add small buffer
+        if (Dialog.confirmDialog(l('chat.confirmLeave'))) {
+          this.destroyAllTabs();
+          setTimeout(() => {
+            electron.ipcRenderer.send('cleanup-complete');
+          }, this.transitionDuration + 50);
+        }
       });
       electron.ipcRenderer.on('reopen-profile', () =>
         this.activeTab!.view.webContents.send('reopen-profile')
@@ -479,7 +480,6 @@
               }, this.transitionDuration + 50);
             }
           });
-        browserWindow.hide();
         return false;
       };
       this.isMaximized = browserWindow.isMaximized();
