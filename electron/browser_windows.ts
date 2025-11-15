@@ -329,26 +329,11 @@ export function createMainWindow(
 
   // Save window state when it is being closed.
   window.on('close', e => {
-    const hasConnectedTabs = Object.values(tabMap).some(
-      webContents =>
-        electron.BrowserWindow.fromWebContents(webContents) === window
-    );
-
-    if (
-      process.env.NODE_ENV === 'production' &&
-      hasConnectedTabs &&
-      settings.closeToTray
-    ) {
-      e.preventDefault();
-      windowState.setSavedWindowState(window);
-      window.hide();
-      return;
-    }
-
+    // Prevent immediate close to allow cleanup timing
     e.preventDefault();
     windowState.setSavedWindowState(window);
     window.webContents.send('window-closing');
-    //the renderer will send 'cleanup-complete' when ready
+    // The renderer will send 'cleanup-complete' when ready
   });
   window.on('closed', () => windows.splice(windows.indexOf(window), 1));
   window.once('ready-to-show', () => {
