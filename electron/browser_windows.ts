@@ -183,20 +183,6 @@ electron.ipcMain.on('disconnect', (_event: IpcMainEvent, character: string) => {
   delete tabMap[character];
   tray.setContextMenu(electron.Menu.buildFromTemplate(createTrayMenu()));
 });
-
-/**
- * Handles the 'cleanup-complete' IPC event.
- * This event is triggered when the renderer has completed tab cleanup with proper animation timing.
- * @event
- * @param {IpcMainEvent} e
- * The IPC main event from the renderer that has completed cleanup.
- */
-electron.ipcMain.on('cleanup-complete', (e: IpcMainEvent) => {
-  const window = electron.BrowserWindow.fromWebContents(e.sender);
-  if (window) {
-    window.destroy();
-  }
-});
 /**
  * Opens a new tab in the specified browser window.
  * @function
@@ -328,13 +314,7 @@ export function createMainWindow(
   setUpWebContents(window.webContents, settings);
 
   // Save window state when it is being closed.
-  window.on('close', e => {
-    // Prevent immediate close to allow cleanup timing
-    e.preventDefault();
-    windowState.setSavedWindowState(window);
-    window.webContents.send('window-closing');
-    // The renderer will send 'cleanup-complete' when ready
-  });
+  window.on('close', () => windowState.setSavedWindowState(window));
   window.on('closed', () => windows.splice(windows.indexOf(window), 1));
   window.once('ready-to-show', () => {
     window.show();
@@ -534,8 +514,7 @@ export function updateZoomLevel(zoomLevel: number) {
 export async function quitAllWindows() {
   for (const w of windows) {
     w.webContents.send('quit');
-    // Don't immediately close - let the renderer handle cleanup timing
-    // The renderer will send 'cleanup-complete' when ready
+    w.close();
   }
 }
 

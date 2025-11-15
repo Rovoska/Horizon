@@ -23,12 +23,10 @@
       >
         <i class="fa fa-arrow-down"></i>
       </div>
-      <transition-group
+      <ul
         class="nav nav-tabs"
         style="border-bottom: 0; margin-bottom: -1px; margin-top: 1px"
         ref="tabs"
-        tag="ul"
-        name="tab-slide"
       >
         <li
           v-for="(tab, index) in tabs"
@@ -68,13 +66,12 @@
           v-show="canOpenTab && hasCompletedUpgrades"
           class="addTab nav-item"
           id="addTab"
-          key="addTabButton"
         >
           <a href="#" @click.prevent="addTab()" class="nav-link"
             ><i class="fa fa-plus"></i
           ></a>
         </li>
-      </transition-group>
+      </ul>
       <div
         style="
           flex: 1;
@@ -217,14 +214,6 @@
     windowTitleKey: string =
       process.env.NODE_ENV === 'production' ? 'title' : 'title.dev';
 
-    get transitionDuration(): number {
-      // Extract duration from CSS transition, default to 200ms if not found
-      const styles = getComputedStyle(document.documentElement);
-      const duration =
-        styles.getPropertyValue('--tab-transition-duration') || '0.2s';
-      return parseFloat(duration) * 1000; // Convert to milliseconds
-    }
-
     @Hook('mounted')
     async mounted(): Promise<void> {
       log.debug('init.window.mounting');
@@ -287,20 +276,7 @@
       electron.ipcRenderer.on('ui-test', () =>
         this.activeTab!.view.webContents.send('ui-test')
       );
-      electron.ipcRenderer.on('quit', () => {
-        this.destroyAllTabs();
-        // Signal that cleanup is complete
-        setTimeout(() => {
-          electron.ipcRenderer.send('cleanup-complete');
-        }, this.transitionDuration + 50); // Add small buffer
-      });
-      electron.ipcRenderer.on('window-closing', () => {
-        this.destroyAllTabs();
-        // Signal that cleanup is complete
-        setTimeout(() => {
-          electron.ipcRenderer.send('cleanup-complete');
-        }, this.transitionDuration + 50); // Add small buffer
-      });
+      electron.ipcRenderer.on('quit', () => this.destroyAllTabs());
       electron.ipcRenderer.on('reopen-profile', () =>
         this.activeTab!.view.webContents.send('reopen-profile')
       );
@@ -316,6 +292,11 @@
           }
         }
       );
+
+      // electron.ipcRenderer.on('update-zoom', (_e: Event, zoomLevel: number) => {
+      //   // log.info('WINDOWVUE ZOOM UPDATE', zoomLevel);
+      //   // browserWindow.webContents.setZoomLevel(zoomLevel);
+      // });
 
       electron.ipcRenderer.on(
         'connect',
@@ -474,9 +455,7 @@
           return setImmediate(() => {
             if (Dialog.confirmDialog(l('chat.confirmLeave'))) {
               this.destroyAllTabs();
-              setTimeout(() => {
-                electron.ipcRenderer.send('cleanup-complete');
-              }, this.transitionDuration + 50);
+              browserWindow.close();
             }
           });
         browserWindow.hide();
@@ -500,12 +479,9 @@
     }
 
     destroyAllTabs(): void {
-      // Force complete any pending transitions before cleanup
-      this.$nextTick(() => {
-        browserWindow.setBrowserView(null!); //tslint:disable-line:no-null-keyword
-        this.tabs.forEach(destroyTab);
-        this.tabs = [];
-      });
+      browserWindow.setBrowserView(null!); //tslint:disable-line:no-null-keyword
+      this.tabs.forEach(destroyTab);
+      this.tabs = [];
     }
 
     refreshWindowTitle() {
@@ -670,26 +646,17 @@
           !Dialog.confirmDialog(l('chat.confirmLeave')))
       )
         return;
-      const tabIndex = this.tabs.indexOf(tab);
-      this.tabs.splice(tabIndex, 1);
+      this.tabs.splice(this.tabs.indexOf(tab), 1);
       electron.ipcRenderer.send(
         'has-new',
         this.tabs.reduce((cur, t) => cur || t.hasNew, false)
       );
       delete this.tabMap[tab.view.webContents.id];
-
       if (this.tabs.length === 0) {
-        // Allow transition to complete before closing
-        this.$nextTick(() => {
-          browserWindow.setBrowserView(null!); //tslint:disable-line:no-null-keyword
-          if (process.env.NODE_ENV === 'production') browserWindow.close();
-        });
-      } else if (this.activeTab === tab) {
-        this.show(this.tabs[0]);
-      }
-
-      // Delay tab destruction to allow transition to complete
-      setTimeout(() => destroyTab(tab), this.transitionDuration);
+        browserWindow.setBrowserView(null!); //tslint:disable-line:no-null-keyword
+        if (process.env.NODE_ENV === 'production') browserWindow.close();
+      } else if (this.activeTab === tab) this.show(this.tabs[0]);
+      destroyTab(tab);
     }
 
     minimize(): void {
@@ -752,10 +719,6 @@
 </script>
 
 <style lang="scss">
-  :root {
-    --tab-transition-duration: 0.2s;
-  }
-
   #window-tabs {
     user-select: none;
     .btn {
@@ -835,27 +798,5 @@
   .disableWindowsHighContrast,
   .disableWindowsHighContrast * {
     forced-color-adjust: none;
-  }
-
-  .tab-slide-enter-active {
-    transition: all var(--tab-transition-duration, 0.2s) ease;
-  }
-  .tab-slide-leave-active {
-    transition: all var(--tab-transition-duration, 0.15s)
-      cubic-bezier(1, 0.5, 0.8, 1);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .tab-slide-enter-active,
-    .tab-slide-leave-active {
-      transition: none;
-    }
-  }
-  .tab-slide-enter {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-
-  .tab-slide-leave-to {
-    opacity: 0;
   }
 </style>
