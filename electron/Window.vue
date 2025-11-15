@@ -724,11 +724,11 @@
 
       // Use requestAnimationFrame for smooth animation
       requestAnimationFrame(() => {
-        el.style.transition = 'all 0.3s ease-out';
+        el.style.transition = 'all 0.15s ease-out';
         el.style.opacity = '1';
         el.style.transform = 'translateX(0)';
 
-        setTimeout(done, 300);
+        setTimeout(done, 150);
       });
     }
 
@@ -738,10 +738,10 @@
         return;
       }
 
-      el.style.transition = 'opacity 0.2s ease-in';
+      el.style.transition = 'opacity 0.1s ease-in';
       el.style.opacity = '0';
 
-      setTimeout(done, 200);
+      setTimeout(done, 100);
     }
 
     getThemeClass() {
