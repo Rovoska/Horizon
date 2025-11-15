@@ -28,40 +28,60 @@
         style="border-bottom: 0; margin-bottom: -1px; margin-top: 1px"
         ref="tabs"
       >
-        <li
+        <!-- Individual tab transitions with appear hooks 
+          :css="!isClosing" - Disables CSS transitions during window cleanup
+          JavaScript hooks (@before-enter, @enter, etc.) take priority over CSS
+          appear - Enables animations for tabs present on initial page load 
+          
+          We wound up doing it this way because working with a <transition-grou> element
+          would be cleaner for the actual template, it wound up giving too many problems
+          because of things relying on the <ul> element being directly referenced through
+          the "tabs" reference
+        -->
+        <transition
+          name="tab"
+          appear
+          :css="!isClosing"
+          @before-enter="onTabBeforeEnter"
+          @enter="onTabEnter"
+          @leave="onTabLeave"
+          @before-appear="onTabBeforeEnter"
+          @appear="onTabEnter"
           v-for="(tab, index) in tabs"
-          :key="'tab-' + index"
-          class="nav-item"
-          :data-id="index"
-          @click.middle="remove(tab)"
+          :key="'tab-' + tab.view.webContents.id"
         >
-          <a
-            href="#"
-            @click.prevent="show(tab)"
-            class="nav-link tab"
-            :class="{
-              active: tab === activeTab,
-              hasNew: tab.hasNew && tab !== activeTab
-            }"
-          >
-            <img v-if="tab.user || tab.avatarUrl" :src="getAvatarImage(tab)" />
-            <span class="d-sm-inline d-none">{{
-              tab.user || l('window.newTab')
-            }}</span>
+          <li class="nav-item" :data-id="index" @click.middle="remove(tab)">
             <a
               href="#"
-              :aria-label="l('action.close')"
-              style="
-                margin-left: 10px;
-                padding: 0;
-                color: inherit;
-                text-decoration: none;
-              "
-              @click.stop="remove(tab)"
-              ><i class="fa fa-times"></i>
+              @click.prevent="show(tab)"
+              class="nav-link tab"
+              :class="{
+                active: tab === activeTab,
+                hasNew: tab.hasNew && tab !== activeTab
+              }"
+            >
+              <img
+                v-if="tab.user || tab.avatarUrl"
+                :src="getAvatarImage(tab)"
+              />
+              <span class="d-sm-inline d-none">{{
+                tab.user || l('window.newTab')
+              }}</span>
+              <a
+                href="#"
+                :aria-label="l('action.close')"
+                style="
+                  margin-left: 10px;
+                  padding: 0;
+                  color: inherit;
+                  text-decoration: none;
+                "
+                @click.stop="remove(tab)"
+                ><i class="fa fa-times"></i>
+              </a>
             </a>
-          </a>
-        </li>
+          </li>
+        </transition>
         <li
           v-show="canOpenTab && hasCompletedUpgrades"
           class="addTab nav-item"
@@ -119,7 +139,7 @@
   import * as url from 'url';
   import Vue from 'vue';
   import l from '../chat/localize';
-  import { GeneralSettings, getSyncedTheme } from './common';
+  import { GeneralSettings } from './common';
   import { getSafeLanguages, updateSupportedLanguages } from './language';
   import log from 'electron-log';
   import { Dialog } from '../helpers/dialog';
@@ -213,6 +233,7 @@
     hasCompletedUpgrades = false;
     windowTitleKey: string =
       process.env.NODE_ENV === 'production' ? 'title' : 'title.dev';
+    isClosing = false;
 
     @Hook('mounted')
     async mounted(): Promise<void> {
@@ -479,9 +500,13 @@
     }
 
     destroyAllTabs(): void {
-      browserWindow.setBrowserView(null!); //tslint:disable-line:no-null-keyword
-      this.tabs.forEach(destroyTab);
-      this.tabs = [];
+      // Disable animations before cleanup to prevent dangling references
+      this.isClosing = true;
+      this.$nextTick(() => {
+        browserWindow.setBrowserView(null!); //tslint:disable-line:no-null-keyword
+        this.tabs.forEach(destroyTab);
+        this.tabs = [];
+      });
     }
 
     refreshWindowTitle() {
@@ -685,6 +710,40 @@
       electron.ipcRenderer.send('open-settings-menu');
     }
 
+    onTabBeforeEnter(el: HTMLElement): void {
+      if (this.isClosing) return;
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(-100%)';
+    }
+
+    onTabEnter(el: HTMLElement, done: () => void): void {
+      if (this.isClosing) {
+        done();
+        return;
+      }
+
+      // Use requestAnimationFrame for smooth animation
+      requestAnimationFrame(() => {
+        el.style.transition = 'all 0.3s ease-out';
+        el.style.opacity = '1';
+        el.style.transform = 'translateX(0)';
+
+        setTimeout(done, 300);
+      });
+    }
+
+    onTabLeave(el: HTMLElement, done: () => void): void {
+      if (this.isClosing) {
+        done();
+        return;
+      }
+
+      el.style.transition = 'opacity 0.2s ease-in';
+      el.style.opacity = '0';
+
+      setTimeout(done, 200);
+    }
+
     getThemeClass() {
       // console.log('getThemeClassWindow', this.settings?.risingDisableWindowsHighContrast);
 
@@ -798,5 +857,18 @@
   .disableWindowsHighContrast,
   .disableWindowsHighContrast * {
     forced-color-adjust: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tab-enter-active,
+    .tab-appear-active,
+    .tab-leave-active {
+      transition: none !important;
+    }
+
+    .tab-enter-from,
+    .tab-appear-from {
+      transform: none !important;
+    }
   }
 </style>
