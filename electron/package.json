@@ -35,7 +35,7 @@
       "shortcutName": "Horizon"
     },
     "mac": {
-      "icon": "build/icon.icns",
+      "icon": "build/icon.icon",
       "category": "public.app-category.social-networking",
       "hardenedRuntime": true,
       "gatekeeperAssess": false
@@ -100,7 +100,7 @@
   "devDependencies": {
     "commander": "^14.0.0",
     "electron": "38.7.0",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.2.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
