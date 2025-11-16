@@ -14,7 +14,7 @@
           ? { 0: l('users.friends'), 1: l('users.members') }
           : !isConsoleTab
             ? { 0: l('users.friends'), 1: l('user.profile') }
-            : { 0: l('users.friends') }
+            : { 0: l('users.friends'), 1: l('users.friends.all') }
       "
       v-model="tab"
     ></tabs>
@@ -267,6 +267,42 @@
         ref="characterPage"
       ></character-page>
     </div>
+    <div
+      v-if="isConsoleTab && tab === '1'"
+      class="users hidden-scrollbar"
+      style="padding-left: 10px"
+    >
+      <h4>{{ l('users.friends') }}</h4>
+      <div
+        v-for="character in allFriends"
+        :key="'char-' + character.name"
+        class="userlist-item"
+      >
+        <user
+          :character="character"
+          :showStatus="false"
+          :bookmark="true"
+          :isMarkerShown="shouldShowMarker"
+          :loadColor="false"
+        ></user>
+      </div>
+
+      <h4>{{ l('users.bookmarks') }}</h4>
+
+      <div
+        v-for="character in allBookmarks"
+        :key="'char-' + character.name"
+        class="userlist-item"
+      >
+        <user
+          :character="character"
+          :showStatus="false"
+          :bookmark="true"
+          :isMarkerShown="false"
+          :loadColor="false"
+        ></user>
+      </div>
+    </div>
   </sidebar>
 </template>
 
@@ -461,6 +497,26 @@
       }
 
       return friendsList.sort(this.sorter);
+    }
+
+    get allFriends(): Character[] {
+      const friendsList = core.characters.friendList.slice();
+
+      let characters: Character[] = [];
+      friendsList.forEach((name: string) => {
+        characters.push(core.characters.get(name));
+      });
+      return characters.sort(this.sorter);
+    }
+
+    get allBookmarks(): Character[] {
+      const friendsList = core.characters.bookmarkList.slice();
+
+      let characters: Character[] = [];
+      friendsList.forEach((name: string) => {
+        characters.push(core.characters.get(name));
+      });
+      return characters.sort(this.sorter);
     }
 
     get bookmarks(): Character[] {

@@ -366,6 +366,7 @@
         undefined,
         true,
         false,
+        true,
         true
       );
     }
