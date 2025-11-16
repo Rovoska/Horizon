@@ -201,6 +201,34 @@
         </div>
       </div>
 
+      <div class="mb-3">
+        <div class="d-flex p-2 justify-content-between align-items-start">
+          <div class="w-50">
+            <label class="control-label" for="showPerCharacterFriends">
+              {{ l('settings.showPerCharacterFriends') }}
+            </label>
+          </div>
+          <settings-checkbox
+            v-model="showPerCharacterFriends"
+            :name="'showPerCharacterFriends'"
+          ></settings-checkbox>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="d-flex p-2 justify-content-between align-items-start">
+          <div class="w-50">
+            <label class="control-label" for="hideNonCharacterFriends">
+              {{ l('settings.hideNonCharacterFriends') }}
+            </label>
+          </div>
+          <settings-checkbox
+            v-model="hideNonCharacterFriends"
+            :name="'hideNonCharacterFriends'"
+          ></settings-checkbox>
+        </div>
+      </div>
+
       <h5>{{ l('settings.chat.logging') }}</h5>
 
       <div class="mb-3">
@@ -272,34 +300,6 @@
             v-model="risingLinkPreview"
             :name="'risingLinkPreview'"
           ></settings-checkbox>
-        </div>
-      </div>
-      <div class="mb-3">
-        <div class="form-check">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            id="showPerCharacterFriends"
-            v-model="showPerCharacterFriends"
-          />
-          <label class="form-check-label" for="showPerCharacterFriends">
-            {{ l('settings.showPerCharacterFriends') }}
-          </label>
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <div class="form-check">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            id="hideNonCharacterFriends"
-            v-model="hideNonCharacterFriends"
-            :disabled="!showPerCharacterFriends"
-          />
-          <label class="form-check-label" for="hideNonCharacterFriends">
-            {{ l('settings.hideNonCharacterFriends') }}
-          </label>
         </div>
       </div>
 
