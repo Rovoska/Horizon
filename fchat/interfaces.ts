@@ -338,6 +338,7 @@ export namespace Character {
     readonly statusText: string;
     readonly isFriend: boolean;
     readonly isBookmarked: boolean;
+    readonly isCharacterFriend: boolean;
     readonly isChatOp: boolean;
     readonly isIgnored: boolean;
     readonly overrides: CharacterOverrides;

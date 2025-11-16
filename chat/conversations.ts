@@ -880,7 +880,8 @@ async function addEventMessage(
 
 function isOfInterest(this: any, character: Character): boolean {
   return (
-    character.isFriend ||
+    (!core.state.settings.hideNonCharacterFriends && character.isFriend) ||
+    character.isCharacterFriend ||
     character.isBookmarked ||
     state.privateMap[character.name.toLowerCase()] !== undefined
   );

@@ -11,6 +11,7 @@ class Character implements Interfaces.Character {
   statusText = '';
   isFriend = false;
   isBookmarked = false;
+  isCharacterFriend = true;
   isChatOp = false;
   isIgnored = false;
   overrides: CharacterOverrides = {};
@@ -250,6 +251,7 @@ export default function (this: void, connection: Connection): Interfaces.State {
           state.characterFriends.indexOf(existing) === -1
         ) {
           state.characterFriends.push(existing);
+          existing.isCharacterFriend = true;
         }
       }
 
@@ -329,6 +331,7 @@ export default function (this: void, connection: Connection): Interfaces.State {
           state.characterFriends.indexOf(character) === -1
         ) {
           state.characterFriends.push(character);
+          character.isCharacterFriend = true;
         }
         break;
       case 'friendremove':
@@ -358,6 +361,7 @@ export default function (this: void, connection: Connection): Interfaces.State {
           const index = state.characterFriends.indexOf(character);
           if (index !== -1) {
             state.characterFriends.splice(index, 1);
+            character.isCharacterFriend = false;
           }
         }
     }
