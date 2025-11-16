@@ -15,7 +15,7 @@
       id="img"
       :title="character.name"
       :alt="character.name"
-      v-once
+      @error="onImageError"
   /></a>
 </template>
 
@@ -84,6 +84,10 @@
       EventBus.$emit('imagepreview-toggle-stickyness', {
         url: this.getCharacterUrl()
       });
+    }
+
+    onImageError(): void {
+      this.character.overrides.avatarUrl = undefined;
     }
   }
 </script>
