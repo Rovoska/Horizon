@@ -11,7 +11,7 @@ class Character implements Interfaces.Character {
   statusText = '';
   isFriend = false;
   isBookmarked = false;
-  isCharacterFriend = true;
+  isCharacterFriend = false;
   isChatOp = false;
   isIgnored = false;
   overrides: CharacterOverrides = {};
