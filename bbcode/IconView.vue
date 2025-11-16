@@ -31,7 +31,6 @@
   export default class IconView extends Vue {
     Utils = Utils;
     characterImage = characterImage;
-    imageError = false;
 
     @Prop({ required: true })
     readonly character!: Character;
@@ -88,7 +87,6 @@
     }
 
     onImageError(): void {
-      this.imageError = true;
       this.character.overrides.avatarUrl = undefined;
     }
   }

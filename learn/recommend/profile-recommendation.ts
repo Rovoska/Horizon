@@ -95,7 +95,6 @@ export class ProfileRecommendationAnalyzer {
     const portraitUrl = ProfileCache.extractHighQualityPortraitURL(
       this.profile.character.description
     );
-    console.log(`HQ Portrait URL: ${portraitUrl}`);
 
     if (!portraitUrl) {
       this.add(
