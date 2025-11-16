@@ -290,8 +290,11 @@
             )
               return a.isCustom < b.isCustom ? 1 : -1;
 
-            if (a.name === b.name) return 0;
-            return a.name < b.name ? -1 : 1;
+            const nameA = a.name.replace(/ /g, '');
+            const nameB = b.name.replace(/ /g, '');
+
+            if (nameA === nameB) return 0;
+            return nameA < nameB ? -1 : 1;
           };
 
           for (const id in characterCustoms) {
