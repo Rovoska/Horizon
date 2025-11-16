@@ -1,48 +1,114 @@
-import Vue, { CreateElement, VNode } from 'vue';
+import { defineComponent, ref, computed, watch, PropType } from 'vue';
+import { CreateElement, VNode } from 'vue';
 
-//tslint:disable-next-line:variable-name
-const Tabs = Vue.extend({
-  props: ['value', 'tabs', 'fullWidth'],
-  render(
-    this: Vue & {
-      readonly value?: string;
-      readonly fullWidth: boolean;
-      _v?: string;
-      selected?: string;
-      tabs: { readonly [key: string]: string };
+interface TabsProps {
+  value?: string;
+  tabs?: { readonly [key: string]: string } | string[];
+  fullWidth?: boolean;
+  tabClass?: string;
+}
+
+const Tabs = defineComponent({
+  name: 'Tabs',
+  props: {
+    value: {
+      type: String as PropType<string | undefined>,
+      default: undefined
     },
-    createElement: CreateElement
-  ): VNode {
-    let children: { [key: string]: string | VNode | undefined };
-    if (this.$slots['default'] !== undefined) {
-      children = {};
-      this.$slots['default']!.forEach((child, i) => {
-        if (child.context !== undefined)
-          children[child.key !== undefined ? child.key : i] = child;
-      });
-    } else children = this.tabs;
-    const keys = Object.keys(children);
-    if (this._v !== this.value) this.selected = this._v = this.value;
-    if (this._v === undefined || children[this._v] === undefined)
-      this.$emit('input', (this._v = keys[0]));
-    if (this.selected !== this._v && children[this.selected!] !== undefined)
-      this.$emit('input', (this._v = this.selected));
+    tabs: {
+      type: [Object, Array] as PropType<
+        { readonly [key: string]: string } | string[]
+      >,
+      default: () => ({})
+    },
+    fullWidth: {
+      type: Boolean,
+      default: false
+    },
+    tabClass: {
+      type: String,
+      default: 'nav-tabs'
+    }
+  },
+  emits: ['input'],
+  setup(props: TabsProps, { emit }) {
+    const internalValue = ref<string | undefined>(props.value);
+
+    const children = computed(() => {
+      let result: { [key: string]: string };
+      const tabs = props.tabs || [];
+
+      if (Array.isArray(tabs)) {
+        result = {};
+        tabs.forEach((tab, index) => {
+          result[String(index)] = tab;
+        });
+      } else {
+        result = tabs;
+      }
+
+      return result;
+    });
+
+    const keys = computed(() => Object.keys(children.value));
+
+    watch(
+      () => props.value,
+      newValue => {
+        internalValue.value = newValue;
+      }
+    );
+
+    watch(
+      [children, () => props.value],
+      () => {
+        if (
+          internalValue.value === undefined ||
+          children.value[internalValue.value] === undefined
+        ) {
+          const firstKey = keys.value[0];
+          if (firstKey) {
+            internalValue.value = firstKey;
+            emit('input', firstKey);
+          }
+        }
+      },
+      { immediate: true }
+    );
+
+    const handleTabClick = (key: string) => {
+      internalValue.value = key;
+      emit('input', key);
+    };
+
+    return {
+      internalValue,
+      children,
+      keys,
+      handleTabClick,
+      fullWidth: computed(() => props.fullWidth),
+      tabClass: computed(() => props.tabClass)
+    };
+  },
+  render(createElement: CreateElement): VNode {
     return createElement(
       'div',
-      { staticClass: `nav-tabs ${this.fullWidth ? 'nav-justified' : ''}` },
+      {
+        staticClass: `${this.tabClass} ${this.fullWidth ? 'nav-justified' : ''}`
+      },
       [
-        createElement('ul', { staticClass: 'nav nav-tabs' }, [
-          keys.map(key =>
+        createElement('ul', { staticClass: `nav ${this.tabClass}` }, [
+          this.keys.map((key: string) =>
             createElement('li', { staticClass: 'nav-item' }, [
               createElement(
                 'a',
                 {
                   attrs: { href: '#' },
                   staticClass: 'nav-link',
-                  class: { active: this._v === key },
-                  on: { click: () => this.$emit('input', key) }
+                  class: { active: this.internalValue === key },
+                  on: { click: () => this.handleTabClick(key) }
                 },
-                [children[key]!]
+                [this.children[key]!]
               )
             ])
           ),

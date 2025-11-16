@@ -126,11 +126,20 @@
             <div class="char-name">{{ character.name }}</div>
           </button>
         </div>
-        <div style="text-align: right; margin-top: 10px">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+          "
+        >
+          <tips v-if="showTips === true" style="flex: 1"></tips>
           <button
             class="btn btn-primary"
             @click="connect"
             :disabled="connecting"
+            style="margin-left: auto"
           >
             <div
               v-if="connecting"
@@ -177,6 +186,7 @@
   import core from './core';
   import l from './localize';
   import Logs from './Logs.vue';
+  import Tips from './Tips.vue';
   import { init as profileApiInit } from './profile_api';
   import { AdManager } from './ads/ad-manager';
   import { EventBus } from './preview/event-bus';
@@ -252,7 +262,7 @@
   }
 
   @Component({
-    components: { chat: ChatView, modal: Modal, logs: Logs }
+    components: { chat: ChatView, modal: Modal, logs: Logs, tips: Tips }
   })
   export default class Chat extends Vue {
     @Prop({ required: true })
@@ -532,6 +542,10 @@
 
     getChatView(): ChatView | undefined {
       return this.$refs['chatview'] as ChatView;
+    }
+
+    get showTips(): boolean {
+      return core.state.generalSettings?.horizonShowTips ?? false;
     }
   }
 </script>

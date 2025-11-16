@@ -93,36 +93,11 @@
           </div>
           <div class="card bg-light">
             <div class="card-header character-card-header">
-              <tabs class="card-header-tabs" v-model="tab">
-                <span>{{ l('profile.tab.overview') }}</span>
-                <span>{{ l('profile.tab.info') }}</span>
-                <span v-if="!oldApi"
-                  >{{ l('profile.tab.groups') }}
-                  <span class="tab-count" v-if="groups !== null"
-                    >({{ groups.length }})</span
-                  ></span
-                >
-                <span
-                  >{{ l('profile.tab.images') }}
-                  <span class="tab-count"
-                    >({{ character.character.image_count }})</span
-                  ></span
-                >
-                <span v-if="character.settings.guestbook"
-                  >{{ l('profile.tab.guestbook') }}
-                  <span class="tab-count" v-if="guestbook !== null"
-                    >({{ guestbook.posts.length }})</span
-                  ></span
-                >
-                <span
-                  v-if="character.is_self || character.settings.show_friends"
-                  >{{ l('profile.tab.friends') }}
-                  <span class="tab-count" v-if="friends !== null"
-                    >({{ friends.length }})</span
-                  ></span
-                >
-                <span>{{ l('profile.tab.recon') }}</span>
-              </tabs>
+              <tabs
+                class="card-header-tabs"
+                v-model="tab"
+                :tabs="tabLabels"
+              ></tabs>
             </div>
             <div class="card-body">
               <div class="tab-content">
@@ -161,10 +136,10 @@
                     :characterMatch="characterMatch"
                   ></character-infotags>
                 </div>
-                <div role="tabpanel" v-show="tab === '3'">
+                <div role="tabpanel" v-show="tab === '2'">
                   <character-images
                     :character="character"
-                    ref="tab3"
+                    ref="tab2"
                     :use-preview="imagePreview"
                     :injected-images="images"
                   ></character-images>
@@ -172,30 +147,30 @@
                 <div
                   v-if="character.settings.guestbook"
                   role="tabpanel"
-                  v-show="tab === '4'"
+                  v-show="tab === '3'"
                   id="guestbook"
                 >
                   <character-guestbook
                     :character="character"
                     :oldApi="oldApi"
-                    ref="tab4"
+                    ref="tab3"
                   ></character-guestbook>
                 </div>
                 <div
                   v-if="character.is_self || character.settings.show_friends"
                   role="tabpanel"
-                  v-show="tab === '5'"
+                  v-show="tab === '4'"
                   id="friends"
                 >
                   <character-friends
                     :character="character"
-                    ref="tab5"
+                    ref="tab4"
                   ></character-friends>
                 </div>
-                <div role="tabpanel" v-show="tab === '6'">
+                <div role="tabpanel" v-show="tab === '5'">
                   <character-recon
                     :character="character"
-                    ref="tab6"
+                    ref="tab5"
                   ></character-recon>
                 </div>
               </div>
@@ -344,6 +319,39 @@
 
     shouldShowMatch(): boolean {
       return core.state.settings.risingAdScore;
+    }
+
+    get tabLabels(): { [key: string]: string } {
+      const labels: { [key: string]: string } = {};
+
+      // Overview tab - key '0'
+      labels['0'] = this.l('profile.tab.overview');
+
+      // Info tab - key '1'
+      labels['1'] = this.l('profile.tab.info');
+
+      // Images tab - key '2'
+      const imageCount = this.character?.character?.image_count || 0;
+      labels['2'] = this.l('profile.tab.images') + ` (${imageCount})`;
+
+      // Guestbook tab - key '3'
+      if (this.character?.settings?.guestbook) {
+        const guestbookCount =
+          this.guestbook !== null ? ` (${this.guestbook.posts.length})` : '';
+        labels['3'] = this.l('profile.tab.guestbook') + guestbookCount;
+      }
+
+      // Friends tab - key '4'
+      if (this.character?.is_self || this.character?.settings?.show_friends) {
+        const friendsCount =
+          this.friends !== null ? ` (${this.friends.length})` : '';
+        labels['4'] = this.l('profile.tab.friends') + friendsCount;
+      }
+
+      // Recon tab - key '5'
+      labels['5'] = this.l('profile.tab.recon');
+
+      return labels;
     }
 
     async reload(): Promise<void> {

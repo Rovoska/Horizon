@@ -13,6 +13,15 @@ export class UserInterfaceBBCodeParser extends CoreBBCodeParser {
     this.removeTag('eicon');
     this.removeTag('spoiler');
     this.removeTag('url');
+
+    this.addTag(
+      new BBCodeCustomTag('kbd', (parser, parent) => {
+        const el = parser.createElement('kbd');
+        el.className = 'bg-secondary text-white px-1 py-0';
+        parent.appendChild(el);
+        return el;
+      })
+    );
     this.addTag(
       new BBCodeCustomTag('color', (parser, parent, param) => {
         const cregex =

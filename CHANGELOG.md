@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [Releases]
 
-## [1.35.0] - 03-11-2025
+## [1.35.0] - 05-11-2025
 
 ### Added
 
@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed an old 3.0 issue where "toast" messages, like setting a channel to public, would display unparsed BBCode. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d6b79cc521eb38e7cf70a980e2e949f9aec25689)
+- Fixed issues with video previews for sites like Rule34.xxx. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/6c1fcf5195d32dd55288e2f8694ab55fa394a5bd)
+- Fixed `/warn` text in modern chat view having horrible, illegible colors in some themes. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/17e024f12a989348d857a2099a21108fc8da8cc0)
 - Fixed themes not correctly showing as the root element's class name if using the "Sync with system theme". For setting custom CSS on a per-theme level. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5a860a2c7d53cf239c627475930dd08cea2e3f2a)
 - Fixed messages having a broken layout in the Recon tab when using modern chat view. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9ad4269b84771f9e1c6760bc9f0ed58484adb766)
 

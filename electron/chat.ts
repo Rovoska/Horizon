@@ -1,3 +1,40 @@
+/**
+ * @license
+ * Originally licensed under MIT License
+ *
+ * Copyright (c) 2018 F-List
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * ---
+ *
+ * This file is now also licensed under GPLv3 (see LICENSE file).
+ * Modifications made after the original MIT release are licensed under GPLv3.
+ *
+ * This license header applies to this file and all of the non-third-party assets it includes.
+ * @file The entry point for the Electron renderer of F-Chat 3.0.
+ * @copyright 2018 F-List
+ * @author Maya Wolf <maya@f-list.net>
+ * @version 3.0
+ * @see {@link https://github.com/f-list/exported|GitHub repo}
+ */
+
 import * as electron from 'electron';
 
 import * as remote from '@electron/remote';
@@ -215,7 +252,7 @@ webContents.on('context-menu', (_, props) => {
 
   const lookupWord = props.selectionText || wordPosSearch.getLastClickedWord();
 
-  if (lookupWord) {
+  if (connection.isOpen && connection.character && lookupWord) {
     menuTemplate.unshift(
       {
         label: `Look up '${lookupWord}'`,
@@ -231,7 +268,10 @@ webContents.on('context-menu', (_, props) => {
     );
   }
 
-  if (props.srcURL.startsWith('https://static.f-list.net/images/eicon/')) {
+  if (
+    connection.isOpen &&
+    props.srcURL.startsWith('https://static.f-list.net/images/eicon/')
+  ) {
     let eiconName = props.titleText;
     //Electron on Mac allows for header context menu items, so we use that instead of a disabled item split of by a seperator.
     menuTemplate.unshift(

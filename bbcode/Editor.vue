@@ -35,40 +35,42 @@
       v-if="hasToolbar"
       style="flex: 1 51%"
     >
-      <div
-        class="popover popover-top color-selector"
-        v-show="colorPopupVisible"
-        v-on-clickaway="dismissColorSelector"
-      >
-        <div class="popover-body">
-          <div
-            class="color-typing-hint"
-            v-if="awaitingColorKey && awaitingBuffer"
-            :class="{ 'no-match': awaitingNoMatch }"
-          >
-            <div class="buffer">{{ awaitingBuffer.toLowerCase() }}</div>
-            <div class="matches">
-              <span
-                v-for="m in awaitingMatches"
-                :key="m"
-                :class="['chip', m]"
-                >{{ m }}</span
-              >
+      <transition name="color-popover">
+        <div
+          class="popover popover-top color-selector"
+          v-show="colorPopupVisible"
+          v-on-clickaway="dismissColorSelector"
+        >
+          <div class="popover-body">
+            <div
+              class="color-typing-hint"
+              v-if="awaitingColorKey && awaitingBuffer"
+              :class="{ 'no-match': awaitingNoMatch }"
+            >
+              <div class="buffer">{{ awaitingBuffer.toLowerCase() }}</div>
+              <div class="matches">
+                <span
+                  v-for="m in awaitingMatches"
+                  :key="m"
+                  :class="['chip', m]"
+                  >{{ m }}</span
+                >
+              </div>
+            </div>
+            <div class="btn-group" role="group" :aria-label="l('common.color')">
+              <button
+                v-for="btnCol in buttonColors"
+                type="button"
+                class="btn text-color"
+                :class="btnCol"
+                :title="btnCol"
+                @click.prevent.stop="applyAndClearColor(btnCol)"
+                tabindex="0"
+              ></button>
             </div>
           </div>
-          <div class="btn-group" role="group" :aria-label="l('common.color')">
-            <button
-              v-for="btnCol in buttonColors"
-              type="button"
-              class="btn text-color"
-              :class="btnCol"
-              :title="btnCol"
-              @click.prevent.stop="applyAndClearColor(btnCol)"
-              tabindex="0"
-            ></button>
-          </div>
         </div>
-      </div>
+      </transition>
 
       <div class="btn-group toolbar-buttons" style="flex-wrap: wrap">
         <div v-if="!!characterName" class="character-btn">
@@ -96,7 +98,7 @@
               : l('editor.preview', `${this.shortcutModifierKey}+Shift+P`)
           "
         >
-          <i class="fa" :class="preview ? 'fa-eye-slash' : 'fa-eye'"></i>
+          <i class="fa" :class="preview ? 'fa-eye' : 'far fa-eye'"></i>
         </div>
       </div>
       <button
@@ -227,6 +229,7 @@
     text: string = (this.value !== undefined ? this.value : '') as string;
     element!: HTMLTextAreaElement;
     sizer!: HTMLTextAreaElement;
+    editorContainer!: HTMLElement;
     maxHeight!: number;
     minHeight!: number;
     showToolbar = false;
@@ -398,6 +401,11 @@
       this.element.setSelectionRange(start, end);
     }
 
+    private isEIconSelectorOpen(): boolean {
+      const eIconSelector = this.$refs['eIconSelector'] as any;
+      return eIconSelector?.dialog?.isShown === true;
+    }
+
     applyText(
       startText: string,
       endText: string,
@@ -536,16 +544,24 @@
     //By "global" we mean global to the editor, not for the entire page.
     //They fire when the editor element is focused, not the text box.
     onKeyDownGlobal(e: KeyboardEvent): void {
-      const key = getKey(e);
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && key === Keys.KeyP) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.togglePreview();
+      if (this.isEIconSelectorOpen()) {
+        return;
       }
-      if ((key === Keys.Enter || key === Keys.Space) && this.preview) {
+
+      const key = getKey(e);
+      if (
+        ((e.metaKey || e.ctrlKey) && e.shiftKey && key === Keys.KeyP) ||
+        ((key === Keys.Enter || key === Keys.Space) && this.preview)
+      ) {
         e.stopPropagation();
         e.preventDefault();
         this.togglePreview();
+        return;
+      }
+
+      const input = <HTMLTextAreaElement>this.$refs['input'];
+      if (input) {
+        input.focus();
       }
     }
 
@@ -759,7 +775,7 @@
     resize: none;
     &:focus {
       outline: none;
-      .bbcode-editor-preview {
+      .bbcode-editor-text-area {
         outline: 2px ridge var(--bs-primary-border-subtle);
       }
     }
@@ -909,5 +925,15 @@
         }
       }
     }
+  }
+  .color-popover-enter-active,
+  .color-popover-leave-active {
+    transition: all 0.1s ease-in;
+  }
+
+  .color-popover-enter,
+  .color-popover-leave-to {
+    transform: translateY(100%);
+    opacity: 0;
   }
 </style>

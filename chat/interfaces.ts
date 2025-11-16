@@ -119,6 +119,9 @@ export namespace Conversation {
     readonly hasNew: boolean;
     readonly lastConversation: Conversation;
     byKey(key: string): Conversation | undefined;
+    navigateForward(): boolean;
+    navigateBack(): boolean;
+    removeFromNavigationHistory(conversation: Conversation): void;
 
     getPrivate(character: Character): PrivateConversation;
     getPrivate(

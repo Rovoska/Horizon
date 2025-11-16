@@ -63,10 +63,9 @@
   </div>
 </template>
 
-<script lang="ts">
-  import { Component, Hook, Prop } from '@f-list/vue-ts';
+<script setup lang="ts">
+  import { ref, onBeforeMount } from 'vue';
   import * as _ from 'lodash';
-  import Vue from 'vue';
   import * as Utils from '../utils';
   import {
     Matcher,
@@ -81,72 +80,61 @@
     [key: string]: boolean;
   }
 
-  @Component
-  export default class MatchReportView extends Vue {
-    @Prop({ required: true })
-    readonly characterMatch!: MatchReport;
+  const props = defineProps<{
+    characterMatch: MatchReport;
+  }>();
 
-    // @Prop({required: true})
-    // readonly minimized = false;
+  const isMinimized = ref(false);
 
-    isMinimized = false;
+  onBeforeMount(async () => {
+    isMinimized.value = !!(await core.settingsStore.get(
+      'hideProfileComparisonSummary'
+    ));
+  });
 
-    @Hook('beforeMount')
-    async beforeMount(): Promise<void> {
-      this.isMinimized = !!(await core.settingsStore.get(
-        'hideProfileComparisonSummary'
-      ));
+  const getAvatarUrl = (name: string) => {
+    const c = core.characters.get(name);
+
+    if (c.overrides.avatarUrl) {
+      return c.overrides.avatarUrl;
     }
 
-    // @Watch('minimized')
-    // onMinimizedChange(): void {
-    //     this.isMinimized = this.minimized;
-    // }
+    return Utils.avatarURL(name);
+  };
 
-    getAvatarUrl(name: string) {
-      const c = core.characters.get(name);
+  const getScoreClass = (score: Score): CssClassMap => {
+    const classes: CssClassMap = {};
 
-      if (c.overrides.avatarUrl) {
-        return c.overrides.avatarUrl;
-      }
+    classes[score.getRecommendedClass()] = true;
+    classes['match-score'] = true;
 
-      return Utils.avatarURL(name);
-    }
+    return classes;
+  };
 
-    getScoreClass(score: Score): CssClassMap {
-      const classes: CssClassMap = {};
+  const haveScores = (result: MatchResult): boolean => {
+    return !_.every(result.scores, (s: Score) => s.score === Scoring.NEUTRAL);
+  };
 
-      classes[score.getRecommendedClass()] = true;
-      classes['match-score'] = true;
+  const shouldShowScore = (score: Score): boolean => {
+    return score.score !== Scoring.NEUTRAL;
+  };
 
-      return classes;
-    }
+  const getScores = (result: MatchResult): Score[] => {
+    return _.map(result.scores, (s: Score) => s);
+  };
 
-    haveScores(result: MatchResult): boolean {
-      return !_.every(result.scores, (s: Score) => s.score === Scoring.NEUTRAL);
-    }
+  const getSpeciesStr = (m: MatchResult): string => {
+    const t = Matcher.getTagValue(TagId.Species, m.you);
 
-    shouldShowScore(score: Score): boolean {
-      return score.score !== Scoring.NEUTRAL;
-    }
+    return _.get(t, 'string', 'unknown');
+  };
 
-    getScores(result: MatchResult): Score[] {
-      return _.map(result.scores, (s: Score) => s);
-    }
+  const toggleMinimize = async (): Promise<void> => {
+    isMinimized.value = !isMinimized.value;
 
-    getSpeciesStr(m: MatchResult): string {
-      const t = Matcher.getTagValue(TagId.Species, m.you);
-
-      return _.get(t, 'string', 'unknown');
-    }
-
-    async toggleMinimize(): Promise<void> {
-      this.isMinimized = !this.isMinimized;
-
-      await core.settingsStore.set(
-        'hideProfileComparisonSummary',
-        this.isMinimized
-      );
-    }
-  }
+    await core.settingsStore.set(
+      'hideProfileComparisonSummary',
+      isMinimized.value
+    );
+  };
 </script>

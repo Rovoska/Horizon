@@ -92,11 +92,9 @@
                 @keypress.enter="login()"
                 :disabled="loggingIn"
               />
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" @click="resetHost()">
-                  <span class="fas fa-undo-alt"></span>
-                </button>
-              </div>
+              <button class="btn btn-outline-secondary" @click="resetHost()">
+                <span class="fas fa-undo-alt"></span>
+              </button>
             </div>
             <div style="height: 8px"></div>
             <label class="control-label" for="proxy">{{
@@ -109,11 +107,9 @@
                 v-model="settings.proxy"
                 @keypress.enter="login()"
               />
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" @click="resetProxy()">
-                  <span class="fas fa-undo-alt"></span>
-                </button>
-              </div>
+              <button class="btn btn-outline-secondary" @click="resetProxy()">
+                <span class="fas fa-undo-alt"></span>
+              </button>
             </div>
           </div>
           <div class="mb-3">
@@ -474,14 +470,6 @@
     @Hook('mounted')
     onMounted(): void {
       log.debug('init.chat.mounted');
-
-      EventBus.$on('word-definition', (data: any) => {
-        this.wordDefinitionLookup = data.lookupWord;
-
-        if (!!data.lookupWord) {
-          (<Modal>this.$refs.wordDefinitionViewer).show();
-        }
-      });
     }
 
     @Hook('created')
@@ -726,6 +714,14 @@
             newValue => parent.send('has-new', webContents.id, newValue)
           );
           Raven.setUserContext({ username: core.connection.character });
+
+          EventBus.$on('word-definition', (data: any) => {
+            this.wordDefinitionLookup = data.lookupWord;
+
+            if (!!data.lookupWord) {
+              (<Modal>this.$refs.wordDefinitionViewer).show();
+            }
+          });
         });
         core.connection.onEvent('closed', () => {
           if (this.character === undefined) return;
@@ -854,17 +850,24 @@
         }
 
         return {
-          [`theme-${core.state.settings.risingCharacterTheme || this.getSyncedTheme()}`]: true,
-          colorblindMode: core.state.settings.risingColorblindMode,
+          [`theme-${core.state.settings?.risingCharacterTheme || this.getSyncedTheme()}`]: true,
+          [`${this.getSyncedTheme()}`]: true,
+          colorblindMode: core.state.settings?.risingColorblindMode || false,
           vanillaTextColors: this.settings.horizonVanillaTextColors,
           vanillaGenderColors: this.settings.horizonVanillaGenderColors,
+          ['force-reduced-motion']: this.settings.reducedMotion || false,
           bbcodeGlow: this.settings.horizonBbcodeGlow,
           disableWindowsHighContrast:
-            core.state.generalSettings?.risingDisableWindowsHighContrast ||
-            false
+            this.settings.risingDisableWindowsHighContrast || false
         };
       } catch (err) {
-        return { [`theme-${this.getSyncedTheme()}`]: true };
+        return {
+          [`theme-${this.getSyncedTheme()}`]: true,
+
+          ['force-reduced-motion']: this.settings.reducedMotion || false,
+          disableWindowsHighContrast:
+            this.settings.risingDisableWindowsHighContrast || false
+        };
       }
     }
 
