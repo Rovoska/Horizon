@@ -1,4 +1,8 @@
-$fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
+@use '~@fortawesome/fontawesome-free/scss/_variables.scss' with (
+  // customizing $font-path
+  $font-path: '~@fortawesome/fontawesome-free/webfonts'
+);
+
 @import '~@fortawesome/fontawesome-free/scss/fontawesome.scss';
 @import '~@fortawesome/fontawesome-free/scss/solid.scss';
 @import '~@fortawesome/fontawesome-free/scss/regular.scss';
