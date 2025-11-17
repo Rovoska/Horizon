@@ -936,4 +936,16 @@
     transform: translateY(100%);
     opacity: 0;
   }
+
+  .force-reduced-motion .bbcode-editor {
+    @media (prefers-reduced-motion: no-preference) {
+      *,
+      *::before,
+      *::after {
+        //Sorry to all my fellow !important haters. The root implementation
+        // of our reduced motion setting has forced my hand.
+        transition-duration: unset !important;
+      }
+    }
+  }
 </style>
