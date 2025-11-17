@@ -196,6 +196,7 @@ export function fixLogs(character: string): void {
           statusText: '',
           isFriend: false,
           isBookmarked: false,
+          isCharacterFriend: false,
           isChatOp: false,
           isIgnored: false,
           name,

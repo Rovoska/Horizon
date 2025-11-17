@@ -23,10 +23,13 @@
       style="padding-left: 10px"
       v-if="tab === '0'"
     >
-      <h4>{{ l('users.friends') }}</h4>
+      <h4 v-if="showPerCharacterFriends && characterFriends.length > 0">
+        {{ l('users.characterFriends') }}
+      </h4>
       <div
-        v-for="character in friends"
-        :key="character.name"
+        v-if="showPerCharacterFriends"
+        v-for="character in characterFriends"
+        :key="'char-' + character.name"
         class="userlist-item"
       >
         <user
@@ -36,10 +39,29 @@
           :isMarkerShown="shouldShowMarker"
         ></user>
       </div>
-      <h4>{{ l('users.bookmarks') }}</h4>
+      <h4 v-if="friends.length > 0">
+        {{
+          l(
+            `users.${this.showPerCharacterFriends && this.characterFriends.length > 0 ? 'friends.nonCharacter' : 'friends'}`
+          )
+        }}
+      </h4>
+      <div
+        v-for="character in friends"
+        :key="'friend-' + character.name"
+        class="userlist-item"
+      >
+        <user
+          :character="character"
+          :showStatus="true"
+          :bookmark="false"
+          :isMarkerShown="shouldShowMarker"
+        ></user>
+      </div>
+      <h4 v-if="bookmarks.length > 0">{{ l('users.bookmarks') }}</h4>
       <div
         v-for="character in bookmarks"
-        :key="character.name"
+        :key="'bookmark-' + character.name"
         class="userlist-item"
       >
         <user
@@ -404,15 +426,69 @@
       }
     }
 
+    //Making these settings a getter performs better with larger lists
+    get showPerCharacterFriends(): boolean {
+      return core.state.settings.showPerCharacterFriends;
+    }
+
+    get hideNonCharacterFriends(): boolean {
+      return core.state.settings.hideNonCharacterFriends;
+    }
+
+    get characterFriends(): Character[] {
+      if (!this.showPerCharacterFriends) {
+        return [];
+      }
+      return core.characters.characterFriends.slice().sort(this.sorter);
+    }
+
     get friends(): Character[] {
-      return core.characters.friends.slice().sort(this.sorter);
+      let friendsList = core.characters.friends.slice();
+
+      // If per-character friends are shown, filter them out to avoid duplicates
+      if (this.showPerCharacterFriends) {
+        const characterFriendNames = new Set(
+          core.characters.characterFriendList.map(name => name.toLowerCase())
+        );
+        friendsList = friendsList.filter(
+          f => !characterFriendNames.has(f.name.toLowerCase())
+        );
+
+        // If hideNonCharacterFriends is enabled, hide ALL remaining global friends
+        if (core.state.settings.hideNonCharacterFriends) {
+          return [];
+        }
+      }
+
+      return friendsList.sort(this.sorter);
     }
 
     get bookmarks(): Character[] {
-      return core.characters.bookmarks
+      let friendNames =
+        this.showPerCharacterFriends &&
+        core.state.settings.hideNonCharacterFriends
+          ? new Set(
+              core.characters.characterFriends.map(characterFriend =>
+                characterFriend.name.toLowerCase()
+              )
+            )
+          : new Set(
+              core.characters.friends.map(friend => friend.name.toLowerCase())
+            );
+      let bookmarks = core.characters.bookmarks
         .slice()
-        .filter(x => core.characters.friends.indexOf(x) === -1)
-        .sort(this.sorter);
+        .filter(x => !friendNames.has(x.name.toLowerCase()));
+
+      if (this.showPerCharacterFriends) {
+        const characterFriendNames = new Set(
+          core.characters.characterFriendList.map(name => name.toLowerCase())
+        );
+        bookmarks = bookmarks.filter(
+          x => !characterFriendNames.has(x.name.toLowerCase())
+        );
+      }
+
+      return bookmarks.sort(this.sorter);
     }
 
     get channel(): Channel {

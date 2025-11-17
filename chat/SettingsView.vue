@@ -201,6 +201,34 @@
         </div>
       </div>
 
+      <div class="mb-3">
+        <div class="d-flex p-2 justify-content-between align-items-start">
+          <div class="w-50">
+            <label class="control-label" for="showPerCharacterFriends">
+              {{ l('settings.showPerCharacterFriends') }}
+            </label>
+          </div>
+          <settings-checkbox
+            v-model="showPerCharacterFriends"
+            :name="'showPerCharacterFriends'"
+          ></settings-checkbox>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="d-flex p-2 justify-content-between align-items-start">
+          <div class="w-50">
+            <label class="control-label" for="hideNonCharacterFriends">
+              {{ l('settings.hideNonCharacterFriends') }}
+            </label>
+          </div>
+          <settings-checkbox
+            v-model="hideNonCharacterFriends"
+            :name="'hideNonCharacterFriends'"
+          ></settings-checkbox>
+        </div>
+      </div>
+
       <h5>{{ l('settings.chat.logging') }}</h5>
 
       <div class="mb-3">
@@ -1129,6 +1157,8 @@
     showNeedsReply!: boolean;
     enterSend!: boolean;
     colorBookmarks!: boolean;
+    showPerCharacterFriends!: boolean;
+    hideNonCharacterFriends!: boolean;
     bbCodeBar!: boolean;
 
     risingAdScore!: boolean;
@@ -1193,6 +1223,8 @@
       this.showNeedsReply = settings.showNeedsReply;
       this.enterSend = settings.enterSend;
       this.colorBookmarks = settings.colorBookmarks;
+      this.showPerCharacterFriends = settings.showPerCharacterFriends;
+      this.hideNonCharacterFriends = settings.hideNonCharacterFriends;
       this.bbCodeBar = settings.bbCodeBar;
       this.availableImports = (
         await core.settingsStore.getAvailableCharacters()
@@ -1296,8 +1328,11 @@
         this.horizonSaveDraftMessagesToDiskTimer
       );
 
+      const previousSettings = core.state.settings;
+
       core.state.settings = {
         playSound: this.playSound,
+        soundTheme: previousSettings.soundTheme,
         clickOpensMessage: this.clickOpensMessage,
         disallowedTags: this.disallowedTags
           .split(',')
@@ -1336,6 +1371,8 @@
         showNeedsReply: this.showNeedsReply,
         enterSend: this.enterSend,
         colorBookmarks: this.colorBookmarks,
+        showPerCharacterFriends: this.showPerCharacterFriends,
+        hideNonCharacterFriends: this.hideNonCharacterFriends,
         bbCodeBar: this.bbCodeBar,
 
         risingAdScore: this.risingAdScore,
@@ -1354,11 +1391,11 @@
           this.horizonMessagePortraitHighQuality,
         horizonShowCustomCharacterColors: this.horizonShowCustomCharacterColors,
         horizonShowDeveloperBadges: this.horizonShowDeveloperBadges,
-        horizonAutoGenderFilter: (core.state.settings as any)
+        horizonAutoGenderFilter: (previousSettings as any)
           .horizonAutoGenderFilter,
-        horizonSavedGenderFilters: (core.state.settings as any)
+        horizonSavedGenderFilters: (previousSettings as any)
           .horizonSavedGenderFilters,
-        horizonSavedMembersSort: (core.state.settings as any)
+        horizonSavedMembersSort: (previousSettings as any)
           .horizonSavedMembersSort,
         horizonPersistentMemberFilters: this.horizonPersistentMemberFilters,
         horizonShowGenderMarker: this.horizonShowGenderMarker,
@@ -1401,7 +1438,6 @@
             ? this.risingCharacterTheme
             : undefined
       };
-
       console.log('SETTINGS', minAge, maxAge, core.state.settings);
 
       const newRisingFilter = JSON.parse(
