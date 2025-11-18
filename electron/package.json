@@ -93,7 +93,7 @@
     "build:win": "powershell -Command \"New-Item -ItemType Directory -Path dist -Force | Out-Null; pnpm run webpack:prod; node build/build.mjs --os windows --format nsis | Tee-Object -FilePath dist/build.log\"",
     "build:dev:win": "powershell -Command \"New-Item -ItemType Directory -Path dist -Force | Out-Null; pnpm run webpack:dev; node build/build.mjs --os windows --format nsis | Tee-Object -FilePath dist/build.log\"",
     "build:mac": "(mkdir -p dist && pnpm run webpack:prod && node build/build.mjs --os macos --format dmg zip) | tee dist/build.log",
-    "build:dev:mac": "(mkdir -p dist && pnpm run webpack:dev && node build/build.mjs --os macos --format zip) | tee dist/build.log",
+    "build:dev:mac": "(mkdir -p dist && pnpm run webpack:dev && node build/build.mjs --os macos --format zip --arch x64 arm64) | tee dist/build.log",
     "build:linux": "(mkdir -p dist && pnpm run webpack:prod && node build/build.mjs --os linux --format deb tar.gz AppImage) | tee dist/build.log",
     "build:dev:linux": "(mkdir -p dist && pnpm run webpack:dev && node build/build.mjs --os linux --format deb tar.gz AppImage) | tee dist/build.log"
   },
