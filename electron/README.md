@@ -62,6 +62,7 @@ electron/
 
 - Node.js 22+
 - pnpm
+- Xcode 26+ (required for macOS builds)
 - Platform-specific dependencies (see CI workflows)
 
 ### Build Commands
