@@ -889,6 +889,7 @@
   "tips.7": "Press [kbd]{0}[/kbd] + [kbd]T[/kbd] for the Quick Jumper. You can scroll and pick a result with the arrow and Enter keys, or you can just click them!",
   "tips.8": "You can override various notification settings on a per-channel basis by clicking \"Tab Settings\".",
   "tips.9": "You can turn off these tips at any time by going to the \"General\" tab in the app settings window.",
+  "tips.10": "You can use [kbd]{1}[/kbd] + [kbd]↑[/kbd]/[kbd]↓[/kbd] to navigate up and down between conversations. Add the [kbd]Shift[/kbd] key to jump between unread conversations. Add the [kbd]{0}[/kbd], [kbd]{1}[/kbd] and the [kbd]Shift[/kbd] keys to jump between pinged conversations.",
   "title": "Horizon",
   "title.beta": "Horizon (Beta)",
   "title.connected": "Horizon ({0})",

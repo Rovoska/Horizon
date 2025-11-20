@@ -6,11 +6,14 @@ import Vue from 'vue';
  * The amount of tips we have. Based on this number (minus one),
  * we will fetch tips from the localization files.
  */
-const TIP_COUNT = 10;
+const TIP_COUNT = 30;
 /*
  * The modifier key for keyboard shortcuts based on the user's platform.
  */
-const MODIFIER_KEY = process.platform !== 'darwin' ? 'Ctrl' : '⌘';
+
+let isMac = process.platform === 'darwin';
+const MODIFIER_KEY = !isMac ? 'Ctrl' : '⌘';
+const ALT_KEY = !isMac ? 'Alt' : '⌥';
 /*
  * An array of tip indices to track the current order of tips.
  */
@@ -87,5 +90,5 @@ function validateTips() {
  */
 export default function tip(): string {
   validateTips();
-  return l(`tips.${tips[currentTipIndex.value]}`, MODIFIER_KEY);
+  return l(`tips.${tips[currentTipIndex.value]}`, MODIFIER_KEY, ALT_KEY);
 }

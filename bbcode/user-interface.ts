@@ -17,7 +17,7 @@ export class UserInterfaceBBCodeParser extends CoreBBCodeParser {
     this.addTag(
       new BBCodeCustomTag('kbd', (parser, parent) => {
         const el = parser.createElement('kbd');
-        el.className = 'bg-secondary text-white px-1 py-0';
+        el.className = 'text-bg-secondary px-1 py-0';
         parent.appendChild(el);
         return el;
       })
