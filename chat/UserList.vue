@@ -42,7 +42,7 @@
       <h4 v-if="friends.length > 0">
         {{
           l(
-            `users.${this.showPerCharacterFriends && this.characterFriends.length > 0 ? 'friends.nonCharacter' : 'friends'}`
+            `users.${showPerCharacterFriends && characterFriends.length > 0 ? 'friends.nonCharacter' : 'friends'}`
           )
         }}
       </h4>
@@ -272,10 +272,33 @@
       class="users hidden-scrollbar"
       style="padding-left: 10px"
     >
-      <h4>{{ l('users.friends') }}</h4>
+      <h4 v-if="showPerCharacterFriends && allCharacterFriends.length > 0">
+        {{ l('users.characterFriends') }}
+      </h4>
+      <div
+        v-if="showPerCharacterFriends"
+        v-for="character in allCharacterFriends"
+        :key="'char-' + character.name"
+        class="userlist-item"
+      >
+        <user
+          :character="character"
+          :showStatus="false"
+          :bookmark="true"
+          :isMarkerShown="shouldShowMarker"
+          :loadColor="false"
+        ></user>
+      </div>
+      <h4 v-if="allFriends.length > 0">
+        {{
+          l(
+            `users.${showPerCharacterFriends && allCharacterFriends.length > 0 ? 'friends.nonCharacter' : 'friends'}`
+          )
+        }}
+      </h4>
       <div
         v-for="character in allFriends"
-        :key="'char-' + character.name"
+        :key="'friend-' + character.name"
         class="userlist-item"
       >
         <user
@@ -499,8 +522,44 @@
       return friendsList.sort(this.sorter);
     }
 
+    get allCharacterFriends(): Character[] {
+      if (!this.showPerCharacterFriends) {
+        return [];
+      }
+      const characterFriendsList = core.characters.characterFriendList.slice();
+
+      let characters: Character[] = [];
+      characterFriendsList.forEach((name: string) => {
+        characters.push(core.characters.get(name));
+      });
+      return characters.sort(this.sorter);
+    }
+
     get allFriends(): Character[] {
-      const friendsList = core.characters.friendList.slice();
+      let friendsList = core.characters.friendList.slice();
+
+      const uniqueFriendNames = new Set<string>();
+      friendsList = friendsList.filter(name => {
+        const lowerName = name.toLowerCase();
+        if (uniqueFriendNames.has(lowerName)) {
+          return false;
+        }
+        uniqueFriendNames.add(lowerName);
+        return true;
+      });
+
+      if (this.showPerCharacterFriends) {
+        const characterFriendNames = new Set(
+          core.characters.characterFriendList.map(name => name.toLowerCase())
+        );
+        friendsList = friendsList.filter(
+          name => !characterFriendNames.has(name.toLowerCase())
+        );
+
+        if (core.state.settings.hideNonCharacterFriends) {
+          return [];
+        }
+      }
 
       let characters: Character[] = [];
       friendsList.forEach((name: string) => {
@@ -510,10 +569,10 @@
     }
 
     get allBookmarks(): Character[] {
-      const friendsList = core.characters.bookmarkList.slice();
+      const bookmarksList = core.characters.bookmarkList.slice();
 
       let characters: Character[] = [];
-      friendsList.forEach((name: string) => {
+      bookmarksList.forEach((name: string) => {
         characters.push(core.characters.get(name));
       });
       return characters.sort(this.sorter);
