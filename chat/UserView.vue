@@ -104,7 +104,8 @@
     channel: Channel | undefined,
     showStatus: boolean,
     showBookmark: boolean,
-    showMatch: boolean
+    showMatch: boolean,
+    loadColor: boolean
   ): StatusClasses {
     let rankIcon: string | null = null;
     let devIcon: string | null = null;
@@ -150,6 +151,7 @@
       // undefined == not interested
       // null == no cache hit
       if (
+        loadColor &&
         core.cache.hasCacheStarted &&
         core.state.settings.horizonShowCustomCharacterColors &&
         character.overrides.characterColor === undefined
@@ -262,6 +264,9 @@
     @Prop({ default: false })
     readonly useOriginalAvatar: boolean = false;
 
+    @Prop({ default: true })
+    readonly loadColor: boolean = true;
+
     userClass = '';
 
     rankIcon: string | null = null;
@@ -352,7 +357,8 @@
         this.channel,
         !!this.showStatus,
         !!this.bookmark,
-        !!this.match
+        !!this.match,
+        this.loadColor
       );
 
       this.rankIcon = res.rankIcon;

@@ -940,6 +940,7 @@
   "users.bookmarks": "Bookmarks",
   "users.characterFriends": "Your Friends",
   "users.friends": "Friends",
+  "users.friends.all": "All",
   "users.friends.nonCharacter": "Other Friends",
   "users.memberCount": "{0} Members",
   "users.members": "Members",
