@@ -111,6 +111,7 @@ export interface DisplayKink {
   group: number;
   isCustom: boolean;
   hasSubkinks: boolean;
+  viewerChoiceWeight?: number;
   subkinks: DisplayKink[];
   ignore: boolean;
   key: string;

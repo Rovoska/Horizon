@@ -1,7 +1,9 @@
 <template>
   <div class="character-kinks-block">
-    <div class="compare-highlight-block row justify-content-between">
-      <div class="expand-custom-kinks-block col-12 col-lg-3 col-xl-2">
+    <div
+      class="compare-highlight-block row justify-content-between align-items-stretch"
+    >
+      <div class="expand-custom-kinks-block col-12 col-lg-2 col-xl-2 d-flex">
         <button
           class="btn btn-primary form-control"
           @click="toggleExpandedCustomKinks"
@@ -14,33 +16,78 @@
           {{ expandedCustoms ? l('profile.collapse') : l('profile.expand') }}
         </button>
       </div>
-
       <div
         v-if="shared.authenticated"
         class="input-group quick-compare-block col-12 col-lg-3 col-xl-3 w-md-100"
       >
         <character-select v-model="characterToCompare"></character-select>
+
+        <div
+          class="form-label"
+          :style="`
+            width: 2.4em;
+            height: 2.4em;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-image: url(${getCompareAvatarUrl()});
+            `"
+        >
+          <a
+            v-if="compareCharacter"
+            :href="compareHref"
+            target="_blank"
+            class="compare-avatar-wrapper"
+            style="height: 100%; width: 100%"
+          >
+          </a>
+        </div>
+
+        <!-- small filter icon merged into compare area; highlighted when active -->
         <button
-          class="btn btn-outline-secondary"
-          @click="compareKinks()"
+          type="button"
+          class="btn"
+          :class="
+            sortByViewerPriorities ? 'btn-primary' : 'btn-outline-secondary'
+          "
+          @click.stop="toggleSort"
+          :aria-pressed="sortByViewerPriorities"
+          :title="l('profile.sortByMyPriorities')"
+        >
+          <i class="fa-solid fa-filter"></i>
+        </button>
+
+        <!-- Compare / Refresh button (highlights when comparison is active) -->
+        <button
+          :class="comparing ? 'btn btn-primary' : 'btn btn-outline-secondary'"
+          @click="onCompareClick"
           :disabled="loading || !characterToCompare"
         >
           {{ compareButtonText }}
         </button>
       </div>
 
-      <div class="col-12 col-lg-3 col-xl-2">
+      <div class="col-12 col-lg-2 col-xl-2 d-flex">
         <select v-model="highlightGroup" class="form-select">
           <option :value="undefined">{{ l('profile.none') }}</option>
-          <option
-            v-for="group in kinkGroups"
-            v-if="group"
-            :value="group.id"
-            :key="group.id"
-          >
+          <option v-for="group in kinkGroups" :value="group.id" :key="group.id">
             {{ group.name }}
           </option>
         </select>
+      </div>
+
+      <div class="col-12 col-lg-2 col-xl-2 d-flex">
+        <div class="input-group w-100">
+          <span class="input-group-text"
+            ><span class="fas fa-search"></span
+          ></span>
+          <input
+            class="form-control"
+            v-model="search"
+            :placeholder="l('filter')"
+            type="text"
+          />
+        </div>
       </div>
     </div>
     <div class="row mt-3" :class="{ highlighting: !!highlightGroup }">
@@ -127,12 +174,14 @@
     PropType
   } from 'vue';
   import core from '../../chat/core';
+  import { kinkComparisonSwaps } from '../../learn/matcher-types';
   import { Kink, KinkChoice, KinkGroup } from '../../interfaces';
   import * as Utils from '../utils';
   import { methods, Store } from './data_store';
   import { Character, CharacterKink, DisplayKink } from './interfaces';
   import KinkView from './kink.vue';
   import l from '../../chat/localize';
+  import anyAscii from 'any-ascii';
 
   export default defineComponent({
     name: 'CharacterKinksView',
@@ -155,6 +204,8 @@
       const shared = Store;
       const characterToCompare = ref(Utils.settings.defaultCharacter);
       const highlightGroup = ref<number | undefined>(undefined);
+      const search = ref('');
+      const sortByViewerPriorities = ref(false);
       const loading = ref(false);
       const comparing = ref(false);
       const highlighting = ref<{ [key: string]: boolean }>({});
@@ -204,16 +255,8 @@
       };
 
       const compareKinks = async (
-        overridingCharacter?: Character,
-        forced: boolean = false
+        overridingCharacter?: Character
       ): Promise<void> => {
-        if (comparing.value && !forced) {
-          comparison.value = {};
-          comparing.value = false;
-          loading.value = false;
-          return;
-        }
-
         try {
           loading.value = true;
           comparing.value = true;
@@ -229,8 +272,9 @@
           comparing.value = false;
           comparison.value = {};
           Utils.ajaxError(e, l('profile.compareError'));
+        } finally {
+          loading.value = false;
         }
-        loading.value = false;
       };
 
       const highlightKinks = (group: number | null): void => {
@@ -255,7 +299,64 @@
 
       const compareButtonText = computed((): string => {
         if (loading.value) return l('common.loading');
-        return comparing.value ? l('common.clear') : l('common.compare');
+        return l('common.compare');
+      });
+
+      const toggleSort = () => {
+        sortByViewerPriorities.value = !sortByViewerPriorities.value;
+      };
+
+      const clearComparison = () => {
+        comparison.value = {};
+        comparing.value = false;
+        loading.value = false;
+      };
+
+      const onCompareClick = async () => {
+        if (loading.value) return;
+        if (comparing.value) {
+          clearComparison();
+          return;
+        }
+
+        await compareKinks();
+      };
+
+      const getCompareAvatarUrl = (): string => {
+        //There should be a site util for sanitizing avatars like this tbqh.
+        return Utils.avatarURL(compareName.value).replace(/ /g, '%20');
+      };
+
+      const compareCharacter = computed(() => {
+        try {
+          const id = characterToCompare.value;
+          if (id === undefined || id === null) return undefined;
+
+          const scs = Utils.characters || [];
+          const found = scs.find((c: any) => c.id === id);
+          const name = found ? found.name : undefined;
+          if (!name) return undefined;
+
+          return core.characters.get(name);
+        } catch (e) {
+          return undefined;
+        }
+      });
+
+      const compareName = computed(() => {
+        try {
+          const cc = compareCharacter.value as any;
+          if (!cc) return undefined;
+          return cc.name || (cc.character && cc.character.name) || undefined;
+        } catch (e) {
+          return undefined;
+        }
+      });
+
+      const compareHref = computed(() => {
+        const name = compareName.value;
+        if (!name) return '#';
+        return Utils.characterURL(name);
       });
 
       const groupedKinks = computed(
@@ -279,22 +380,70 @@
             isCustom: false,
             hasSubkinks: false,
             ignore: false,
+            viewerChoiceWeight: 0,
             subkinks: [],
             key: kink.id.toString()
           });
 
           const kinkSorter = (a: DisplayKink, b: DisplayKink) => {
-            if (
-              props.character.settings.customs_first &&
-              a.isCustom !== b.isCustom
-            )
-              return a.isCustom < b.isCustom ? 1 : -1;
+            if (a.isCustom !== b.isCustom) return a.isCustom ? -1 : 1;
+
+            if (sortByViewerPriorities.value) {
+              const wa = a.viewerChoiceWeight || 0;
+              const wb = b.viewerChoiceWeight || 0;
+              if (wa !== wb) return wb - wa;
+            }
 
             const nameA = a.name.replace(/ /g, '');
             const nameB = b.name.replace(/ /g, '');
 
             if (nameA === nameB) return 0;
             return nameA < nameB ? -1 : 1;
+          };
+
+          const computeViewerWeight = (d: DisplayKink) => {
+            try {
+              let kinkIdToCheck = d.id;
+              const swap = kinkComparisonSwaps[d.id];
+              if (typeof swap === 'number') kinkIdToCheck = swap;
+
+              // Prefer the currently selected comparison mapping if available
+              const cmp = comparison.value;
+              let resolved: string | null = null;
+
+              if (cmp && Object.keys(cmp).length > 0) {
+                const val = cmp[kinkIdToCheck] ?? cmp[d.id];
+                if (typeof val === 'string') resolved = val;
+                else if (typeof val === 'number') {
+                  // numeric values may reference custom kinks; try to resolve via props.character customs
+                  // attempt to resolve as a custom id mapping if possible
+                  const custom = props.character.character.customs[val];
+                  if (custom) resolved = custom.choice;
+                }
+              } else {
+                const own = core.characters.ownProfile;
+                if (!own || !own.character) return 0;
+                const ownKinkValue =
+                  own.character.kinks[kinkIdToCheck] ??
+                  own.character.kinks[d.id];
+                resolved = resolveKinkChoice(own, ownKinkValue);
+              }
+
+              switch (resolved) {
+                case 'favorite':
+                  return 4;
+                case 'yes':
+                  return 3;
+                case 'maybe':
+                  return 2;
+                case 'no':
+                  return 1;
+                default:
+                  return 0;
+              }
+            } catch (e) {
+              return 0;
+            }
           };
 
           for (const id in characterCustoms) {
@@ -318,6 +467,7 @@
             const kink = <Kink | undefined>kinks[kinkId];
             if (kink === undefined) continue;
             const newKink = makeKink(kink);
+            newKink.viewerChoiceWeight = computeViewerWeight(newKink);
             if (
               typeof kinkChoice === 'number' &&
               typeof displayCustoms[kinkChoice] !== 'undefined'
@@ -332,12 +482,49 @@
 
           for (const customId in displayCustoms) {
             const custom = displayCustoms[customId]!;
-            if (custom.hasSubkinks) custom.subkinks.sort(kinkSorter);
+            if (custom.hasSubkinks) {
+              for (const sk of custom.subkinks)
+                sk.viewerChoiceWeight = computeViewerWeight(sk);
+              custom.subkinks.sort(kinkSorter);
+            }
             outputKinks[<string>custom.choice].push(custom);
           }
 
-          for (const choice in outputKinks)
+          const filter = anyAscii(search.value.trim().toLowerCase());
+
+          for (const choice in outputKinks) {
+            for (const dk of outputKinks[choice])
+              dk.viewerChoiceWeight =
+                dk.viewerChoiceWeight ?? computeViewerWeight(dk);
+
+            if (filter.length > 0) {
+              outputKinks[choice] = outputKinks[choice].filter(d => {
+                const name = anyAscii((d.name || '').toLowerCase());
+                if (d.isCustom) {
+                  const custom = d;
+                  if (name.indexOf(filter) !== -1) return true;
+                  if (
+                    Array.isArray(custom.subkinks) &&
+                    custom.subkinks.length
+                  ) {
+                    const matched = custom.subkinks.filter(
+                      sk =>
+                        anyAscii((sk.name || '').toLowerCase()).indexOf(
+                          filter
+                        ) !== -1
+                    );
+                    custom.subkinks = matched;
+                    return matched.length > 0;
+                  }
+                  return false;
+                }
+
+                return name.indexOf(filter) !== -1;
+              });
+            }
+
             outputKinks[choice].sort(kinkSorter);
+          }
 
           return <{ [key in KinkChoice]: DisplayKink[] }>outputKinks;
         }
@@ -351,7 +538,7 @@
           expandedCustoms.value = props.autoExpandCustoms;
 
           if (core.state.settings.risingAutoCompareKinks) {
-            await compareKinks(core.characters.ownProfile, true);
+            await compareKinks(core.characters.ownProfile);
           }
         }
       );
@@ -360,19 +547,36 @@
         highlightKinks(group ?? null);
       });
 
+      // Auto-compare when user selects a character to compare
+      watch(characterToCompare, async (val: any) => {
+        if (!val) {
+          clearComparison();
+          return;
+        }
+
+        // run an immediate compare (refresh)
+        await compareKinks();
+      });
+
       onMounted(async () => {
         expandedCustoms.value = props.autoExpandCustoms;
         if (props.character && props.character.is_self) return;
 
         if (core.state.settings.risingAutoCompareKinks) {
-          await compareKinks(core.characters.ownProfile, true);
+          await compareKinks(core.characters.ownProfile);
         }
       });
 
       return {
         shared,
         characterToCompare,
+        compareCharacter,
+        compareName,
+        compareHref,
+        getCompareAvatarUrl,
         highlightGroup,
+        search,
+        sortByViewerPriorities,
         loading,
         comparing,
         highlighting,
@@ -381,6 +585,9 @@
         l,
         _,
         toggleExpandedCustomKinks,
+        toggleSort,
+        clearComparison,
+        onCompareClick,
         compareKinks,
         kinkGroups,
         compareButtonText,
@@ -389,3 +596,59 @@
     }
   });
 </script>
+
+<style scoped>
+  .compare-highlight-block > .col-12.d-flex,
+  .compare-highlight-block > .col-12 {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .compare-highlight-block .d-flex > .btn,
+  .compare-highlight-block .d-flex > .form-select,
+  .compare-highlight-block .input-group > .form-control,
+  .compare-highlight-block .input-group > .input-group-text,
+  .compare-highlight-block .quick-compare-block > character-select,
+  .compare-highlight-block .quick-compare-block > button {
+    height: 100%;
+  }
+
+  .compare-highlight-block .input-group .input-group-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .quick-compare-block {
+    display: flex;
+    width: 100%;
+    align-items: center; /* center children so avatar doesn't stretch the row */
+  }
+  .quick-compare-block > character-select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .quick-compare-block > button {
+    flex: 0 0 auto;
+  }
+
+  .compare-avatar {
+    flex: 0 0 auto;
+    width: 37px;
+    height: 37px;
+    max-height: 37px;
+    max-width: 37px;
+    object-fit: cover;
+    align-self: center;
+  }
+
+  .compare-avatar-wrapper {
+    display: inline-flex;
+    align-items: center;
+  }
+  .compare-avatar-wrapper {
+    width: auto;
+    height: auto;
+    justify-content: center;
+  }
+</style>
