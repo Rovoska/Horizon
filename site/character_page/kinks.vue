@@ -3,7 +3,7 @@
     <div
       class="compare-highlight-block row justify-content-between align-items-stretch"
     >
-      <div class="expand-custom-kinks-block col-12 col-lg-2 col-xl-2 d-flex">
+      <div class="expand-custom-kinks-block col-12 col-lg-4 col-xl-2 d-flex">
         <button
           class="btn btn-primary form-control"
           @click="toggleExpandedCustomKinks"
@@ -18,12 +18,12 @@
       </div>
       <div
         v-if="shared.authenticated"
-        class="input-group quick-compare-block col-12 col-lg-3 col-xl-3 w-md-100"
+        class="input-group quick-compare-block col-12 col-lg-6 col-xl-3 w-md-100"
       >
         <character-select v-model="characterToCompare"></character-select>
 
         <div
-          class="form-label"
+          class="form-label mb-0"
           :style="`
             width: 2.4em;
             height: 2.4em;
@@ -67,7 +67,7 @@
         </button>
       </div>
 
-      <div class="col-12 col-lg-2 col-xl-2 d-flex">
+      <div class="col-12 col-lg-6 col-xl-2 d-flex">
         <select v-model="highlightGroup" class="form-select">
           <option :value="undefined">{{ l('profile.none') }}</option>
           <option v-for="group in kinkGroups" :value="group.id" :key="group.id">
@@ -76,7 +76,7 @@
         </select>
       </div>
 
-      <div class="col-12 col-lg-2 col-xl-2 d-flex">
+      <div class="col-12 col-lg-6 col-xl-2 d-flex">
         <div class="input-group w-100">
           <span class="input-group-text"
             ><span class="fas fa-search"></span
