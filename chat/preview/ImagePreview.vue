@@ -625,7 +625,6 @@
       const urlShorteners = [
         'bit.ly',
         'tinyurl.com',
-        't.co',
         'short.link',
         'ow.ly',
         'is.gd',
