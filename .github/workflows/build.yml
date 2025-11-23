@@ -31,7 +31,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-26, windows-latest]
     env:
       RELEASE_VERSION: ${{ needs.set-version.outputs.release_version }}
     steps:
@@ -57,7 +57,7 @@ jobs:
           electron/release-scripts/linux.sh "$RELEASE_VERSION" "$GITHUB_WORKSPACE/release_artifacts/linux/$RELEASE_VERSION"
 
       - name: Run Build Script (macOS)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-26'
         run: |
           # ! Execute macOS build script
           chmod +x electron/release-scripts/macos.sh
