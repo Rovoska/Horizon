@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Your character's friends now appear in their own list on top of the friends tab. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/1bd8a6afb6f308ba35428d04838ba39198aca238)
   - There is even a setting to hide other friends (the ones that are not friends with your _current_ character), or to group them all together (the vanilla behaviour).
+- The profile viewer now has extra filters and sorting options for comparing kinks between you and the profile you're viewing. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/6da8d252ff8b01dc3f01875b84e29a59d30bf8c6)
+  - Thank you, @Matthew-X!
+- The console view now has an "All friends" tab where you can see all of your friends and bookmarked profiles, even if they are offline. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/110a8534efbf5f5a738fee9dedcbfec0dab630d2)
 - You can now navigate between your conversation history with the mouse's back and forwards buttons. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/a10f74f90ea4dda2ce5665a2ce862c83e4f654de)
   - `Alt` + `←` / `→` (or `Cmd` + `[` / `]` on macOS) are also supported.
 - Modal dialog windows now have snappy opening and closing animations. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/0128f472ef7ee464c04d134f3601e43e6bbdaf96)
@@ -27,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - If you're an expert user already, you can easily disable these from ever showing up in the app's general settings.
 - We redesigned the character settings menu and put most of the settings in appropriate categories, in the hopes that it will help you find settings a bit easier. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/a669f36f71707afbf67ba68d5d4786c870a488dd)
   - The new design with the coloured buttons is in preparation for the new, _new_ settings menus where you will be able to set character settings on a global level. We're working on that still, but stay tuned.
+- The MacOS version now uses a proper version of the Tahoe-style icon if you're on MacOS 26 (or later). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/3e3c5e98bf0f031d2e2c909cca10158f60137931)
 
 ### Fixed
 
@@ -42,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Development
 
 - Upgraded to Electron v38.7.0. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/073d0035a9eaf31a2826c3833dac52fcec2e3c0c)
+- Upgraded Electron Builder to v26.2.0. [Commit]
 - Converted the following components to the composition API:
   - `components/tabs.ts` [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/db553bb818c0976e9bd54cb14ae949b6d25cfe6a)
   - `character_page/friends.vue` [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/8646a035c471652c254cea55031ccc5971c87825)
@@ -56,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - https://github.com/Fchat-Horizon/Horizon/pull/505 by @FatCatClient
 - https://github.com/Fchat-Horizon/Horizon/pull/508 by @CodingWithAnxiety
 - https://github.com/Fchat-Horizon/Horizon/pull/509 by @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/510 by @Matthew-X
 - https://github.com/Fchat-Horizon/Horizon/pull/512 by @FatCatClient
 
 # [Releases]
