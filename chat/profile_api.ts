@@ -40,10 +40,20 @@ import core from './core';
 import { EventBus } from './preview/event-bus';
 
 let horizonDevs: string[] = [];
+let horizonContributors: Map<string, string> = new Map(); // character name -> alias
 
 export function isHorizonDev(characterName: string): boolean {
   return horizonDevs.includes(characterName);
 }
+
+export function isHorizonContributor(characterName: string): boolean {
+  return horizonContributors.has(characterName);
+}
+
+export function getContributorAlias(characterName: string): string | undefined {
+  return horizonContributors.get(characterName);
+}
+
 export async function preloadTeamData(): Promise<void> {
   try {
     const response = await fetch(
@@ -52,6 +62,19 @@ export async function preloadTeamData(): Promise<void> {
     if (response.ok) {
       const data = await response.json();
       horizonDevs = data.devs?.maintainers || [];
+
+      // Load contributors
+      horizonContributors = new Map();
+      if (data.devs?.contributors) {
+        for (const key in data.devs.contributors) {
+          const contributor = data.devs.contributors[key];
+          if (contributor.characters && contributor.alias) {
+            for (const charName of contributor.characters) {
+              horizonContributors.set(charName, contributor.alias);
+            }
+          }
+        }
+      }
     }
   } catch (error) {}
 }
@@ -159,6 +182,13 @@ async function executeCharacterData(
   ) {
     if (!badges.includes('maintainer')) {
       badges.push('maintainer');
+    }
+  }
+
+  const contributorAlias = getContributorAlias(data.name);
+  if (contributorAlias && core.state.settings.horizonShowDeveloperBadges) {
+    if (!badges.includes('contributor')) {
+      badges.push('contributor');
     }
   }
 

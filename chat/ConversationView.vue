@@ -1346,6 +1346,11 @@
       margin-right: 2px;
     }
 
+    .user-contributor {
+      font-size: 80%;
+      margin-right: 2px;
+    }
+
     .user-gender {
       &.gender-male,
       &.gender-female,
