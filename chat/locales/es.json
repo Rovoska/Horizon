@@ -392,7 +392,7 @@
   "events.status.message": "{0} está ahora {1}: {2}",
   "events.status.own": "Estás ahora {0}.",
   "events.status.ownMessage": "Estás ahora {0}: {1}",
-  "events.timeout": "2} ha expulsado temporalmente a {1} de {0} durante {3} minutos.",
+  "events.timeout": "{2} ha expulsado temporalmente a {1} de {0} durante {3} minutos.",
   "events.uptime": "El servidor está en funcionamiento desde {0}, con {1} canales y {2} usuarios actualmente, un total de {3} conexiones aceptadas y un máximo de {4} usuarios.",
   "events.watchedUserPosted": "{0} habló en {1}",
   "filter": "Escribe para filtrar…",
