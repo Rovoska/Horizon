@@ -697,8 +697,10 @@
         e.preventDefault();
         //we only replace the brackets instead of trying to force the whole path to be escaped because
         //these two characters give us trouble with BBCode and the rest can just be picked up by the browser anyway
+        //Oh, and if your TS compiler cries about it, don't worry.  Chromium's JS engine supports it...
+        //And the problem is just that as of writing (27 nov 2025) we are still, somehow, using es2017 as our target.
         this.applyText(
-          `[url=${data.replace('[', '%5B').replace(']', '%5D')}]`,
+          `[url=${data.replaceAll('[', '%5B').replaceAll(']', '%5D')}]`,
           '[/url]'
         );
       }
