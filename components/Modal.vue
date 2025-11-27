@@ -192,7 +192,15 @@
     animation: slide-in 0.3s;
   }
   .slide-leave-active {
+    animation: slide-in reverse 0.15s;
+  }
+
+  .profile-viewer .slide-leave-active {
     animation: spread-out 0.2s;
+  }
+
+  .profile-viewer .slide-enter-active {
+    animation: spread-out reverse 0.2s;
   }
   @keyframes slide-in {
     0% {
