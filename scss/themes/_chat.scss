@@ -154,7 +154,8 @@ $selection-color: color-contrast($primary);
 .hidden-scrollbar {
   $scrollbar-width: 8px;
   overflow-y: scroll;
-  &::-webkit-scrollbar-thumb {
+  padding-right: 8px;
+  &::-webkit-scrollbar {
     display: none;
   }
 
@@ -167,7 +168,8 @@ $selection-color: color-contrast($primary);
 }
 
 .hidden-scrollbar:hover {
-  &::-webkit-scrollbar-thumb {
+  padding-right: 0px;
+  &::-webkit-scrollbar {
     display: initial;
   }
 }
