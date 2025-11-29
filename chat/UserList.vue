@@ -10,11 +10,13 @@
       style="flex-shrink: 0"
       :fullWidth="true"
       :tabs="
+        //We label the 'all' tab as 2 so that it doesnt pop up when going
+        //from a channel to the console. It's very annoying behaviour
         channel
           ? { 0: l('users.friends'), 1: l('users.members') }
           : !isConsoleTab
             ? { 0: l('users.friends'), 1: l('user.profile') }
-            : { 0: l('users.friends'), 1: l('users.friends.all') }
+            : { 0: l('users.friends'), 2: l('users.friends.all') }
       "
       v-model="tab"
     ></tabs>
@@ -73,7 +75,7 @@
       </div>
     </div>
     <div
-      v-if="channel && tab === '1'"
+      v-if="channel && tab !== '0'"
       style="padding-left: 5px; flex: 1; display: flex; flex-direction: column"
     >
       <div class="users hidden-scrollbar" style="flex: 1; padding-left: 5px">
@@ -245,7 +247,7 @@
       </dropdown>
     </div>
     <div
-      v-if="!channel && !isConsoleTab && tab === '1'"
+      v-if="!channel && !isConsoleTab && tab !== '0'"
       style="
         flex: 1;
         display: flex;
@@ -268,12 +270,12 @@
       ></character-page>
     </div>
     <div
-      v-if="isConsoleTab && tab === '1'"
+      v-if="isConsoleTab && tab === '2'"
       class="users hidden-scrollbar"
       style="padding-left: 10px"
     >
       <h4 v-if="showPerCharacterFriends && allCharacterFriends.length > 0">
-        {{ l('users.characterFriends') }}
+        {{ l('users.characterFriends.all') }}
       </h4>
       <div
         v-if="showPerCharacterFriends"
@@ -292,7 +294,7 @@
       <h4 v-if="allFriends.length > 0">
         {{
           l(
-            `users.${showPerCharacterFriends && allCharacterFriends.length > 0 ? 'friends.nonCharacter' : 'friends'}`
+            `users.${showPerCharacterFriends && allCharacterFriends.length > 0 ? 'friends.nonCharacter.all' : 'friends'}`
           )
         }}
       </h4>
@@ -310,7 +312,7 @@
         ></user>
       </div>
 
-      <h4>{{ l('users.bookmarks') }}</h4>
+      <h4>{{ l('users.bookmarks.all') }}</h4>
 
       <div
         v-for="character in allBookmarks"
