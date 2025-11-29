@@ -5,9 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). You can also read it on our [website](https://fchat-horizon.github.io/docs/changelog.html).
 
-# [Unreleased]
+# [Releases]
 
-## [1.35.1] - xx-11-2025
+## [1.35.1] - 29-11-2025
 
 ### Added
 
@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tabs on the top of the window now also have snappy opening and closing animations. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b3d0eea6dc285b56956960b3683fb306782245d5)
 - Added an accessibility setting to disable all animations, regardless of your system's reduced motions preference. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b598237dd80bbdb6f7eb4b5a9e389bebff7cb999)
 - `Ctrl` + `Shift` + `Q` now acts like a shortcut to quickly close the app on Windows and Linux. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/4f8f4dd6d072adde2571d269a5cd0499fae259a0)
+- Contributor badges are now visible for people who have contributed to the Horizon repo. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d2cff127c3c024e5ec9fe5bd5bd92638690cf300)
 
 ### Changed
 
@@ -38,10 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the dictionary lookup breaking once you disconnect and reconnect in the same tab. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/141976a834908186d72641f8c36147bccbec7f2b)
 - Fixed the context menu showing an option to pin an eicon when viewing logs before having logged in.
 - Fixed issues with the image previewer doing things it shouldn't do (like opening links) because of redirects. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/e525bfe0cf2bd1f3625c5b731de38ad1334101e2)
-  - This technically prevents _all_ redirects from working in the previewer, but aren't URL shorteners already against the F-List rules?
 - Fixed some cases where custom kinks were sorted differently from the website (most notably for people who manually sort their customs with whitespace characters). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5123c86c5c7e1b1e898b6a760de7c98a98ae25d8)
 - Custom profile portraits with broken URLs now get reset into their default ones. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9b0dda8555e1a507fe4e3aacb0fc499a4dea7063)
   - If your own custom portrait is broken, the profile analyser on your profile page will tell you too.
+- Fixed pasting urls with multiple square brackets (`[`/`]`) only fixing the first pair. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/742a1d10e360d9c67c26f5df2d05f4e06e02ad4e)
 
 ### Development
 
@@ -63,8 +64,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - https://github.com/Fchat-Horizon/Horizon/pull/509 by @FatCatClient
 - https://github.com/Fchat-Horizon/Horizon/pull/510 by @Matthew-X
 - https://github.com/Fchat-Horizon/Horizon/pull/512 by @FatCatClient
-
-# [Releases]
 
 ## [1.35.0] - 05-11-2025
 
