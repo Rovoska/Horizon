@@ -153,7 +153,7 @@ $selection-color: color-contrast($primary);
 
 .hidden-scrollbar {
   $scrollbar-width: 8px;
-  overflow-y: scroll;
+  overflow-y: scroll !important;
   padding-right: $scrollbar-width;
   &::-webkit-scrollbar {
     display: none;
