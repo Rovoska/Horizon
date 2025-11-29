@@ -92,7 +92,7 @@ function openIncognito(url: string): void {
   for (const key in commands)
     if (browser!.indexOf(key) !== -1)
       start = commands[<keyof typeof commands>key];
-  exec(`start ${start} ${url}`);
+  exec(`start ${start} "${url}"`);
 }
 
 const wordPosSearch = new WordPosSearch();
