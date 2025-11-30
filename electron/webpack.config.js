@@ -58,7 +58,6 @@ const mainConfig = {
       extensions: ['.ts', '.js']
     },
     optimization: {
-      minimize: false,
       moduleIds: 'named',
       chunkIds: 'named'
     }
@@ -255,7 +254,6 @@ const mainConfig = {
     },
     optimization: {
       splitChunks: { chunks: 'all', minChunks: 2, name: 'common' },
-      minimize: false,
       moduleIds: 'named',
       chunkIds: 'named'
     }
@@ -299,7 +297,6 @@ const storeWorkerEndpointConfig = _.assign(_.cloneDeep(mainConfig), {
   },
 
   optimization: {
-    minimize: false,
     moduleIds: 'named',
     chunkIds: 'named'
   },
