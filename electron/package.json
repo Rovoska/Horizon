@@ -100,7 +100,7 @@
   "devDependencies": {
     "commander": "^14.0.0",
     "electron": "38.7.0",
-    "electron-builder": "^26.2.0"
+    "electron-builder": "^26.3.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

@@ -7673,7 +7673,7 @@ snapshots:
       builder-util: 26.1.0(supports-color@10.0.0)
       builder-util-runtime: 9.5.0(supports-color@10.0.0)
       chalk: 4.1.2
-      form-data: 4.0.4
+      form-data: 4.0.5
       fs-extra: 10.1.0
       lazy-val: 1.0.5
       mime: 2.6.0
