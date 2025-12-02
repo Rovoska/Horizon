@@ -280,7 +280,7 @@
       <div
         v-if="showPerCharacterFriends"
         v-for="character in allCharacterFriends"
-        :key="'char-' + character.name"
+        :key="'char-friends-all-' + character.name"
         class="userlist-item"
       >
         <user
@@ -300,7 +300,7 @@
       </h4>
       <div
         v-for="character in allFriends"
-        :key="'friend-' + character.name"
+        :key="'friend-all' + character.name"
         class="userlist-item"
       >
         <user
@@ -316,7 +316,7 @@
 
       <div
         v-for="character in allBookmarks"
-        :key="'char-' + character.name"
+        :key="'bookmarks-all' + character.name"
         class="userlist-item"
       >
         <user
