@@ -760,9 +760,8 @@
         conversation.typingStatus === 'paused'
       ) {
         return {
-          fas: true,
-          'fa-comment-dots': conversation.typingStatus === 'typing',
-          'fa-comment': conversation.typingStatus === 'paused'
+          'fas fa-comment-dots': conversation.typingStatus === 'typing',
+          'far fa-comment': conversation.typingStatus === 'paused'
         };
       }
 
