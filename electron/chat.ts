@@ -140,7 +140,7 @@ function openIncognito(url: string): void {
       param = params[<keyof typeof params>key];
     }
   let executablePath = execSync(
-    `where.exe /r "c:\\Program Files" "${executableName}"`,
+    `where.exe /r "%ProgramFiles%" "${executableName}"`,
     {
       encoding: 'utf-8',
       timeout: 3000
