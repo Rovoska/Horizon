@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). You can also read it on our [website](https://fchat-horizon.github.io/docs/changelog.html).
 
+# [Unreleased]
+
+## [1.35.3] - XX-12-2025
+
+### Fixed
+
+- Fixed various issues like desynced friends lists or full app lockups as a result of switching between the "Friends" and "All" tabs in the console view. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/1e910ce6ac041e9ab769cbfb7a80323211eca498)
+- Fixed the taskbar icon still flashing on Windows, even if you have desktop notifications disabled. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/eb49d1aba0667e46f69cfe420cb52ff2d6a52e7b)
+
+### Changed
+
+- The window's base color tries to take your system's light/ dark theme into account, to prevent a flashbang for cases where loading the actual webview is noticeable. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/eb49d1aba0667e46f69cfe420cb52ff2d6a52e7b)
+- The typing indicator should be more distinct between "typing" and "paused" states. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b81894b8aac1a29dd9b2a321715f801546b0faf2)
+- Updated localization files.
+  - Thanks @MJSJyanshi for the typo fix!
+
 # [Releases]
 
 ## [1.35.2] - 01-12-2025

@@ -44,7 +44,7 @@ const webContents = remote.getCurrentWebContents();
 require('@electron/remote/main').enable(webContents);
 
 import Axios from 'axios';
-import { exec, execSync } from 'child_process';
+import { exec, execSync, spawn } from 'child_process';
 import * as path from 'path';
 import * as qs from 'querystring';
 import { getKey } from '../chat/common';
@@ -106,6 +106,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 let browser: string | undefined;
 
+//If this were available on non-Windows platforms, getting the values for browser and exec would require using $PATH and whereis
 function openIncognito(url: string): void {
   if (browser === undefined)
     try {
@@ -120,16 +121,35 @@ function openIncognito(url: string): void {
       console.error(e);
     }
   const commands = {
-    chrome: 'chrome.exe -incognito',
-    firefox: 'firefox.exe -private-window',
-    vivaldi: 'vivaldi.exe -incognito',
-    opera: 'opera.exe -private'
+    chrome: 'chrome.exe',
+    firefox: 'firefox.exe',
+    vivaldi: 'vivaldi.exe',
+    opera: 'opera.exe'
   };
-  let start = 'iexplore.exe -private';
+  const params = {
+    chrome: '-incognito',
+    firefox: '-private-window',
+    vivaldi: '-incognito',
+    opera: '-private'
+  };
+  let executableName = 'iexplore.exe';
+  let param = '-private';
   for (const key in commands)
-    if (browser!.indexOf(key) !== -1)
-      start = commands[<keyof typeof commands>key];
-  exec(`start ${start} "${url}"`);
+    if (browser!.indexOf(key) !== -1) {
+      executableName = commands[<keyof typeof commands>key];
+      param = params[<keyof typeof params>key];
+    }
+  let executablePath = execSync(
+    `where.exe /r "c:\\Program Files" "${executableName}"`,
+    {
+      encoding: 'utf-8',
+      timeout: 3000
+    }
+  )
+    .trim()
+    .split('\n', 2)[0];
+
+  spawn(executablePath, [param, url]);
 }
 
 const wordPosSearch = new WordPosSearch();
