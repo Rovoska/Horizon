@@ -5,9 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). You can also read it on our [website](https://fchat-horizon.github.io/docs/changelog.html).
 
-# [Unreleased]
+# [Releases]
 
-## [1.35.3] - XX-12-2025
+## [1.35.3] - 04-12-2025
+
+### Security
+
+- Fixed a potential exploit that would let malformed links run arbitrary commands when links are opened in incognito mode on Windows (mirrored from 3.0) [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d882d542d2f40937c02e2c1ea1214753ec37c646)
 
 ### Fixed
 
@@ -20,8 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The typing indicator should be more distinct between "typing" and "paused" states. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b81894b8aac1a29dd9b2a321715f801546b0faf2)
 - Updated localization files.
   - Thanks @MJSJyanshi for the typo fix!
-
-# [Releases]
 
 ## [1.35.2] - 01-12-2025
 
