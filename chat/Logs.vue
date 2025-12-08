@@ -126,6 +126,7 @@
       <input
         class="form-control"
         v-model="filter"
+        ref="messageFilter"
         :placeholder="l('filter')"
         v-show="messages"
         type="text"
@@ -466,11 +467,12 @@
     async onOpen(): Promise<void> {
       if (this.selectedCharacter !== '') {
         await this.loadConversations();
-        if (this.conversation !== undefined)
+        if (this.conversation !== undefined) {
           this.selectedConversation = this.conversations.filter(
             x => x.key === this.conversation!.key
           )[0];
-        else {
+          (this.$refs['messageFilter'] as HTMLInputElement).focus();
+        } else {
           await this.loadDates();
           await this.loadMessages();
         }
