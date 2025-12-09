@@ -314,10 +314,12 @@ export namespace Character {
   export interface State {
     readonly ownCharacter: Character;
     readonly friends: ReadonlyArray<Character>;
+    readonly characterFriends: ReadonlyArray<Character>;
     readonly bookmarks: ReadonlyArray<Character>;
     readonly ignoreList: ReadonlyArray<string>;
     readonly opList: ReadonlyArray<string>;
     readonly friendList: ReadonlyArray<string>;
+    readonly characterFriendList: ReadonlyArray<string>;
     readonly bookmarkList: ReadonlyArray<string>;
 
     readonly ownProfile: CharacterProfile;
@@ -336,6 +338,7 @@ export namespace Character {
     readonly statusText: string;
     readonly isFriend: boolean;
     readonly isBookmarked: boolean;
+    readonly isCharacterFriend: boolean;
     readonly isChatOp: boolean;
     readonly isIgnored: boolean;
     readonly overrides: CharacterOverrides;

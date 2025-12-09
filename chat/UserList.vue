@@ -10,11 +10,13 @@
       style="flex-shrink: 0"
       :fullWidth="true"
       :tabs="
+        //We label the 'all' tab as 2 so that it doesnt pop up when going
+        //from a channel to the console. It's very annoying behaviour
         channel
           ? { 0: l('users.friends'), 1: l('users.members') }
           : !isConsoleTab
             ? { 0: l('users.friends'), 1: l('user.profile') }
-            : { 0: l('users.friends') }
+            : { 0: l('users.friends'), 2: l('users.friends.all') }
       "
       v-model="tab"
     ></tabs>
@@ -23,10 +25,13 @@
       style="padding-left: 10px"
       v-if="tab === '0'"
     >
-      <h4>{{ l('users.friends') }}</h4>
+      <h4 v-if="showPerCharacterFriends && characterFriends.length > 0">
+        {{ l('users.characterFriends') }}
+      </h4>
       <div
-        v-for="character in friends"
-        :key="character.name"
+        v-if="showPerCharacterFriends"
+        v-for="character in characterFriends"
+        :key="'char-' + character.name"
         class="userlist-item"
       >
         <user
@@ -36,10 +41,29 @@
           :isMarkerShown="shouldShowMarker"
         ></user>
       </div>
-      <h4>{{ l('users.bookmarks') }}</h4>
+      <h4 v-if="friends.length > 0">
+        {{
+          l(
+            `users.${showPerCharacterFriends && characterFriends.length > 0 ? 'friends.nonCharacter' : 'friends'}`
+          )
+        }}
+      </h4>
+      <div
+        v-for="character in friends"
+        :key="'friend-' + character.name"
+        class="userlist-item"
+      >
+        <user
+          :character="character"
+          :showStatus="true"
+          :bookmark="false"
+          :isMarkerShown="shouldShowMarker"
+        ></user>
+      </div>
+      <h4 v-if="bookmarks.length > 0">{{ l('users.bookmarks') }}</h4>
       <div
         v-for="character in bookmarks"
-        :key="character.name"
+        :key="'bookmark-' + character.name"
         class="userlist-item"
       >
         <user
@@ -51,7 +75,7 @@
       </div>
     </div>
     <div
-      v-if="channel && tab === '1'"
+      v-if="channel && tab !== '0'"
       style="padding-left: 5px; flex: 1; display: flex; flex-direction: column"
     >
       <div class="users hidden-scrollbar" style="flex: 1; padding-left: 5px">
@@ -223,7 +247,7 @@
       </dropdown>
     </div>
     <div
-      v-if="!channel && !isConsoleTab && tab === '1'"
+      v-if="!channel && !isConsoleTab && tab !== '0'"
       style="
         flex: 1;
         display: flex;
@@ -244,6 +268,65 @@
         :image-preview="true"
         ref="characterPage"
       ></character-page>
+    </div>
+    <div
+      v-if="isConsoleTab && tab === '2'"
+      class="users hidden-scrollbar"
+      style="padding-left: 10px"
+    >
+      <h4 v-if="showPerCharacterFriends && allCharacterFriends.length > 0">
+        {{ l('users.characterFriends.all') }}
+      </h4>
+      <div
+        v-if="showPerCharacterFriends"
+        v-for="character in allCharacterFriends"
+        :key="'char-friends-all-' + character.name"
+        class="userlist-item"
+      >
+        <user
+          :character="character"
+          :showStatus="false"
+          :bookmark="true"
+          :isMarkerShown="shouldShowMarker"
+          :loadColor="false"
+        ></user>
+      </div>
+      <h4 v-if="allFriends.length > 0">
+        {{
+          l(
+            `users.${showPerCharacterFriends && allCharacterFriends.length > 0 ? 'friends.nonCharacter.all' : 'friends'}`
+          )
+        }}
+      </h4>
+      <div
+        v-for="character in allFriends"
+        :key="'friend-all' + character.name"
+        class="userlist-item"
+      >
+        <user
+          :character="character"
+          :showStatus="false"
+          :bookmark="true"
+          :isMarkerShown="shouldShowMarker"
+          :loadColor="false"
+        ></user>
+      </div>
+
+      <h4>{{ l('users.bookmarks.all') }}</h4>
+
+      <div
+        v-for="character in allBookmarks"
+        :key="'bookmarks-all' + character.name"
+        class="userlist-item"
+      >
+        <user
+          :character="character"
+          :showStatus="false"
+          :bookmark="true"
+          :isMarkerShown="false"
+          :loadColor="false"
+        ></user>
+      </div>
     </div>
   </sidebar>
 </template>
@@ -404,15 +487,125 @@
       }
     }
 
+    //Making these settings a getter performs better with larger lists
+    get showPerCharacterFriends(): boolean {
+      return core.state.settings.showPerCharacterFriends;
+    }
+
+    get hideNonCharacterFriends(): boolean {
+      return core.state.settings.hideNonCharacterFriends;
+    }
+
+    get characterFriends(): Character[] {
+      if (!this.showPerCharacterFriends) {
+        return [];
+      }
+      return core.characters.characterFriends.slice().sort(this.sorter);
+    }
+
     get friends(): Character[] {
-      return core.characters.friends.slice().sort(this.sorter);
+      let friendsList = core.characters.friends.slice();
+
+      // If per-character friends are shown, filter them out to avoid duplicates
+      if (this.showPerCharacterFriends) {
+        const characterFriendNames = new Set(
+          core.characters.characterFriendList.map(name => name.toLowerCase())
+        );
+        friendsList = friendsList.filter(
+          f => !characterFriendNames.has(f.name.toLowerCase())
+        );
+
+        // If hideNonCharacterFriends is enabled, hide ALL remaining global friends
+        if (core.state.settings.hideNonCharacterFriends) {
+          return [];
+        }
+      }
+
+      return friendsList.sort(this.sorter);
+    }
+
+    get allCharacterFriends(): Character[] {
+      if (!this.showPerCharacterFriends) {
+        return [];
+      }
+      const characterFriendsList = core.characters.characterFriendList.slice();
+
+      let characters: Character[] = [];
+      characterFriendsList.forEach((name: string) => {
+        characters.push(core.characters.get(name));
+      });
+      return characters.sort(this.sorter);
+    }
+
+    get allFriends(): Character[] {
+      let friendsList = core.characters.friendList.slice();
+
+      const uniqueFriendNames = new Set<string>();
+      friendsList = friendsList.filter(name => {
+        const lowerName = name.toLowerCase();
+        if (uniqueFriendNames.has(lowerName)) {
+          return false;
+        }
+        uniqueFriendNames.add(lowerName);
+        return true;
+      });
+
+      if (this.showPerCharacterFriends) {
+        const characterFriendNames = new Set(
+          core.characters.characterFriendList.map(name => name.toLowerCase())
+        );
+        friendsList = friendsList.filter(
+          name => !characterFriendNames.has(name.toLowerCase())
+        );
+
+        if (core.state.settings.hideNonCharacterFriends) {
+          return [];
+        }
+      }
+
+      let characters: Character[] = [];
+      friendsList.forEach((name: string) => {
+        characters.push(core.characters.get(name));
+      });
+      return characters.sort(this.sorter);
+    }
+
+    get allBookmarks(): Character[] {
+      const bookmarksList = core.characters.bookmarkList.slice();
+
+      let characters: Character[] = [];
+      bookmarksList.forEach((name: string) => {
+        characters.push(core.characters.get(name));
+      });
+      return characters.sort(this.sorter);
     }
 
     get bookmarks(): Character[] {
-      return core.characters.bookmarks
+      let friendNames =
+        this.showPerCharacterFriends &&
+        core.state.settings.hideNonCharacterFriends
+          ? new Set(
+              core.characters.characterFriends.map(characterFriend =>
+                characterFriend.name.toLowerCase()
+              )
+            )
+          : new Set(
+              core.characters.friends.map(friend => friend.name.toLowerCase())
+            );
+      let bookmarks = core.characters.bookmarks
         .slice()
-        .filter(x => core.characters.friends.indexOf(x) === -1)
-        .sort(this.sorter);
+        .filter(x => !friendNames.has(x.name.toLowerCase()));
+
+      if (this.showPerCharacterFriends) {
+        const characterFriendNames = new Set(
+          core.characters.characterFriendList.map(name => name.toLowerCase())
+        );
+        bookmarks = bookmarks.filter(
+          x => !characterFriendNames.has(x.name.toLowerCase())
+        );
+      }
+
+      return bookmarks.sort(this.sorter);
     }
 
     get channel(): Channel {

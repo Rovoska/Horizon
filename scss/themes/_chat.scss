@@ -152,7 +152,6 @@ $selection-color: color-contrast($primary);
 }
 
 .hidden-scrollbar {
-  $scrollbar-width: 8px;
   overflow-y: scroll;
   &::-webkit-scrollbar-thumb {
     display: none;
@@ -162,12 +161,16 @@ $selection-color: color-contrast($primary);
     box-shadow: none;
   }
   &::-webkit-scrollbar {
-    width: $scrollbar-width;
+    width: 8px;
   }
 }
 
 .hidden-scrollbar:hover {
+  //This has no purpose, but for some godawful reason the SCSS compilation breaks if we don't put an additional rule here.
+  //If we don't, for some reason this winds up only displaying the thumb once you hover over it.
+  //So I just picked a rule that has 0 impact on anything else.
+  overflow-y: scroll;
   &::-webkit-scrollbar-thumb {
-    display: initial;
+    display: block;
   }
 }

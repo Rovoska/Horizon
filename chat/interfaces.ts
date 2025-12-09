@@ -119,6 +119,9 @@ export namespace Conversation {
     readonly hasNew: boolean;
     readonly lastConversation: Conversation;
     byKey(key: string): Conversation | undefined;
+    navigateForward(): boolean;
+    navigateBack(): boolean;
+    removeFromNavigationHistory(conversation: Conversation): void;
 
     getPrivate(character: Character): PrivateConversation;
     getPrivate(
@@ -280,6 +283,8 @@ export namespace Settings {
     readonly showNeedsReply: boolean;
     readonly enterSend: boolean;
     readonly colorBookmarks: boolean;
+    readonly showPerCharacterFriends: boolean;
+    readonly hideNonCharacterFriends: boolean;
     readonly bbCodeBar: boolean;
 
     readonly risingAdScore: boolean;

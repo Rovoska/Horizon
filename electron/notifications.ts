@@ -17,7 +17,8 @@ export default class Notifications extends BaseNotifications {
     if (!this.shouldNotify(conversation)) return;
     this.playSound(sound);
     //Since Electron >=31.0.0 this makes the dock icon bounce like crazy on MacOS, which is a million times more annoying (and not the intended use case of the dock bounce anyway) than the flashing taskbar icon on Windows.
-    if (process.platform !== 'darwin') browserWindow.flashFrame(true);
+    if (process.platform !== 'darwin' && core.state.settings.notifications)
+      browserWindow.flashFrame(true);
     if (core.state.settings.notifications) {
       const notification = new Notification(
         title,

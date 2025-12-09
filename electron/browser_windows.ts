@@ -213,6 +213,27 @@ export function createMainWindow(
   if (tabCount >= maxTabCount) return;
   const lastState = windowState.getSavedWindowState();
 
+  let windowBackgroundColor: string;
+
+  switch (process.platform) {
+    //Windows and MacOS have a different property name for their background colors.
+    case 'win32':
+      windowBackgroundColor = electron.systemPreferences.getColor('window');
+      break;
+    case 'darwin':
+      windowBackgroundColor =
+        electron.systemPreferences.getColor('window-background');
+      break;
+
+    //This is specifically for Linux, but doing it as the default path makes
+    //the typescript compiler stop whining that the variable might not be assigned
+    default:
+      windowBackgroundColor = electron.nativeTheme.shouldUseDarkColors
+        ? '#000'
+        : '#e5e5e5';
+      break;
+  }
+
   const windowProperties: electron.BrowserWindowConstructorOptions & {
     maximized: boolean;
   } = {
@@ -220,6 +241,7 @@ export function createMainWindow(
     center: lastState.x === undefined,
     show: false,
     icon: process.platform === 'win32' ? winIcon : pngIcon,
+    backgroundColor: windowBackgroundColor,
     transparent: settings.allowWindowTransparency,
     webPreferences: {
       webviewTag: true,

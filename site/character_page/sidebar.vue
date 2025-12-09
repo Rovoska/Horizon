@@ -245,6 +245,7 @@
   import MemoDialog from './memo_dialog.vue';
   import ReportDialog from './report_dialog.vue';
   import core from '../../chat/core';
+  import { getContributorAlias } from '../../chat/profile_api';
 
   interface ShowableVueDialog extends Vue {
     show(): void;
@@ -312,9 +313,9 @@
       if (!this.character.badges) return [];
       if (core.state.settings?.horizonShowDeveloperBadges)
         return this.character.badges;
-      // Filter out maintainer & developer badges if user disabled them.
+      // Filter out maintainer, developer, & contributor badges if user disabled them.
       return this.character.badges.filter(
-        b => b !== 'maintainer' && b !== 'developer'
+        b => b !== 'maintainer' && b !== 'developer' && b !== 'contributor'
       );
     }
 
@@ -331,12 +332,17 @@
         helpdesk: 'fa fa-user',
         developer: 'fa fa-terminal',
         maintainer: 'fa fa-wrench',
+        contributor: 'fa fa-code',
         'subscription.lifetime': 'fa fa-certificate'
       };
       return badgeName in classMap ? classMap[badgeName] : '';
     }
 
     badgeTitle(badgeName: string): string {
+      if (badgeName === 'contributor') {
+        const alias = getContributorAlias(this.character.character.name);
+        return alias ? `Horizon Contributor "${alias}"` : 'Horizon Contributor';
+      }
       const badgeMap: { [key: string]: string } = {
         admin: 'Administrator',
         global: 'Global Moderator',

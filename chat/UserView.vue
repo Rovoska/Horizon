@@ -17,7 +17,8 @@
     ></span
     ><span v-if="!!statusClass" :class="statusClass"></span
     ><span v-if="!!rankIcon" :class="rankIcon"></span
-    ><span v-if="!!devIcon" :class="devIcon"></span>
+    ><span v-if="!!devIcon" :class="devIcon"></span
+    ><span v-if="!!contributorIcon" :class="contributorIcon"></span>
     <span v-if="!!smartFilterIcon" :class="smartFilterIcon"></span
     >{{ character.name
     }}<span v-if="!!matchClass" :class="matchClass">{{
@@ -35,7 +36,7 @@
   import { EventBus } from './preview/event-bus';
   import { kinkMatchWeights, Scoring } from '../learn/matcher-types';
   import { characterImage } from './common';
-  import { isHorizonDev } from './profile_api';
+  import { isHorizonDev, isHorizonContributor } from './profile_api';
   import { CharacterColor } from './../fchat/characters';
 
   export function getStatusIcon(status: Character.Status): string {
@@ -90,6 +91,7 @@
   export interface StatusClasses {
     rankIcon: string | null;
     devIcon: string | null;
+    contributorIcon: string | null;
     smartFilterIcon: string | null;
     genderClass: string | null;
     statusClass: string | null;
@@ -104,7 +106,8 @@
     channel: Channel | undefined,
     showStatus: boolean,
     showBookmark: boolean,
-    showMatch: boolean
+    showMatch: boolean,
+    loadColor: boolean
   ): StatusClasses {
     let rankIcon: string | null = null;
     let devIcon: string | null = null;
@@ -137,6 +140,15 @@
       devIcon = 'fa fa-wrench';
     }
 
+    // Check for contributor badge
+    let contributorIcon: string | null = null;
+    if (
+      isHorizonContributor(character.name) &&
+      core.state.settings.horizonShowDeveloperBadges
+    ) {
+      contributorIcon = 'fa fa-code';
+    }
+
     if (showStatus || character.status === 'crown')
       statusClass = `fa-fw ${getStatusIcon(character.status)}`;
 
@@ -150,6 +162,7 @@
       // undefined == not interested
       // null == no cache hit
       if (
+        loadColor &&
         core.cache.hasCacheStarted &&
         core.state.settings.horizonShowCustomCharacterColors &&
         character.overrides.characterColor === undefined
@@ -222,6 +235,9 @@
       genderClass: genderClass ? `user-gender ${genderClass}` : null,
       rankIcon: rankIcon ? `user-rank ${rankIcon}` : null,
       devIcon: devIcon ? `user-dev ${devIcon}` : null,
+      contributorIcon: contributorIcon
+        ? `user-contributor ${contributorIcon}`
+        : null,
       statusClass: statusClass ? `user-status ${statusClass}` : null,
       matchClass,
       matchScore,
@@ -262,10 +278,14 @@
     @Prop({ default: false })
     readonly useOriginalAvatar: boolean = false;
 
+    @Prop({ default: true })
+    readonly loadColor: boolean = true;
+
     userClass = '';
 
     rankIcon: string | null = null;
     devIcon: string | null = null;
+    contributorIcon: string | null = null;
     smartFilterIcon: string | null = null;
     genderClass: string | null = null;
     statusClass: string | null = null;
@@ -352,11 +372,13 @@
         this.channel,
         !!this.showStatus,
         !!this.bookmark,
-        !!this.match
+        !!this.match,
+        this.loadColor
       );
 
       this.rankIcon = res.rankIcon;
       this.devIcon = res.devIcon;
+      this.contributorIcon = res.contributorIcon;
       this.smartFilterIcon = res.smartFilterIcon;
       this.genderClass = res.genderClass;
       this.statusClass = res.statusClass;

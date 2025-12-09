@@ -53,6 +53,13 @@
       color: mix($black, $success, 8 * 8%);
       font-weight: bold;
     }
+
+    &.character-badge-contributor {
+      background-color: mix($white, $info, 10 * 8%);
+      border: 1px solid mix($white, $info, 9 * 8%);
+      color: mix($black, $info, 8 * 8%);
+      font-weight: bold;
+    }
   }
 }
 

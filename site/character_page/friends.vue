@@ -19,9 +19,8 @@
   </div>
 </template>
 
-<script lang="ts">
-  import { Component, Prop } from '@f-list/vue-ts';
-  import Vue from 'vue';
+<script setup lang="ts">
+  import { ref } from 'vue';
   import * as Utils from '../utils';
   import { methods } from './data_store';
   import { Character } from './interfaces';
@@ -29,44 +28,44 @@
   import core from '../../chat/core';
   import l from '../../chat/localize';
 
-  @Component
-  export default class FriendsView extends Vue {
-    @Prop({ required: true })
-    private readonly character!: Character;
-    private shown = false;
-    friends: SimpleCharacter[] = [];
-    loading = true;
-    error = '';
-    l = l;
+  const props = defineProps<{
+    character: Character;
+  }>();
 
-    avatarUrl = Utils.avatarURL;
-    characterUrl = Utils.characterURL;
+  const shown = ref(false);
+  const friends = ref<SimpleCharacter[]>([]);
+  const loading = ref(true);
+  const error = ref('');
 
-    async show(): Promise<void> {
-      if (this.shown) return;
-      try {
-        this.error = '';
-        this.shown = true;
-        this.loading = true;
-        this.friends = await this.resolveFriends();
-      } catch (e) {
-        this.shown = false;
-        if (Utils.isJSONError(e)) this.error = <string>e.response.data.error;
-        Utils.ajaxError(e, l('profile.friends.unableLoad'));
-      }
-      this.loading = false;
+  const avatarUrl = Utils.avatarURL;
+  const characterUrl = Utils.characterURL;
+
+  async function resolveFriends(): Promise<SimpleCharacter[]> {
+    const c = await core.cache.profileCache.get(props.character.character.name);
+
+    if (c && c.meta && c.meta.friends) {
+      return c.meta.friends;
     }
 
-    async resolveFriends(): Promise<SimpleCharacter[]> {
-      const c = await core.cache.profileCache.get(
-        this.character.character.name
-      );
-
-      if (c && c.meta && c.meta.friends) {
-        return c.meta.friends;
-      }
-
-      return methods.friendsGet(this.character.character.id);
-    }
+    return methods.friendsGet(props.character.character.id);
   }
+
+  async function show(): Promise<void> {
+    if (shown.value) return;
+    try {
+      error.value = '';
+      shown.value = true;
+      loading.value = true;
+      friends.value = await resolveFriends();
+    } catch (e) {
+      shown.value = false;
+      if (Utils.isJSONError(e)) error.value = <string>e.response.data.error;
+      Utils.ajaxError(e, l('profile.friends.unableLoad'));
+    }
+    loading.value = false;
+  }
+
+  defineExpose({
+    show
+  });
 </script>

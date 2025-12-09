@@ -1,3 +1,40 @@
+/**
+ * @license
+ * Originally licensed under MIT License
+ *
+ * Copyright (c) 2018 F-List
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * ---
+ *
+ * This file is now also licensed under GPLv3 (see LICENSE file).
+ * Modifications made after the original MIT release are licensed under GPLv3.
+ *
+ * This license header applies to this file and all of the non-third-party assets it includes.
+ * @file The entry point for the Electron renderer of F-Chat 3.0.
+ * @copyright 2018 F-List
+ * @author Maya Wolf <maya@f-list.net>
+ * @version 3.0
+ * @see {@link https://github.com/f-list/exported|GitHub repo}
+ */
+
 import * as electron from 'electron';
 
 import * as remote from '@electron/remote';
@@ -7,7 +44,7 @@ const webContents = remote.getCurrentWebContents();
 require('@electron/remote/main').enable(webContents);
 
 import Axios from 'axios';
-import { exec, execSync } from 'child_process';
+import { exec, execSync, spawn } from 'child_process';
 import * as path from 'path';
 import * as qs from 'querystring';
 import { getKey } from '../chat/common';
@@ -69,6 +106,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 let browser: string | undefined;
 
+//If this were available on non-Windows platforms, getting the values for browser and exec would require using $PATH and whereis
 function openIncognito(url: string): void {
   if (browser === undefined)
     try {
@@ -83,16 +121,35 @@ function openIncognito(url: string): void {
       console.error(e);
     }
   const commands = {
-    chrome: 'chrome.exe -incognito',
-    firefox: 'firefox.exe -private-window',
-    vivaldi: 'vivaldi.exe -incognito',
-    opera: 'opera.exe -private'
+    chrome: 'chrome.exe',
+    firefox: 'firefox.exe',
+    vivaldi: 'vivaldi.exe',
+    opera: 'opera.exe'
   };
-  let start = 'iexplore.exe -private';
+  const params = {
+    chrome: '-incognito',
+    firefox: '-private-window',
+    vivaldi: '-incognito',
+    opera: '-private'
+  };
+  let executableName = 'iexplore.exe';
+  let param = '-private';
   for (const key in commands)
-    if (browser!.indexOf(key) !== -1)
-      start = commands[<keyof typeof commands>key];
-  exec(`start ${start} ${url}`);
+    if (browser!.indexOf(key) !== -1) {
+      executableName = commands[<keyof typeof commands>key];
+      param = params[<keyof typeof params>key];
+    }
+  let executablePath = execSync(
+    `where.exe /r "%ProgramFiles%" "${executableName}"`,
+    {
+      encoding: 'utf-8',
+      timeout: 3000
+    }
+  )
+    .trim()
+    .split('\n', 2)[0];
+
+  spawn(executablePath, [param, url]);
 }
 
 const wordPosSearch = new WordPosSearch();
@@ -215,7 +272,7 @@ webContents.on('context-menu', (_, props) => {
 
   const lookupWord = props.selectionText || wordPosSearch.getLastClickedWord();
 
-  if (lookupWord) {
+  if (connection.isOpen && connection.character && lookupWord) {
     menuTemplate.unshift(
       {
         label: `Look up '${lookupWord}'`,
@@ -231,7 +288,10 @@ webContents.on('context-menu', (_, props) => {
     );
   }
 
-  if (props.srcURL.startsWith('https://static.f-list.net/images/eicon/')) {
+  if (
+    connection.isOpen &&
+    props.srcURL.startsWith('https://static.f-list.net/images/eicon/')
+  ) {
     let eiconName = props.titleText;
     //Electron on Mac allows for header context menu items, so we use that instead of a disabled item split of by a seperator.
     menuTemplate.unshift(

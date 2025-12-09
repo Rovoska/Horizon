@@ -35,40 +35,42 @@
       v-if="hasToolbar"
       style="flex: 1 51%"
     >
-      <div
-        class="popover popover-top color-selector"
-        v-show="colorPopupVisible"
-        v-on-clickaway="dismissColorSelector"
-      >
-        <div class="popover-body">
-          <div
-            class="color-typing-hint"
-            v-if="awaitingColorKey && awaitingBuffer"
-            :class="{ 'no-match': awaitingNoMatch }"
-          >
-            <div class="buffer">{{ awaitingBuffer.toLowerCase() }}</div>
-            <div class="matches">
-              <span
-                v-for="m in awaitingMatches"
-                :key="m"
-                :class="['chip', m]"
-                >{{ m }}</span
-              >
+      <transition name="color-popover">
+        <div
+          class="popover popover-top color-selector"
+          v-show="colorPopupVisible"
+          v-on-clickaway="dismissColorSelector"
+        >
+          <div class="popover-body">
+            <div
+              class="color-typing-hint"
+              v-if="awaitingColorKey && awaitingBuffer"
+              :class="{ 'no-match': awaitingNoMatch }"
+            >
+              <div class="buffer">{{ awaitingBuffer.toLowerCase() }}</div>
+              <div class="matches">
+                <span
+                  v-for="m in awaitingMatches"
+                  :key="m"
+                  :class="['chip', m]"
+                  >{{ m }}</span
+                >
+              </div>
+            </div>
+            <div class="btn-group" role="group" :aria-label="l('common.color')">
+              <button
+                v-for="btnCol in buttonColors"
+                type="button"
+                class="btn text-color"
+                :class="btnCol"
+                :title="btnCol"
+                @click.prevent.stop="applyAndClearColor(btnCol)"
+                tabindex="0"
+              ></button>
             </div>
           </div>
-          <div class="btn-group" role="group" :aria-label="l('common.color')">
-            <button
-              v-for="btnCol in buttonColors"
-              type="button"
-              class="btn text-color"
-              :class="btnCol"
-              :title="btnCol"
-              @click.prevent.stop="applyAndClearColor(btnCol)"
-              tabindex="0"
-            ></button>
-          </div>
         </div>
-      </div>
+      </transition>
 
       <div class="btn-group toolbar-buttons" style="flex-wrap: wrap">
         <div v-if="!!characterName" class="character-btn">
@@ -96,7 +98,7 @@
               : l('editor.preview', `${this.shortcutModifierKey}+Shift+P`)
           "
         >
-          <i class="fa" :class="preview ? 'fa-eye-slash' : 'fa-eye'"></i>
+          <i class="fa" :class="preview ? 'fa-eye' : 'far fa-eye'"></i>
         </div>
       </div>
       <button
@@ -227,6 +229,7 @@
     text: string = (this.value !== undefined ? this.value : '') as string;
     element!: HTMLTextAreaElement;
     sizer!: HTMLTextAreaElement;
+    editorContainer!: HTMLElement;
     maxHeight!: number;
     minHeight!: number;
     showToolbar = false;
@@ -398,6 +401,11 @@
       this.element.setSelectionRange(start, end);
     }
 
+    private isEIconSelectorOpen(): boolean {
+      const eIconSelector = this.$refs['eIconSelector'] as any;
+      return eIconSelector?.dialog?.isShown === true;
+    }
+
     applyText(
       startText: string,
       endText: string,
@@ -536,16 +544,24 @@
     //By "global" we mean global to the editor, not for the entire page.
     //They fire when the editor element is focused, not the text box.
     onKeyDownGlobal(e: KeyboardEvent): void {
-      const key = getKey(e);
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && key === Keys.KeyP) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.togglePreview();
+      if (this.isEIconSelectorOpen()) {
+        return;
       }
-      if ((key === Keys.Enter || key === Keys.Space) && this.preview) {
+
+      const key = getKey(e);
+      if (
+        ((e.metaKey || e.ctrlKey) && e.shiftKey && key === Keys.KeyP) ||
+        ((key === Keys.Enter || key === Keys.Space) && this.preview)
+      ) {
         e.stopPropagation();
         e.preventDefault();
         this.togglePreview();
+        return;
+      }
+
+      const input = <HTMLTextAreaElement>this.$refs['input'];
+      if (input) {
+        input.focus();
       }
     }
 
@@ -681,8 +697,10 @@
         e.preventDefault();
         //we only replace the brackets instead of trying to force the whole path to be escaped because
         //these two characters give us trouble with BBCode and the rest can just be picked up by the browser anyway
+        //Oh, and if your TS compiler cries about it, don't worry.  Chromium's JS engine supports it...
+        //And the problem is just that as of writing (27 nov 2025) we are still, somehow, using es2017 as our target.
         this.applyText(
-          `[url=${data.replace('[', '%5B').replace(']', '%5D')}]`,
+          `[url=${data.replaceAll('[', '%5B').replaceAll(']', '%5D')}]`,
           '[/url]'
         );
       }
@@ -759,7 +777,7 @@
     resize: none;
     &:focus {
       outline: none;
-      .bbcode-editor-preview {
+      .bbcode-editor-text-area {
         outline: 2px ridge var(--bs-primary-border-subtle);
       }
     }
@@ -907,6 +925,28 @@
             background-color: var(--textGrayColor);
           }
         }
+      }
+    }
+  }
+  .color-popover-enter-active,
+  .color-popover-leave-active {
+    transition: all 0.1s ease-in;
+  }
+
+  .color-popover-enter,
+  .color-popover-leave-to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  .force-reduced-motion .bbcode-editor {
+    @media (prefers-reduced-motion: no-preference) {
+      *,
+      *::before,
+      *::after {
+        //Sorry to all my fellow !important haters. The root implementation
+        // of our reduced motion setting has forced my hand.
+        transition-duration: unset !important;
       }
     }
   }

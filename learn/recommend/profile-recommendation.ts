@@ -92,11 +92,11 @@ export class ProfileRecommendationAnalyzer {
   }
 
   protected async checkHqPortrait(): Promise<void> {
-    const profileUrl = ProfileCache.extractHighQualityPortraitURL(
+    const portraitUrl = ProfileCache.extractHighQualityPortraitURL(
       this.profile.character.description
     );
 
-    if (!profileUrl) {
+    if (!portraitUrl) {
       this.add(
         `ADD_HQ_AVATAR`,
         ProfileRecommendationLevel.NOTE,
@@ -104,13 +104,20 @@ export class ProfileRecommendationAnalyzer {
         'Profiles with a high-quality portrait stand out in chats with other Horizon users.',
         'https://horizn.moe/docs/guides/colors-and-avatars.html'
       );
-    } else if (!ProfileCache.isSafeRisingPortraitURL(profileUrl)) {
+    } else if (!ProfileCache.isSafeRisingPortraitURL(portraitUrl)) {
       this.add(
         `ADD_HQ_AVATAR_SAFE_DOMAIN`,
         ProfileRecommendationLevel.CRITICAL,
         'Unsupported high-quality portrait URL',
         'High-quality portraits can only point to f-list.net, freeimages.host, e621.net, iili.io, imgur.com, imgchest.com, or redgifs.com domains.',
         'https://horizn.moe/docs/guides/colors-and-avatars.html'
+      );
+    } else if (!(await Axios.get(portraitUrl).catch(() => false))) {
+      this.add(
+        `ADD_HQ_AVATAR_BROKEN_LINK`,
+        ProfileRecommendationLevel.CRITICAL,
+        'Broken high-quality portrait link',
+        'The high-quality portrait link in your profile appears to be broken or inaccessible.'
       );
     }
   }

@@ -412,12 +412,39 @@
     privateCanGlow = !this.channelConversations?.length;
     channelCanGlow = !this.privateConversations?.length;
 
+    historyNavigateHandleForward!: (e: KeyboardEvent) => boolean;
+    historyNavigateHandleBackward!: (e: KeyboardEvent) => boolean;
+
+    mouseButtonListener!: (e: MouseEvent) => void;
+
     @Hook('mounted')
     onMounted(): void {
       this.keydownListener = (e: KeyboardEvent) => this.onKeyDown(e);
       window.addEventListener('keydown', this.keydownListener);
       this.setFontSize(core.state.settings.fontSize);
 
+      this.mouseButtonListener = (e: MouseEvent) => this.onMouseButton(e);
+      window.addEventListener('mouseup', this.mouseButtonListener);
+
+      //We do this because it's a massive pain in the 🫏 to read some monstrosity of
+      //an if-else statement to compare our platforms and then pick a keyboard shortcut in our keyboard handle event
+      this.historyNavigateHandleForward = !this.isMac
+        ? (e: KeyboardEvent) => {
+            return getKey(e) === Keys.ArrowRight && e.altKey;
+          }
+        : (e: KeyboardEvent) => {
+            return (
+              this.isControlOrCommand(e) && getKey(e) === Keys.BracketRight
+            );
+          };
+
+      this.historyNavigateHandleBackward = !this.isMac
+        ? (e: KeyboardEvent) => {
+            return getKey(e) === Keys.ArrowLeft && e.altKey;
+          }
+        : (e: KeyboardEvent) => {
+            return this.isControlOrCommand(e) && getKey(e) === Keys.BracketLeft;
+          };
       this.$watch('conversations.channelConversations', newVal => {
         if (newVal?.length) {
           this.channelCanGlow = false;
@@ -522,6 +549,18 @@
       window.removeEventListener('keydown', this.keydownListener);
       window.removeEventListener('focus', this.focusListener);
       window.removeEventListener('blur', this.blurListener);
+      window.removeEventListener('mouseup', this.mouseButtonListener);
+    }
+
+    onMouseButton(e: MouseEvent): void {
+      // Mouse button 3 = back, 4 = forward
+      const navigated =
+        e.button === 3
+          ? this.conversations.navigateBack()
+          : e.button === 4
+            ? this.conversations.navigateForward()
+            : false;
+      if (navigated) e.preventDefault();
     }
 
     needsReply(conversation: Conversation): boolean {
@@ -609,6 +648,23 @@
             )
           );
         }
+        //"Oh my god, why would you do it this way?"
+        // We assign these specific functions in the component's mount handler,
+        // because different platforms have different expected keyboard shortcuts for this action.
+        //
+        // Now we can run only that platform's comparison in our keyboard handler
+        // without having to compare our platform every time. Because that'd make
+        // this if-else chain a nightmare for human eyes to parse
+        //
+        // You're welcome.
+      } else if (this.historyNavigateHandleBackward(e)) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.conversations.navigateBack();
+      } else if (this.historyNavigateHandleForward(e)) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.conversations.navigateForward();
       } else if (
         getKey(e) === Keys.KeyT &&
         this.isControlOrCommand(e) &&
@@ -685,7 +741,7 @@
       document.body.appendChild(overrideEl);
       const sheet = <CSSStyleSheet>overrideEl.sheet;
       sheet.insertRule(
-        `#chatView, .btn, .form-control, .custom-select { font-size: ${fontSize}px; }`,
+        `#chatView, .btn, .form-control, .form-label, .custom-select { font-size: ${fontSize}px; }`,
         sheet.cssRules.length
       );
       sheet.insertRule(
@@ -704,9 +760,8 @@
         conversation.typingStatus === 'paused'
       ) {
         return {
-          fas: true,
-          'fa-comment-dots': conversation.typingStatus === 'typing',
-          'fa-comment': conversation.typingStatus === 'paused'
+          'fas fa-comment-dots': conversation.typingStatus === 'typing',
+          'far fa-comment': conversation.typingStatus === 'paused'
         };
       }
 
