@@ -266,6 +266,15 @@ export class EIconStore {
 
     const changes = await this.updater.fetchUpdates(this.asOfTimestamp);
 
+    // This is a hack to prevent massive changesets from locking up the thread. I'm sorry.
+    if (changes.recordUpdates.length > 2000) {
+      log.warn('eicons.update.tooManyChanges', {
+        changeCount: changes.recordUpdates.length
+      });
+      await this.downloadAll();
+      return;
+    }
+
     const removals = changes.recordUpdates
       .filter(changeRecord => changeRecord.action === '-')
       .map(i => i.eicon);
