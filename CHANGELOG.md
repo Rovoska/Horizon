@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). You can also read it on our [website](https://fchat-horizon.github.io/docs/changelog.html).
 
-# [Unreleased]
+# [Releases]
 
 ## [1.35.4] - 04-11-2025
 
@@ -20,12 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restored old behaviour for taskbar icon flashing on Windows. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b849619d3ac18bd11c8c5a6005abdb49e1f82b44)
   - If you want to disable it regardless, there is an app-level setting for it now.
 - Opening the log viewer when looking at a conversation now automatically focuses the search field. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c359973e6e20f8a8f1da7d1fc64764d0d5ef949f)
+- Updated localization files.
 
 ### Development
 
 - Updated Ghostery to v2.13.0 (from 2.10.0) [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/8c95c9837be4e18dab481445b1e3810287af16ad)
-
-# [Releases]
 
 ## [1.35.3] - 04-12-2025
 
