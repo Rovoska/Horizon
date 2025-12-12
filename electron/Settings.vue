@@ -486,6 +486,26 @@
                     {{ l('settings.soundTheme.noSounds') }}
                   </div>
                 </div>
+                <div class="mb-3" v-if="!isMac">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="flashWindow"
+                      v-model="settings.flashWindow"
+                    />
+                    <label class="form-check-label" for="flashWindow">
+                      {{ l('settings.flashWindow') }}
+                    </label>
+                  </div>
+                  <div
+                    id="flashWindowNote"
+                    class="form-text text-muted"
+                    v-if="!isWindows"
+                  >
+                    {{ l('settings.flashWindow.note') }}
+                  </div>
+                </div>
               </div>
               <!--Behavior-->
               <div
