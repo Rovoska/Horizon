@@ -145,7 +145,7 @@ importers:
         version: 6.2.0(webpack@5.99.9)
       fork-ts-checker-webpack-plugin:
         specifier: ^6.5.0
-        version: 6.5.3(typescript@3.9.10)(vue-template-compiler@2.6.12)(webpack@5.99.9)
+        version: 6.5.3(typescript@5.9.3)(vue-template-compiler@2.6.12)(webpack@5.99.9)
       install:
         specifier: ^0.13.0
         version: 0.13.0
@@ -199,16 +199,16 @@ importers:
         version: 5.0.0
       ts-loader:
         specifier: ^8.4.0
-        version: 8.4.0(typescript@3.9.10)(webpack@5.99.9)
+        version: 8.4.0(typescript@5.9.3)(webpack@5.99.9)
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
       tslint:
         specifier: ^6.1.3
-        version: 6.1.3(typescript@3.9.10)
+        version: 6.1.3(typescript@5.9.3)
       typescript:
-        specifier: ^3.9.10
-        version: 3.9.10
+        specifier: ^5.9.3
+        version: 5.9.3
       vue:
         specifier: 2.7.16
         version: 2.7.16
@@ -464,6 +464,9 @@ packages:
 
   '@jridgewell/source-map@0.3.6':
     resolution: {integrity: sha512-1ZJTZebgqllO79ue2bm3rIGud/bOe0pP5BjSRCRxxYkEZS8STV7zN84UBbiYu7jy+eCKSnVIUgoWWE/tt+shMQ==}
+
+  '@jridgewell/sourcemap-codec@1.5.0':
+    resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
 
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
@@ -2723,6 +2726,9 @@ packages:
     resolution: {integrity: sha512-Hiyv+mXHfFEP7LzUL/llg9RwFxxY+o9N3JVLIeG5E7iFIFAalxvRU9UZthBdYDEVnzHMgjnKJPPpay5BWf1g9g==}
     engines: {node: '>=6.9.0'}
     hasBin: true
+
+  immutable@5.1.3:
+    resolution: {integrity: sha512-+chQdDfvscSF1SJqv2gn4SRO2ZyS3xL3r7IW/wWEEzrzLisnOlKiQu5ytC/BVNcS15C39WT2Hg/bjKjDMcu+zg==}
 
   immutable@5.1.5:
     resolution: {integrity: sha512-t7xcm2siw+hlUM68I+UEOK+z84RzmN59as9DZ7P1l0994DKUWV7UXBMQZVxaoMSRQ+PBZbHCOoBt7a2wxOMt+A==}
@@ -4986,11 +4992,6 @@ packages:
   typedarray-to-buffer@3.1.5:
     resolution: {integrity: sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==}
 
-  typescript@3.9.10:
-    resolution: {integrity: sha512-w6fIxVE/H1PkLKcCPsFqKE7Kv7QUwhU8qQY2MueZXWx5cPZdwFupLgKK3vntcK98BtNHZtAF4LA/yl2a7k8R6Q==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
@@ -5572,7 +5573,7 @@ snapshots:
   '@jridgewell/gen-mapping@0.3.8':
     dependencies:
       '@jridgewell/set-array': 1.2.1
-      '@jridgewell/sourcemap-codec': 1.5.5
+      '@jridgewell/sourcemap-codec': 1.5.0
       '@jridgewell/trace-mapping': 0.3.25
 
   '@jridgewell/resolve-uri@3.1.2': {}
@@ -5584,12 +5585,15 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@jridgewell/sourcemap-codec@1.5.5': {}
+  '@jridgewell/sourcemap-codec@1.5.0': {}
+
+  '@jridgewell/sourcemap-codec@1.5.5':
+    optional: true
 
   '@jridgewell/trace-mapping@0.3.25':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.5.5
+      '@jridgewell/sourcemap-codec': 1.5.0
 
   '@malept/cross-spawn-promise@1.1.1':
     dependencies:
@@ -6705,7 +6709,7 @@ snapshots:
   builder-util-runtime@9.2.10(supports-color@10.0.0):
     dependencies:
       debug: 4.4.3(supports-color@10.0.0)
-      sax: 1.5.0
+      sax: 1.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -8054,7 +8058,7 @@ snapshots:
 
   forever-agent@0.6.1: {}
 
-  fork-ts-checker-webpack-plugin@6.5.3(typescript@3.9.10)(vue-template-compiler@2.6.12)(webpack@5.99.9):
+  fork-ts-checker-webpack-plugin@6.5.3(typescript@5.9.3)(vue-template-compiler@2.6.12)(webpack@5.99.9):
     dependencies:
       '@babel/code-frame': 7.27.1
       '@types/json-schema': 7.0.15
@@ -8069,7 +8073,7 @@ snapshots:
       schema-utils: 2.7.0
       semver: 7.7.2
       tapable: 1.1.3
-      typescript: 3.9.10
+      typescript: 5.9.3
       webpack: 5.99.9
     optionalDependencies:
       vue-template-compiler: 2.6.12
@@ -8512,6 +8516,8 @@ snapshots:
 
   image-size@0.7.5:
     optional: true
+
+  immutable@5.1.3: {}
 
   immutable@5.1.5: {}
 
@@ -10123,7 +10129,7 @@ snapshots:
       '@bufbuild/protobuf': 2.5.2
       buffer-builder: 0.2.0
       colorjs.io: 0.5.2
-      immutable: 5.1.5
+      immutable: 5.1.3
       rxjs: 7.8.2
       supports-color: 8.1.1
       sync-child-process: 1.0.2
@@ -10753,21 +10759,21 @@ snapshots:
     dependencies:
       utf8-byte-length: 1.0.5
 
-  ts-loader@8.4.0(typescript@3.9.10)(webpack@5.99.9):
+  ts-loader@8.4.0(typescript@5.9.3)(webpack@5.99.9):
     dependencies:
       chalk: 4.1.2
       enhanced-resolve: 4.5.0
       loader-utils: 2.0.4
       micromatch: 4.0.8
       semver: 7.7.2
-      typescript: 3.9.10
+      typescript: 5.9.3
       webpack: 5.99.9
 
   tslib@1.14.1: {}
 
   tslib@2.8.1: {}
 
-  tslint@6.1.3(typescript@3.9.10):
+  tslint@6.1.3(typescript@5.9.3):
     dependencies:
       '@babel/code-frame': 7.26.2
       builtin-modules: 1.1.1
@@ -10781,13 +10787,13 @@ snapshots:
       resolve: 1.22.10
       semver: 5.7.2
       tslib: 1.14.1
-      tsutils: 2.29.0(typescript@3.9.10)
-      typescript: 3.9.10
+      tsutils: 2.29.0(typescript@5.9.3)
+      typescript: 5.9.3
 
-  tsutils@2.29.0(typescript@3.9.10):
+  tsutils@2.29.0(typescript@5.9.3):
     dependencies:
       tslib: 1.14.1
-      typescript: 3.9.10
+      typescript: 5.9.3
 
   tty-browserify@0.0.1: {}
 
@@ -10819,8 +10825,6 @@ snapshots:
   typedarray-to-buffer@3.1.5:
     dependencies:
       is-typedarray: 1.0.0
-
-  typescript@3.9.10: {}
 
   typescript@5.9.3: {}
 
