@@ -11,6 +11,7 @@ electron/release_artifacts/**
 
 .prettierignore
 .gitignore
+.git-blame-ignore-revs
 .DS_Store
 
 

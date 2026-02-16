@@ -3,7 +3,7 @@ name: PR Build Validation
 
 # Set the required permissions for the workflow
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 # Trigger workflow on pull requests to main and dev branches
@@ -34,6 +34,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
