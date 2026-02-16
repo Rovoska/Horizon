@@ -48,7 +48,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Prettier
-        run: pnpm prettier --write .
+        run: pnpm lint
 
       - name: Commit formatting changes
         run: |
@@ -69,7 +69,7 @@ jobs:
           echo "$COMMIT_SHA" >> .git-blame-ignore-revs
 
           git add .git-blame-ignore-revs
-          git commit --amend --no-edit
+          git commit -m "chore: add formatting commit to blame-ignore-revs"
 
           git push
 
