@@ -206,6 +206,13 @@
             html
               ? t => {
                   const parsedElement = core.bbCodeParser.parseEverything(t);
+                  //TODO: If we want to instead use a custom BBCode parser (so we can also have a different kind of Spoiler tag for logs
+                  //Then we would need to remove this
+                  parsedElement
+                    .querySelectorAll('.character-avatar.eicon')
+                    .forEach(el => {
+                      el.classList.remove('loading');
+                    });
                   const result = parsedElement.innerHTML;
                   parsedElement.cleanup?.();
                   return `${result}`;
