@@ -294,7 +294,8 @@ async function createArchive(
       hidden: opts.includeHidden,
       jsonLogs: undefined
     },
-    expectedFiles
+    expectedFiles,
+    dataDir
   );
   archive.append(JSON.stringify(manifest, null, 2), {
     name: 'manifest.json'

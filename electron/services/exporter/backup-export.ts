@@ -314,7 +314,8 @@ export async function runExport(vm: any): Promise<void> {
     const manifest = createManifest(
       selectedCharacters,
       buildManifestIncludes(vm),
-      entries.length
+      entries.length,
+      vm.settings?.logDirectory
     );
     archive.append(JSON.stringify(manifest, null, 2), {
       name: 'manifest.json'

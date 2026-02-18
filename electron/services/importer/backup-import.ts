@@ -6,6 +6,8 @@ import log from 'electron-log';
 import AdmZip from 'adm-zip';
 import { isValidManifest } from '../exporter/manifest';
 import type { ExportManifest } from '../exporter/manifest';
+/** Default log directory in the renderer process (avoids instantiating GeneralSettings). */
+const defaultLogDirectory = path.join(remote.app.getPath('userData'), 'data');
 
 /**
  * Information about a character found in a Horizon backup ZIP file.
@@ -79,6 +81,9 @@ export function resetImportZipState(vm: any): void {
   vm.importZipError = undefined;
   vm.importZipHasManifest = false;
   vm.importZipManifest = undefined;
+  vm.importCustomLogDirectory = undefined;
+  vm.importUseCustomLogLocation = false;
+  vm.importCustomLogLocationError = undefined;
 }
 
 /**
@@ -102,9 +107,9 @@ export async function loadImportZip(vm: any, filePath: string): Promise<void> {
     parseImportZip(vm);
   } catch (error) {
     log.error('settings.import.zip.load.error', error);
+    const reason = error instanceof Error ? error.message : String(error);
     resetImportZipState(vm);
-    vm.importZipError =
-      "We couldn't read that export. Please choose a Horizon export created by this app.";
+    vm.importZipError = `We couldn't read that export: ${reason}. Please choose a Horizon export created by this app.`;
   }
 }
 
@@ -224,6 +229,33 @@ export function parseImportZip(vm: any): void {
   }
 
   vm.importGeneralAvailable = entries.some(e => e.entryName === 'settings');
+
+  // Detect custom log directory from manifest or settings entry
+  vm.importCustomLogDirectory = undefined;
+  vm.importUseCustomLogLocation = false;
+  vm.importCustomLogLocationError = undefined;
+  let backupLogDir: string | undefined;
+  // Prefer manifest (always present in v2+ exports)
+  if (vm.importZipManifest?.logDirectory) {
+    backupLogDir = vm.importZipManifest.logDirectory;
+  }
+  // Fall back to settings entry
+  if (!backupLogDir) {
+    const settingsEntry = zip.getEntry('settings');
+    if (settingsEntry) {
+      try {
+        const parsed = JSON.parse(settingsEntry.getData().toString('utf8'));
+        if (parsed.logDirectory && typeof parsed.logDirectory === 'string') {
+          backupLogDir = parsed.logDirectory;
+        }
+      } catch {
+        // Ignore parse errors — custom log detection is best-effort
+      }
+    }
+  }
+  if (backupLogDir && backupLogDir !== defaultLogDirectory) {
+    vm.importCustomLogDirectory = backupLogDir;
+  }
 
   for (const entry of entries) {
     if (!entry || entry.isDirectory) continue;
@@ -458,6 +490,24 @@ function shouldImportSettingsFile(
   );
 }
 
+/**
+ * Checks whether a directory can be read from and written to.
+ * Creates the directory if it doesn't exist yet.
+ */
+function checkDirectoryAccess(dir: string): string | undefined {
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch {
+    return `Cannot create directory: ${dir}`;
+  }
+  try {
+    fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);
+  } catch {
+    return `No read/write access to: ${dir}`;
+  }
+  return undefined;
+}
+
 async function checkConnectedCharacters(): Promise<boolean> {
   try {
     const connected: string[] = await ipcRenderer.invoke(
@@ -493,6 +543,9 @@ function importGeneralSettings(
 
     try {
       const newSettings = JSON.parse(generalData.toString('utf8'));
+      if (!vm.importUseCustomLogLocation) {
+        delete newSettings.logDirectory;
+      }
       Object.assign(vm.settings, newSettings);
     } catch (error) {
       log.warn('settings.import.zip.general.parse', error);
@@ -652,9 +705,20 @@ export async function runZipImport(vm: any): Promise<void> {
   vm.importError = undefined;
 
   try {
-    const dataDir = vm.settings.logDirectory;
-    if (!dataDir) throw new Error('No log directory configured');
-    fs.mkdirSync(dataDir, { recursive: true });
+    let dataDir: string;
+    if (vm.importUseCustomLogLocation && vm.importCustomLogDirectory) {
+      const accessError = checkDirectoryAccess(vm.importCustomLogDirectory);
+      if (accessError) {
+        vm.importCustomLogLocationError = accessError;
+        vm.importError = accessError;
+        return;
+      }
+      dataDir = vm.importCustomLogDirectory;
+    } else {
+      dataDir = vm.settings.logDirectory;
+      if (!dataDir) throw new Error('No log directory configured');
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
 
     const selectedCharacters = new Set(getSelectedImportCharacters(vm));
     const characterInfo = new Map(
@@ -684,7 +748,8 @@ export async function runZipImport(vm: any): Promise<void> {
     finalizeImport(vm, stats);
   } catch (error) {
     log.error('settings.import.zip.error', error);
-    vm.importError = 'Import failed. Please review the log for more details.';
+    const reason = error instanceof Error ? error.message : String(error);
+    vm.importError = `Import failed: ${reason}`;
   } finally {
     vm.importInProgress = false;
   }

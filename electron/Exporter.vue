@@ -688,6 +688,38 @@
                         {{ l('settings.import.zip.generalUnavailable') }}
                       </small>
                     </div>
+                    <div v-if="importCustomLogDirectory" class="mb-2">
+                      <div class="form-check mb-1">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="importUseCustomLogLocation"
+                          v-model="importUseCustomLogLocation"
+                        />
+                        <label
+                          class="form-check-label"
+                          for="importUseCustomLogLocation"
+                        >
+                          Import to custom log location
+                        </label>
+                      </div>
+                      <small class="form-text text-muted d-block">
+                        This backup used a custom log directory:
+                        <code>{{ importCustomLogDirectory }}</code>
+                      </small>
+                      <small
+                        v-if="!importUseCustomLogLocation"
+                        class="form-text text-muted d-block"
+                      >
+                        Logs will be imported to the default location instead.
+                      </small>
+                      <div
+                        v-if="importCustomLogLocationError"
+                        class="alert alert-danger small mt-1 mb-0 py-1 px-2"
+                      >
+                        {{ importCustomLogLocationError }}
+                      </div>
+                    </div>
                     <div class="form-check mb-2">
                       <input
                         class="form-check-input"
@@ -1303,6 +1335,9 @@
     private importZipArchive?: any;
     importZipHasManifest = false;
     importZipManifest: any = undefined;
+    importCustomLogDirectory: string | undefined = undefined;
+    importUseCustomLogLocation = false;
+    importCustomLogLocationError: string | undefined = undefined;
 
     connectedCharacters: string[] = [];
     autoBackups: { name: string; path: string; mtime: number; size: number }[] =
@@ -1569,6 +1604,12 @@
         }
       );
 
+      this.$watch(
+        () => this.importUseCustomLogLocation,
+        () => {
+          this.importCustomLogLocationError = undefined;
+        }
+      );
       this.$watch(
         () => this.selectedAutoBackup,
         async (backupPath: string | undefined) => {

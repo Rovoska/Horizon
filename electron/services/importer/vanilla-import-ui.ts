@@ -220,7 +220,8 @@ export async function runVanillaImport(vm: any): Promise<void> {
     refreshExportCharacters(vm);
   } catch (error) {
     log.error('settings.import.vanilla.error', error);
-    vm.vanillaImportError = l('settings.import.vanilla.errorGeneric');
+    const reason = error instanceof Error ? error.message : String(error);
+    vm.vanillaImportError = `${l('settings.import.vanilla.errorGeneric')}: ${reason}`;
   } finally {
     vm.vanillaImportInProgress = false;
   }

@@ -15,14 +15,16 @@ export interface ExportManifest {
     hidden: boolean;
     jsonLogs?: boolean;
   };
+  logDirectory?: string;
 }
 
 export function createManifest(
   characters: string[],
   includes: ExportManifest['includes'],
-  expectedFiles: number
+  expectedFiles: number,
+  logDirectory?: string
 ): ExportManifest {
-  return {
+  const manifest: ExportManifest = {
     version: 2,
     createdAt: new Date().toISOString(),
     app: 'horizon',
@@ -30,6 +32,10 @@ export function createManifest(
     characters,
     includes
   };
+  if (logDirectory) {
+    manifest.logDirectory = logDirectory;
+  }
+  return manifest;
 }
 
 export function isValidManifest(data: unknown): data is ExportManifest {
