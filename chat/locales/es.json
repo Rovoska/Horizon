@@ -874,6 +874,7 @@
   "status.looking": "Buscando",
   "status.offline": "Desconectado",
   "status.online": "En línea",
+  "statusHistory": "Historial",
   "statusHistory.confirmRemove": "¿Estás seguro de que quieres eliminar este mensaje de estado?",
   "statusHistory.confirmRemove.pinned": "¿Estás seguro de que quieres desanclar este mensaje de estado?",
   "statusHistory.count": "Historial de estados {0}/{1}",
