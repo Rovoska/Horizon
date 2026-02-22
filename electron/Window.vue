@@ -681,7 +681,7 @@
       // electron.ipcRenderer.send('active-tab', { webContentsId: tab.view.webContents.id });
     }
 
-    remove(tab: Tab, shouldConfirm: boolean = true): void {
+    async remove(tab: Tab, shouldConfirm: boolean = true): Promise<void> {
       if (
         this.lockTab ||
         (shouldConfirm &&
@@ -698,7 +698,15 @@
       if (this.tabs.length === 0) {
         browserWindow.setBrowserView(null!); //tslint:disable-line:no-null-keyword
         if (process.env.NODE_ENV === 'production') browserWindow.close();
-      } else if (this.activeTab === tab) this.show(this.tabs[0]);
+      } else {
+        await this.$nextTick();
+
+        if (this.activeTab === tab) {
+          this.show(this.tabs[0]);
+        } else {
+          this.activeTab!.view.setBounds(getWindowBounds());
+        }
+      }
       destroyTab(tab);
     }
 
