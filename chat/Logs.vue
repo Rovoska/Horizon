@@ -119,6 +119,7 @@
       <template slot-scope="{ item, index, isScrolling }">
         <div v-if="!isScrolling" class="message-container">
           <span
+            v-if="filter.length > 0"
             class="message-jump-icon"
             @click="jumpToMessage(item.id)"
             title="Jump to this message"
@@ -839,20 +840,18 @@
     opacity: 0;
     z-index: 10;
     padding: 2px 4px;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--bs-danger-bg-subtle);
     border-radius: 3px;
-    color: #fff;
-    font-size: 0.75rem;
+    font-size: 1rem;
     line-height: 1;
   }
 
   .message-container:hover .message-jump-icon {
-    opacity: 0.7;
+    opacity: 1;
   }
 
   .message-jump-icon:hover {
-    opacity: 1 !important;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: var(--bs-danger-bg-subtle);
   }
 
   .message-selectable {
