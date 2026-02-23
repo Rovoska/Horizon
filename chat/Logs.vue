@@ -394,6 +394,21 @@
       return filter.test(conversation.name);
     }
 
+    @Watch('conversation')
+    async onConversationPropChanged(): Promise<void> {
+      if (!this.dialog.isShown || this.conversation === undefined) return;
+      let match = this.conversations.find(
+        x => x.key === this.conversation!.key
+      );
+      if (!match) {
+        await this.loadConversations();
+        match = this.conversations.find(x => x.key === this.conversation!.key);
+      }
+      if (match && match !== this.selectedConversation) {
+        this.selectedConversation = match;
+      }
+    }
+
     @Watch('selectedConversation')
     async conversationSelected(
       oldValue: Conversation | undefined,
@@ -405,6 +420,7 @@
         oldValue.key === newValue.key
       )
         return;
+      this.messages = [];
       await this.loadDates();
       this.selectedDate = undefined;
       this.dateOffset = -1;
