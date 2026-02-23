@@ -1299,7 +1299,6 @@ export default function (this: any): Interfaces.State {
         data.character,
         l(
           'events.watchedUserPosted.notification',
-          data.character,
           conversation.name,
           data.message
         ),

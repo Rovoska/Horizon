@@ -395,7 +395,7 @@
   "events.timeout": "{2} has timed out {1} from {0} for {3} minutes.",
   "events.uptime": "Server has been running since {0}, with currently {1} channels and {2} users, a total of {3} accepted connections, and {4} maximum users.",
   "events.watchedUserPosted": "{0} spoke in {1}.",
-  "events.watchedUserPosted.notification": "{0} spoke in {1}:\n{2}",
+  "events.watchedUserPosted.notification": "spoke in {0}:\n{1}",
   "filter": "Type to filter…",
   "fixLogs.action": "Fix corrupted logs",
   "fixLogs.character": "Character",
