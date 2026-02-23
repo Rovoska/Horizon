@@ -645,6 +645,30 @@
                     </label>
                   </div>
                 </div>
+
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="nativeWindowShowSingleTab"
+                      v-model="settings.nativeWindowShowSingleTab"
+                      :disabled="!settings.forceNativeWindowControls"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="nativeWindowShowSingleTab"
+                    >
+                      {{ l('settings.nativeWindowShowSingleTab') }}
+                    </label>
+                    <div
+                      id="nativeWindowShowSingleTabNote"
+                      class="form-text text-muted"
+                    >
+                      {{ l('settings.nativeWindowShowSingleTab.note') }}
+                    </div>
+                  </div>
+                </div>
               </div>
               <!--Accessibility-->
               <div
@@ -1007,7 +1031,7 @@
       this.browserArgs = this.settings.browserArgs;
       this.logDirectory = this.settings.logDirectory;
       this.logLevel = this.settings.risingSystemLogLevel;
-      this.showTitle = this.settings.forceNativeWindowControls;
+      this.showTitle = this.settings.forceNativeWindowControls && !this.isMac;
       this.availableThemes = fs
         .readdirSync(path.join(__dirname, 'themes'))
         .filter(x => x.substr(-4) === '.css')

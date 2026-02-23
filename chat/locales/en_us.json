@@ -770,6 +770,8 @@
   "settings.messageSeparators": "Display separator lines between messages",
   "settings.minAge": "Characters younger than (years)",
   "settings.misc": "Misc",
+  "settings.nativeWindowShowSingleTab": "Show tab line when only one tab is open (requires restart)",
+  "settings.nativeWindowShowSingleTab.note": "You will need to use the keyboard shortcut Ctrl+Shift+T if you want to open tabs",
   "settings.notifications": "Show desktop/push notifications",
   "settings.notifications.console": "Console",
   "settings.notifications.pings": "Messages and events",

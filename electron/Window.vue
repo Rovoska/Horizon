@@ -7,7 +7,7 @@
     <div v-html="styling"></div>
     <div
       :style="`
-        display: ${!hideWindowControls | (tabs.length > 1) ? 'flex' : 'none'};
+        display: ${!(hideWindowControls && !hideSingleTab) | (tabs.length > 1) ? 'flex' : 'none'};
         align-items: stretch;
         border-bottom-width: 1px;
         min-height: 31px;
@@ -250,6 +250,7 @@
       process.env.NODE_ENV === 'production' ? 'title' : 'title.dev';
     isClosing = false;
     hideWindowControls = false;
+    hideSingleTab = true;
 
     @Hook('mounted')
     async mounted(): Promise<void> {
@@ -261,7 +262,10 @@
         browserWindow.webContents.openDevTools({ mode: 'detach' });
       }
 
-      this.hideWindowControls = this.settings.forceNativeWindowControls;
+      //double check for MacOS here because I don't want to deal with issues caused by imported settings
+      this.hideWindowControls =
+        this.settings.forceNativeWindowControls && this.platform !== 'darwin';
+      this.hideSingleTab = this.settings.nativeWindowShowSingleTab;
 
       updateSupportedLanguages(
         browserWindow.webContents.session.availableSpellCheckerLanguages
