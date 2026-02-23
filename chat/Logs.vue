@@ -834,10 +834,13 @@
   }
 </script>
 
-<style>
+<style lang="scss">
   .logs-dialog {
     max-width: 98% !important;
     width: 98% !important;
+    .input-group-text {
+      font-size: 1em;
+    }
   }
 
   .logs-dialog .modal-body {
