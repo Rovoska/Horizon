@@ -660,6 +660,7 @@
         this.resetKey++;
       } else if (this.dateOffset === -1) {
         this.dateOffset = 0;
+        this.messages = [];
         await this.bulkLoadDates(500);
         await this.$nextTick();
         const vl = this.$refs['messages'] as InstanceType<
