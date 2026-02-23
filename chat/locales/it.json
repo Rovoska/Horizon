@@ -874,6 +874,7 @@
   "status.looking": "Cercando",
   "status.offline": "Offline",
   "status.online": "Online",
+  "statusHistory": "Storico",
   "statusHistory.confirmRemove": "Sei sicuro di voler rimuovere questo messaggio di stato?",
   "statusHistory.confirmRemove.pinned": "Sei sicuro di voler sbloccare questo messaggio di stato?",
   "statusHistory.count": "Storico stati {0}/{1}",
