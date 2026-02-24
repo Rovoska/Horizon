@@ -287,13 +287,13 @@
 
       if (tags.length === 0) {
         e.preventDefault();
-        alert(l('ads.selectTagRequired'));
+        core.notifications.alert(l('ads.selectTagRequired'));
         return;
       }
 
       if (channelIds.length === 0) {
         e.preventDefault();
-        alert(l('ads.selectChannelRequired'));
+        core.notifications.alert(l('ads.selectChannelRequired'));
         return;
       }
 

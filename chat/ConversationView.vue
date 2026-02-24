@@ -1092,7 +1092,7 @@
     updateMemo(): void {
       this.memoManager
         ?.set(this.editorMemo)
-        .catch((e: object) => alert(errorToString(e)));
+        .catch((e: object) => core.notifications.alert(errorToString(e)));
       this.userMemo = this.editorMemo;
     }
 
@@ -1115,7 +1115,7 @@
           this.userMemo = this.memoManager.get().memo;
           this.editorMemo = this.userMemo;
         } catch (e) {
-          alert(errorToString(e));
+          core.notifications.alert(errorToString(e));
         }
       }
     }
