@@ -711,7 +711,7 @@
       const targetChar = core.characters.get(targetName);
 
       if (targetChar.status === 'offline') {
-        alert(l('logs.shareOffline', targetName));
+        core.notifications.alert(l('logs.shareOffline', targetName));
         return;
       }
 
@@ -739,13 +739,13 @@
         .join('');
 
       if (formatted.length > core.connection.vars.priv_max) {
-        alert(l('logs.shareTooLong'));
+        core.notifications.alert(l('logs.shareTooLong'));
         return;
       }
 
       const conv = core.conversations.getPrivate(targetChar);
       await conv.sendMessageEx(formatted);
-      alert(l('logs.shareSuccess'));
+      core.notifications.alert(l('logs.shareSuccess'));
       this.setSelectionMode(false);
     }
 

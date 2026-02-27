@@ -268,7 +268,7 @@
           `bookmark-${this.character!.isBookmarked ? 'remove' : 'add'}.php`,
           { name: this.character!.name }
         )
-        .catch((e: object) => alert(errorToString(e)));
+        .catch((e: object) => core.notifications.alert(errorToString(e)));
     }
 
     setHidden(): void {
@@ -305,14 +305,14 @@
         this.memo = this.memoManager.get().memo;
         this.memoLoading = false;
       } catch (e) {
-        alert(errorToString(e));
+        core.notifications.alert(errorToString(e));
       }
     }
 
     updateMemo(): void {
       this.memoManager
         ?.set(this.memo)
-        .catch((e: object) => alert(errorToString(e)));
+        .catch((e: object) => core.notifications.alert(errorToString(e)));
     }
 
     showAdLogs(): void {

@@ -702,7 +702,7 @@
             ) &&
             process.env.NODE_ENV === 'production'
           ) {
-            alert(l('login.alreadyLoggedIn'));
+            core.notifications.alert(l('login.alreadyLoggedIn'));
             return core.connection.close();
           }
           parent.send('connect', webContents.id, core.connection.character);
@@ -759,12 +759,12 @@
 
     fixLogs(): void {
       if (!electron.ipcRenderer.sendSync('connect', this.fixCharacter))
-        return alert(l('login.alreadyLoggedIn'));
+        return core.notifications.alert(l('login.alreadyLoggedIn'));
       try {
         fixLogs(this.fixCharacter);
-        alert(l('fixLogs.success'));
+        core.notifications.alert(l('fixLogs.success'));
       } catch (e) {
-        alert(l('fixLogs.error'));
+        core.notifications.alert(l('fixLogs.error'));
         throw e;
       } finally {
         electron.ipcRenderer.send('disconnect', this.fixCharacter);

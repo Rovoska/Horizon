@@ -344,6 +344,7 @@ export interface Notifications {
   playSound(sound: string): void;
   requestPermission(): Promise<void>;
   initSounds(sounds: ReadonlyArray<string>): Promise<void>;
+  alert(message: string): void;
 }
 
 export interface State {
