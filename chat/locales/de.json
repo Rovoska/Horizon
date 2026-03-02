@@ -184,7 +184,7 @@
   "commands.createchannel.param0": "Raumname",
   "commands.createchannel.param0.help": "Ein Name für einen neuen offiziellen Raum.",
   "commands.deop": "Rang \"Raum OP\" entziehen",
-  "commands.deop.help": "Entzieht einem Benutzer im aktuellen Kanal den Status \"Channel OP\".",
+  "commands.deop.help": "Entzieht einem Benutzer im aktuellen Raum den Status \"Channel OP\".",
   "commands.emptyCharacter": "Gebe einen Charakternamen an.",
   "commands.gban": "Chat-Ban",
   "commands.gban.help": "Verbannt einen Charakter vom Chat. Die Person wird keine Verbindung herstellen können bis du den Bann mit /unban wieder aufhebst.",
