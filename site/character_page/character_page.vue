@@ -540,6 +540,11 @@
 
       this.parseTextToAscii(this.character);
 
+      //save to cache if we fetched fresh data
+      if (!cache || skipCache) {
+        await core.cache.profileCache.register(this.character);
+      }
+
       if (cache && cache.meta) {
         this.guestbook = cache.meta.guestbook;
         this.friends = cache.meta.friends;
@@ -602,6 +607,7 @@
         this.character = character;
 
         standardParser.inlines = this.character.character.inlines;
+        await core.cache.profileCache.register(this.character);
 
         this.updateMatches();
 
