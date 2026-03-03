@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an app setting to force native window controls and frames. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/4b231afa787c53c256eb15d151496b36d7e407a4)
 - Various places where character names show up (like the hidden ads/ ignore list, kick notifications, etc) now have clickable character names. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/da602e0dbeb8510b5dea466cb3c5ff64da624624)
 - Ignored users are now dimmed in channel lists [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d4151b598d2b5fa1c0f051ef7db6d97a6ee942d0)
+- Additional badges in chat for supporters, donators, and contributors! [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/00ed996e6425128b4a39ce3e5c7cc81213f689da)
 
 ### Fixed
 
@@ -26,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Missing checks for specific species not having a category to be thrown in, even though the category exists.
   - Presumed kemonomimi (having your species field filled with an animal while using the "Human" bodytype) are no longer considered furries for the Furry/ Human preference check.
 - Sending a PM now clears it from your drafts. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c46bd79e01629c8aaa852aa912465239bd3faa67)
+- Fixed issues where sorting your pinned eicons while you have over 77 pinned eicons would unpin the additional ones if they hadn't loaded in yet though. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/501d85e2b2ba8f761bc807ea9df8d417208817e3)
+- Fixed issues on Windows where the chatbox and input fields would become nonresponsive until you alt-tab back in after viewing an alert. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/aafa177b7968772aed29dae5f1a7f4f0b5ca6ff4)
 - Fixed the filter for the spellcheck option not working. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/31eb84e584292ef1fc8dba816985e6c28c19652b)
 - Fixed some jank where having your window(s) closed to the tray while at the maximum amount of tabs would confuse people when they try to reopen the app. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/289274d8e21e5d9b82dd067be94ea18e38a1d769)
 - Fixed some ancient edge cases where the window's saved location would be completely outside of your screen, meaning the app would be unclickable if you restarted it. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5b403603b4da71ef4157d095166ced4e6a31ca10)
