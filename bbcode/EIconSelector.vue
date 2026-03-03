@@ -296,13 +296,14 @@
           const oldIndex = e.oldIndex!;
           const newIndex = e.newIndex!;
 
+          if (oldIndex === newIndex) return;
           const eicon = this.results[oldIndex];
 
-          this.results.splice(oldIndex, 1);
-          this.results.splice(newIndex, 0, eicon);
+          this.allResults.splice(oldIndex, 1);
+          this.allResults.splice(newIndex, 0, eicon);
 
           const newFavorites: Record<string, boolean> = {};
-          for (const eicon of this.results) {
+          for (const eicon of this.allResults) {
             if (!this.isFavorite(eicon)) continue;
             newFavorites[eicon] = true;
           }
