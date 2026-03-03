@@ -1029,8 +1029,10 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 50%;
-    height: 70%;
+    width: max-content;
+    max-width: 50%;
+    height: max-content;
+    max-height: 70%;
     pointer-events: none;
     overflow: visible;
 
