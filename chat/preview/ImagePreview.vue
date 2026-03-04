@@ -1029,10 +1029,8 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: max-content;
-    max-width: 50%;
-    height: max-content;
-    max-height: 70%;
+    width: 50%;
+    height: 70%;
     pointer-events: none;
     overflow: visible;
 
@@ -1041,10 +1039,11 @@
     }
 
     &.interactive {
-      pointer-events: auto;
+      pointer-events: none;
 
-      .image-preview-local,
-      .image-preview-auto {
+      .image-preview-toolbar,
+      .image-preview-external,
+      .image-preview-local {
         pointer-events: auto;
       }
     }
