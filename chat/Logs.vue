@@ -780,7 +780,9 @@
           const vl = this.$refs['messages'] as InstanceType<
             typeof VirtualList
           > | void;
-          if (vl) vl.scrollToIndex(index, 'center');
+          if (!vl) return;
+          vl.invalidate();
+          vl.scrollToIndex(index, 'center');
         }, 0);
       });
     }
