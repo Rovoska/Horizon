@@ -63,6 +63,7 @@
     prefixSumsDirty = true;
     programmaticScroll = false;
     measureCooldown = false;
+    scrollLockedToBottom = false;
 
     get visibleItems(): ReadonlyArray<any> {
       return this.items.slice(this.visibleStart, this.visibleEnd);
@@ -178,6 +179,7 @@
     }
 
     invalidate(): void {
+      this.updateContainerHeight();
       this.heightCache.clear();
       this.prefixSumsDirty = true;
       this.updateVisibleRange();
@@ -207,6 +209,7 @@
         this.programmaticScroll = false;
         return;
       }
+      this.scrollLockedToBottom = false;
       if (this.settleTimer !== undefined) clearTimeout(this.settleTimer);
       if (!this.scrollbarHeld) {
         this.settleTimer = setTimeout(() => {
@@ -246,6 +249,19 @@
     updateVisibleRange(): void {
       this.rebuildPrefixSums();
       this.totalHeight = this.getCumHeight(this.items.length);
+      if (this.scrollLockedToBottom) {
+        const targetScrollTop = Math.max(
+          0,
+          this.totalHeight - this.containerHeight
+        );
+        this.scrollTop = targetScrollTop;
+        const el = this.scroller;
+        if (el) {
+          this.programmaticScroll = true;
+          el.scrollTop = targetScrollTop;
+        }
+      }
+
       const listLength = this.items.length;
       const containerHeight = this.containerHeight;
       const total = this.totalHeight;
@@ -305,6 +321,9 @@
         this.updateVisibleRange();
         this.$nextTick(() => {
           this.measureCooldown = false;
+          if (this.scrollLockedToBottom) {
+            this.measureRows();
+          }
         });
       }
     }
@@ -312,12 +331,9 @@
     scrollToBottom(): void {
       const el = this.scroller;
       if (!el) return;
+      this.updateContainerHeight();
       this.prefixSumsDirty = true;
-      this.rebuildPrefixSums();
-      this.totalHeight = this.getCumHeight(this.items.length);
-      this.scrollTop = this.totalHeight;
-      this.programmaticScroll = true;
-      el.scrollTop = this.totalHeight;
+      this.scrollLockedToBottom = true; // updateVisibleRange will compute the actual position
       this.updateVisibleRange();
     }
 
