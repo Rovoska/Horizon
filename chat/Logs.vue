@@ -434,12 +434,17 @@
     onFilterChanged(): void {
       if (this.filterDebounce !== undefined) clearTimeout(this.filterDebounce);
       this.filterDebounce = setTimeout(() => {
+        const wasFiltered = this.pendingFilter.length > 0;
         this.pendingFilter = this.filter;
         const vl = this.$refs['messages'] as InstanceType<
           typeof VirtualList
         > | void;
         if (vl) vl.invalidate();
-        if (this.filter) this.searchMore();
+        if (this.filter) {
+          this.searchMore();
+        } else if (wasFiltered) {
+          if (vl) vl.scrollToBottom();
+        }
       }, 200);
     }
 
