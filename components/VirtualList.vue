@@ -303,6 +303,8 @@
       if (!listWindow) return;
       const rows = listWindow.children;
       let changed = false;
+      let heightDiff = 0;
+      const firstVisible = this.findStartIndex(this.scrollTop);
 
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i] as HTMLElement;
@@ -310,15 +312,24 @@
         if (actualIndex >= this.items.length) break;
         const key = this.getItemKey(this.items[actualIndex], actualIndex);
         const measured = row.offsetHeight;
-        if (measured > 0 && this.heightCache.get(key) !== measured) {
+        const oldHeight = this.heightCache.get(key) ?? this.itemHeight;
+        if (measured > 0 && oldHeight !== measured) {
           this.heightCache.set(key, measured);
           changed = true;
+          if (actualIndex < firstVisible) {
+            heightDiff += measured - oldHeight;
+          }
         }
       }
 
       if (changed) {
         this.prefixSumsDirty = true;
         this.measureCooldown = true;
+        if (heightDiff !== 0 && !this.scrollLockedToBottom) {
+          this.scrollTop += heightDiff;
+          this.programmaticScroll = true;
+          el.scrollTop += heightDiff;
+        }
         this.updateVisibleRange();
         this.$nextTick(() => {
           this.measureCooldown = false;
