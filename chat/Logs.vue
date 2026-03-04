@@ -658,6 +658,14 @@
           )
         ).map(m => Object.freeze(m));
         this.resetKey++;
+        await this.$nextTick();
+        const vl = this.$refs['messages'] as InstanceType<
+          typeof VirtualList
+        > | void;
+        if (vl) {
+          vl.invalidate();
+          vl.scrollToBottom();
+        }
       } else if (this.dateOffset === -1) {
         this.dateOffset = 0;
         this.messages = [];
