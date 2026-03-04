@@ -443,7 +443,7 @@
         if (this.filter) {
           this.searchMore();
         } else if (wasFiltered) {
-          if (vl) vl.scrollToBottom();
+          this.$nextTick().then(() => vl?.scrollToBottom());
         }
       }, 200);
     }

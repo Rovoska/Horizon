@@ -86,6 +86,20 @@
       this.prefixSumsDirty = false;
     }
 
+    syncSpacerHeight(): void {
+      this.rebuildPrefixSums();
+      this.totalHeight = this.getCumHeight(this.items.length);
+      const el = this.scroller;
+      if (el) {
+        const spacer = el.querySelector('.virtual-list-spacer') as
+          | HTMLElement
+          | undefined;
+        if (spacer) {
+          spacer.style.height = this.totalHeight + 'px';
+        }
+      }
+    }
+
     getCumHeight(index: number): number {
       if (index <= 0) return 0;
       if (index < this.prefixSums.length) return this.prefixSums[index];
@@ -172,6 +186,7 @@
       const el = this.scroller;
       if (!el) return;
       this.scrollLockedToBottom = false;
+      this.syncSpacerHeight();
       this.scrollTop = 0;
       this.programmaticScroll = true;
       el.scrollTop = 0;
@@ -248,8 +263,7 @@
     }
 
     updateVisibleRange(): void {
-      this.rebuildPrefixSums();
-      this.totalHeight = this.getCumHeight(this.items.length);
+      this.syncSpacerHeight();
       if (this.scrollLockedToBottom) {
         const targetScrollTop = Math.max(
           0,
@@ -335,6 +349,7 @@
         this.prefixSumsDirty = true;
         this.measureCooldown = true;
         if (heightDiff !== 0 && !this.scrollLockedToBottom) {
+          this.syncSpacerHeight();
           this.scrollTop += heightDiff;
           this.programmaticScroll = true;
           el.scrollTop += heightDiff;
@@ -362,7 +377,7 @@
       const el = this.scroller;
       if (!el) return;
       this.scrollLockedToBottom = false;
-      this.rebuildPrefixSums();
+      this.syncSpacerHeight();
       let top = this.getCumHeight(index);
       if (block === 'center') {
         top = Math.max(
@@ -379,6 +394,7 @@
     adjustScrollForPrepend(addedCount: number): void {
       const el = this.scroller;
       if (!el) return;
+      this.syncSpacerHeight();
       let added = 0;
       for (let i = 0; i < addedCount; i++) {
         added += this.getItemHeight(i);
