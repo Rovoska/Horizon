@@ -291,8 +291,17 @@
       end = Math.min(listLength, end);
 
       this.visibleStart = start;
-      this.offset = this.getCumHeight(start);
       this.visibleEnd = end;
+
+      if (this.scrollLockedToBottom && end === listLength) {
+        let windowHeight = 0;
+        for (let i = start; i < end; i++) {
+          windowHeight += this.getItemHeight(i);
+        }
+        this.offset = Math.max(0, this.totalHeight - windowHeight);
+      } else {
+        this.offset = this.getCumHeight(start);
+      }
     }
 
     measureRows(): void {
