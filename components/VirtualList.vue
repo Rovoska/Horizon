@@ -54,6 +54,7 @@
     scrollbarHeld = false;
     settleTimer: ReturnType<typeof setTimeout> | undefined;
     mouseUpListener = () => this.onMouseUp();
+    resizeObserver: ResizeObserver | undefined;
 
     heightCache: Map<string | number, number> = new Map();
     totalHeight = 0;
@@ -126,6 +127,11 @@
       this.updateContainerHeight();
       this.updateVisibleRange();
       window.addEventListener('resize', this.resizeListener);
+      const el = this.scroller;
+      if (el && typeof ResizeObserver !== 'undefined') {
+        this.resizeObserver = new ResizeObserver(() => this.onResize());
+        this.resizeObserver.observe(el);
+      }
     }
 
     @Hook('updated')
@@ -144,6 +150,7 @@
       window.removeEventListener('resize', this.resizeListener);
       if (this.scrollbarHeld)
         window.removeEventListener('mouseup', this.mouseUpListener);
+      if (this.resizeObserver) this.resizeObserver.disconnect();
     }
 
     @Watch('items')
