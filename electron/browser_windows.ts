@@ -65,6 +65,16 @@ const trayIcon: string = path.join(
 );
 
 /**
+ * Tray icon path for the notified state.
+ * Used only on Windows and Linux.
+ * @internal
+ */
+const trayIconNotif: string = path.join(
+  __dirname,
+  <string>require('./build/tray-notif.png').default
+);
+
+/**
  * @internal
  */
 let tray: electron.Tray;
@@ -132,7 +142,7 @@ const badges: electron.NativeImage[] = [
  * It updates the dock badge on macOS and applies an overlay icon to all windows on Windows and Linux.
  * @event
  * @param {IpcMainEvent} e Event reference.
- * @param {number} hasNew The amount of new messages. If hasNew =< 0, the user has no new messages
+ * @param {number} hasNew The amount of new messages for the window that called it. If hasNew =< 0, the user has no new messages
  */
 electron.ipcMain.on('has-new', (e: IpcMainEvent, hasNew: number) => {
   const window = electron.BrowserWindow.fromWebContents(e.sender);
@@ -149,6 +159,7 @@ electron.ipcMain.on('has-new', (e: IpcMainEvent, hasNew: number) => {
     windows.forEach(item => {
       applyOverlayIcon(item, totalCount);
     });
+    tray.setImage(totalCount > 0 ? trayIconNotif : trayIcon);
   }
 });
 

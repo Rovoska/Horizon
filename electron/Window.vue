@@ -384,7 +384,7 @@
             tab.hasNew = 0;
             electron.ipcRenderer.send(
               'has-new',
-              this.tabs.reduce((cur, t) => cur || t.hasNew, 0)
+              this.tabs.reduce((cur, t) => cur + t.hasNew, 0)
             );
           }
           tab.user = undefined;
@@ -400,7 +400,7 @@
           tab.hasNew = hasNew;
           electron.ipcRenderer.send(
             'has-new',
-            this.tabs.reduce((cur, t) => cur || t.hasNew, 0)
+            this.tabs.reduce((cur, t) => cur + t.hasNew, 0)
           );
         }
       );

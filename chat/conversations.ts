@@ -846,6 +846,7 @@ class State implements Interfaces.State {
   show(conversation: Conversation): void {
     if (conversation === this.selectedConversation) return;
     this.lastConversation = this.selectedConversation;
+    this.lastConversation.unreadCount = 0;
     this.selectedConversation.onHide();
     conversation.unread = Interfaces.UnreadState.None;
     this.selectedConversation = conversation;
