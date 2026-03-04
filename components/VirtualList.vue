@@ -171,6 +171,7 @@
     resetScroll(): void {
       const el = this.scroller;
       if (!el) return;
+      this.scrollLockedToBottom = false;
       this.scrollTop = 0;
       this.programmaticScroll = true;
       el.scrollTop = 0;
@@ -340,6 +341,7 @@
     scrollToIndex(index: number, block: 'start' | 'center' = 'center'): void {
       const el = this.scroller;
       if (!el) return;
+      this.scrollLockedToBottom = false;
       this.rebuildPrefixSums();
       let top = this.getCumHeight(index);
       if (block === 'center') {
