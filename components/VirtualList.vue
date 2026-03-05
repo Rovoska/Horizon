@@ -341,7 +341,7 @@
         const actualIndex = this.visibleStart + i;
         if (actualIndex >= this.items.length) break;
         const key = this.getItemKey(this.items[actualIndex], actualIndex);
-        const measured = row.offsetHeight;
+        const measured = row.getBoundingClientRect().height;
         const oldHeight = this.heightCache.get(key) ?? this.itemHeight;
         if (measured > 0 && oldHeight !== measured) {
           this.heightCache.set(key, measured);
