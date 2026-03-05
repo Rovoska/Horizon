@@ -232,7 +232,13 @@
         this.programmaticScroll = false;
         return;
       }
-      this.scrollLockedToBottom = false;
+      const el = this.scroller;
+      if (el) {
+        this.scrollLockedToBottom =
+          Math.abs(el.scrollHeight - el.scrollTop - el.clientHeight) <= 1;
+      } else {
+        this.scrollLockedToBottom = false;
+      }
       if (this.settleTimer !== undefined) clearTimeout(this.settleTimer);
       if (!this.scrollbarHeld) {
         this.settleTimer = setTimeout(() => {
