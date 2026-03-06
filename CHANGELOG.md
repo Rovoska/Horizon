@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [Unreleased]
 
-## [1.36.0] 19-02-2026
+## [1.36.0] 08-03-2026
 
 ### Added
 
@@ -33,7 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed some jank where having your window(s) closed to the tray while at the maximum amount of tabs would confuse people when they try to reopen the app. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/289274d8e21e5d9b82dd067be94ea18e38a1d769)
 - Fixed some ancient edge cases where the window's saved location would be completely outside of your screen, meaning the app would be unclickable if you restarted it. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5b403603b4da71ef4157d095166ced4e6a31ca10)
 - Fixed eicons being invisible in exported logs. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/1d4018deba7c84fd0ab042a1f41f8e0e8cccc3c0)
-- Fixed cases where exporting/ importing data between different installations can mess up your intended log directory. [Commit]
 - An extra sanity check was added for making sure that dragging eicons doesn't delete your pins. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/694c57ceaae6cc119c92c906f482666276f9cd80)
 
 ### Changed
