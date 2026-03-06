@@ -434,12 +434,17 @@
     onFilterChanged(): void {
       if (this.filterDebounce !== undefined) clearTimeout(this.filterDebounce);
       this.filterDebounce = setTimeout(() => {
+        const wasFiltered = this.pendingFilter.length > 0;
         this.pendingFilter = this.filter;
         const vl = this.$refs['messages'] as InstanceType<
           typeof VirtualList
         > | void;
         if (vl) vl.invalidate();
-        if (this.filter) this.searchMore();
+        if (this.filter) {
+          this.searchMore();
+        } else if (wasFiltered) {
+          this.$nextTick().then(() => vl?.scrollToBottom());
+        }
       }, 200);
     }
 
@@ -658,6 +663,14 @@
           )
         ).map(m => Object.freeze(m));
         this.resetKey++;
+        await this.$nextTick();
+        const vl = this.$refs['messages'] as InstanceType<
+          typeof VirtualList
+        > | void;
+        if (vl) {
+          vl.invalidate();
+          vl.scrollToBottom();
+        }
       } else if (this.dateOffset === -1) {
         this.dateOffset = 0;
         this.messages = [];
@@ -767,7 +780,9 @@
           const vl = this.$refs['messages'] as InstanceType<
             typeof VirtualList
           > | void;
-          if (vl) vl.scrollToIndex(index, 'center');
+          if (!vl) return;
+          vl.invalidate();
+          vl.scrollToIndex(index, 'center');
         }, 0);
       });
     }

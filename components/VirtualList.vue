@@ -54,6 +54,7 @@
     scrollbarHeld = false;
     settleTimer: ReturnType<typeof setTimeout> | undefined;
     mouseUpListener = () => this.onMouseUp();
+    resizeObserver: ResizeObserver | undefined;
 
     heightCache: Map<string | number, number> = new Map();
     totalHeight = 0;
@@ -63,6 +64,7 @@
     prefixSumsDirty = true;
     programmaticScroll = false;
     measureCooldown = false;
+    scrollLockedToBottom = false;
 
     get visibleItems(): ReadonlyArray<any> {
       return this.items.slice(this.visibleStart, this.visibleEnd);
@@ -83,6 +85,20 @@
       }
       this.prefixSums = sums;
       this.prefixSumsDirty = false;
+    }
+
+    syncSpacerHeight(): void {
+      this.rebuildPrefixSums();
+      this.totalHeight = this.getCumHeight(this.items.length);
+      const el = this.scroller;
+      if (el) {
+        const spacer = el.querySelector('.virtual-list-spacer') as
+          | HTMLElement
+          | undefined;
+        if (spacer) {
+          spacer.style.height = this.totalHeight + 'px';
+        }
+      }
     }
 
     getCumHeight(index: number): number {
@@ -111,6 +127,11 @@
       this.updateContainerHeight();
       this.updateVisibleRange();
       window.addEventListener('resize', this.resizeListener);
+      const el = this.scroller;
+      if (el && typeof ResizeObserver !== 'undefined') {
+        this.resizeObserver = new ResizeObserver(() => this.onResize());
+        this.resizeObserver.observe(el);
+      }
     }
 
     @Hook('updated')
@@ -129,6 +150,7 @@
       window.removeEventListener('resize', this.resizeListener);
       if (this.scrollbarHeld)
         window.removeEventListener('mouseup', this.mouseUpListener);
+      if (this.resizeObserver) this.resizeObserver.disconnect();
     }
 
     @Watch('items')
@@ -170,6 +192,8 @@
     resetScroll(): void {
       const el = this.scroller;
       if (!el) return;
+      this.scrollLockedToBottom = false;
+      this.syncSpacerHeight();
       this.scrollTop = 0;
       this.programmaticScroll = true;
       el.scrollTop = 0;
@@ -178,6 +202,7 @@
     }
 
     invalidate(): void {
+      this.updateContainerHeight();
       this.heightCache.clear();
       this.prefixSumsDirty = true;
       this.updateVisibleRange();
@@ -206,6 +231,13 @@
       if (this.programmaticScroll) {
         this.programmaticScroll = false;
         return;
+      }
+      const el = this.scroller;
+      if (el) {
+        this.scrollLockedToBottom =
+          Math.abs(el.scrollHeight - el.scrollTop - el.clientHeight) <= 1;
+      } else {
+        this.scrollLockedToBottom = false;
       }
       if (this.settleTimer !== undefined) clearTimeout(this.settleTimer);
       if (!this.scrollbarHeld) {
@@ -244,8 +276,20 @@
     }
 
     updateVisibleRange(): void {
-      this.rebuildPrefixSums();
-      this.totalHeight = this.getCumHeight(this.items.length);
+      this.syncSpacerHeight();
+      if (this.scrollLockedToBottom) {
+        const targetScrollTop = Math.max(
+          0,
+          this.totalHeight - this.containerHeight
+        );
+        this.scrollTop = targetScrollTop;
+        const el = this.scroller;
+        if (el) {
+          this.programmaticScroll = true;
+          el.scrollTop = targetScrollTop;
+        }
+      }
+
       const listLength = this.items.length;
       const containerHeight = this.containerHeight;
       const total = this.totalHeight;
@@ -274,8 +318,17 @@
       end = Math.min(listLength, end);
 
       this.visibleStart = start;
-      this.offset = this.getCumHeight(start);
       this.visibleEnd = end;
+
+      if (this.scrollLockedToBottom && end === listLength) {
+        let windowHeight = 0;
+        for (let i = start; i < end; i++) {
+          windowHeight += this.getItemHeight(i);
+        }
+        this.offset = Math.max(0, this.totalHeight - windowHeight);
+      } else {
+        this.offset = this.getCumHeight(start);
+      }
     }
 
     measureRows(): void {
@@ -286,25 +339,40 @@
       if (!listWindow) return;
       const rows = listWindow.children;
       let changed = false;
+      let heightDiff = 0;
+      const firstVisible = this.findStartIndex(this.scrollTop);
 
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i] as HTMLElement;
         const actualIndex = this.visibleStart + i;
         if (actualIndex >= this.items.length) break;
         const key = this.getItemKey(this.items[actualIndex], actualIndex);
-        const measured = row.offsetHeight;
-        if (measured > 0 && this.heightCache.get(key) !== measured) {
+        const measured = row.getBoundingClientRect().height;
+        const oldHeight = this.heightCache.get(key) ?? this.itemHeight;
+        if (measured > 0 && oldHeight !== measured) {
           this.heightCache.set(key, measured);
           changed = true;
+          if (actualIndex < firstVisible) {
+            heightDiff += measured - oldHeight;
+          }
         }
       }
 
       if (changed) {
         this.prefixSumsDirty = true;
         this.measureCooldown = true;
+        if (heightDiff !== 0 && !this.scrollLockedToBottom) {
+          this.syncSpacerHeight();
+          this.scrollTop += heightDiff;
+          this.programmaticScroll = true;
+          el.scrollTop += heightDiff;
+        }
         this.updateVisibleRange();
         this.$nextTick(() => {
           this.measureCooldown = false;
+          if (this.scrollLockedToBottom) {
+            this.measureRows();
+          }
         });
       }
     }
@@ -312,19 +380,17 @@
     scrollToBottom(): void {
       const el = this.scroller;
       if (!el) return;
+      this.updateContainerHeight();
       this.prefixSumsDirty = true;
-      this.rebuildPrefixSums();
-      this.totalHeight = this.getCumHeight(this.items.length);
-      this.scrollTop = this.totalHeight;
-      this.programmaticScroll = true;
-      el.scrollTop = this.totalHeight;
+      this.scrollLockedToBottom = true; // updateVisibleRange will compute the actual position
       this.updateVisibleRange();
     }
 
     scrollToIndex(index: number, block: 'start' | 'center' = 'center'): void {
       const el = this.scroller;
       if (!el) return;
-      this.rebuildPrefixSums();
+      this.scrollLockedToBottom = false;
+      this.syncSpacerHeight();
       let top = this.getCumHeight(index);
       if (block === 'center') {
         top = Math.max(
@@ -341,6 +407,7 @@
     adjustScrollForPrepend(addedCount: number): void {
       const el = this.scroller;
       if (!el) return;
+      this.syncSpacerHeight();
       let added = 0;
       for (let i = 0; i < addedCount; i++) {
         added += this.getItemHeight(i);
