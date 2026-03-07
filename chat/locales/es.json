@@ -754,6 +754,7 @@
   "settings.logDir.confirm": "¿Quieres establecer la ubicación de tus registros en {0}?\n\nNo se moverán archivos. Si haces clic en Sí, Horizon se cerrará. Si deseas conservar tus archivos de registro, muévelos manualmente antes de reiniciar Horizon.\n\nUbicación actual de los registros: {1}",
   "settings.logDir.inAppDir": "Por favor, establece tu directorio de registros en una ubicación fuera del directorio de instalación de Horizon, ya que de lo contrario se sobrescribirá durante una actualización.",
   "settings.logDir.note": "¿Quieres hacer una copia de seguridad de tus registros? Consulta esta guía",
+  "settings.logDir.note.onedrive": "OneDrive suele causar problemas cuando se usa como directorio de registros. Por favor, usa otra ubicación que esté fuera de las carpetas de OneDrive.",
   "settings.logDir.select": "Seleccionar una carpeta",
   "settings.logMessages": "Registro de mensajes",
   "settings.macLinkBug1": "Usuario de Mac: Al momento de escribir esto, MacOS tiene un error en la forma en que maneja la apertura de enlaces.",
