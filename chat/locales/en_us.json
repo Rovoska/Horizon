@@ -754,6 +754,7 @@
   "settings.logDir.confirm": "Do you want to set your log location to {0}?\n\nNo files will be moved. If you click Yes here, Horizon will shut down. If you would like to keep your log files, please move them manually before restarting Horizon.\n\nCurrent log location: {1}",
   "settings.logDir.inAppDir": "Please set your log directory to a location outside of the Horizon installation directory, as it would otherwise be overwritten during an update.",
   "settings.logDir.note": "Want to back up your logs? Check this guide",
+  "settings.logDir.note.onedrive": "OneDrive is known to cause issues when used as a log directory. Please use a location outside of OneDrive folders.",
   "settings.logDir.select": "Select a folder",
   "settings.logMessages": "Log messages",
   "settings.macLinkBug1": "Mac User: As of writing, MacOS has a bug in how it handles opening links.",
