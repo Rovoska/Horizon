@@ -754,6 +754,7 @@
   "settings.logDir.confirm": "Möchtest du den Speicherort hierher verschieben? {0}\n\nEs werden keine Dateien verschoben. Bei Bestätigung, wird Horizon geschlossen. Wenn du deine Verläufe behalten möchtest, verschiebe sie manuell an den neuen Speicherort, bevor du Horizon erneut startest.\n\nDerzeitiger Speicherort: {1}",
   "settings.logDir.inAppDir": "Bitte wähle einen Speicherort außerhalb des Dateiverzeichnisses von Horizon, da zukünftige Updates diese Ordner überschreiben würden.",
   "settings.logDir.note": "Du möchtest deine Chatverläufe sichern? Nutze diesen Guide",
+  "settings.logDir.note.onedrive": "OneDrive ist bekannt dafür Probleme zu verursachen, wenn es als Log-Speicherort genutzt wird. Bitte nutze einen anderen Speicherort, außerhalb der OneDrive-Ordner.",
   "settings.logDir.select": "Ordner auswählen",
   "settings.logMessages": "Chatverlauf erfassen",
   "settings.macLinkBug1": "Für Mac-Nutzer: Zum jetzigen Zeitpunkt liegt bei MacOS ein Bug beim Öffnen von Links vor.",

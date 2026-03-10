@@ -5,16 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). You can also read it on our [website](https://fchat-horizon.github.io/docs/changelog.html).
 
-# [Unreleased]
+# [Releases]
 
-## [1.36.0] 08-03-2026
+## [1.36.0] 10-03-2026
 
 ### Added
 
 - A whole bunch of stuff for the log viewer:
   - Performance has been massively improved, scrolling through long conversations no longer blows up your PC. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/fbd9b460b182914b1f83e52d73fb0b5a13be196f)
   - You can directly share messages with your PM partner through the log viewer. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/aeac29c7ff8a6c36bc5e0d6d674b63239f2b2e3c)
-  - While searching, you can instantly jump to a message in its proper context. [[Commit]]
+  - While searching, you can instantly jump to a message in its proper context. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/6487deb53ccf992369b46d0fc3ac81fb48eb2d5a)
 - Added an app setting to force native window controls and frames. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/4b231afa787c53c256eb15d151496b36d7e407a4)
 - Various places where character names show up (like the hidden ads/ ignore list, kick notifications, etc) now have clickable character names. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/da602e0dbeb8510b5dea466cb3c5ff64da624624)
 - Ignored users are now dimmed in channel lists [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d4151b598d2b5fa1c0f051ef7db6d97a6ee942d0)
@@ -34,11 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed some ancient edge cases where the window's saved location would be completely outside of your screen, meaning the app would be unclickable if you restarted it. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5b403603b4da71ef4157d095166ced4e6a31ca10)
 - Fixed eicons being invisible in exported logs. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/1d4018deba7c84fd0ab042a1f41f8e0e8cccc3c0)
 - An extra sanity check was added for making sure that dragging eicons doesn't delete your pins. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/694c57ceaae6cc119c92c906f482666276f9cd80)
+- Reverted the hidden users list in character settings to a lightweight, non-`UserView` rendering path. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ab0645d95a0dea66ed4bf937b975992d49b899ce)
 
 ### Changed
 
 - The user-specific channel ping notification now looks different from the PM one. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/df73cb16eda9c46789743960f719e5908d140f01)
 - Slight redesign for the status picker history button to make it more visible. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/a38c873b95b14de2e9453744985d7ca788a73e46)
+- Added a quick warning for OneDrive-backed log directories to help prevent sync-related logging issues. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/90ca0db76175180c41ca2b72719c215ea97b8384)
+- Updated localization files (French, German, Hungarian, Italian, Spanish, and Cute Engwish).
 
 ### Development
 
@@ -57,8 +60,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - https://github.com/Fchat-Horizon/Horizon/pull/631 by @CodingWithAnxiety
 - https://github.com/Fchat-Horizon/Horizon/pull/634 by @FatCatClient
 - https://github.com/Fchat-Horizon/Horizon/pull/639 by @FatCatClient
-
-# [Releases]
 
 ## [1.35.7] 25-01-2026
 

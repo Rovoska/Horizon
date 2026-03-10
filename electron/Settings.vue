@@ -582,6 +582,13 @@
                         <span class="far fa-fw fa-folder-open"></span>
                       </button></div
                   ></label>
+                  <div
+                    id="logDirNoteOnedrive"
+                    class="form-text text-muted"
+                    v-if="isWindows"
+                  >
+                    <span>{{ `${l('settings.logDir.note.onedrive')} ` }}</span>
+                  </div>
                   <div id="logDirNote" class="form-text text-muted">
                     <a
                       href="#"

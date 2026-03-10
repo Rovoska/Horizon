@@ -754,6 +754,7 @@
   "settings.logDir.confirm": "Be akarod állítani ezt a naplóid helyének? {0}\n\nFájlok nem lesznek áthelyezve. Ha most az Igent választod, a Horizon leáll. Ha szeretnéd megtartani a naplófájljaidat, kérjük helyezd őket át kézileg mielőtt újraindítanád a Horizont.\n\nNaplók jelenlegi helye: {1}",
   "settings.logDir.inAppDir": "Kérjük válassz egy olyan mappát a naplófájljaidnak, amely a Horizon telepítési helyén kívül esik, máskülönben jövőbeli frissítések felül fogják írni őket.",
   "settings.logDir.note": "Biztonsági másolatot készítenél a naplóidról? Kövesd ezt az ismertetőt",
+  "settings.logDir.note.onedrive": "A OneDrive problémákat okozhat, ha mentési útvonalként van beállítva naplófájlokhoz. Kérlek válassz egy, OneDrive mappákon kívüli mentési útvonalat.",
   "settings.logDir.select": "Válassz egy mappát",
   "settings.logMessages": "Üzenetek naplózása",
   "settings.macLinkBug1": "Mac felhasználó: Jelenleg hiba található a MacOS-ben a hivatkozások megnyitásával kapcsolatban.",

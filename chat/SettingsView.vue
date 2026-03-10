@@ -717,13 +717,13 @@
       <h5>{{ l('settings.tabs.hideAds') }}</h5>
       <div class="mb-3 p-2">
         <template v-if="hidden.length">
-          <div v-for="(user, i) in hidden">
+          <div v-for="(user, i) in hidden" :key="`hidden-${user}-${i}`">
             <span
               class="fa fa-times"
               style="cursor: pointer"
               @click.stop="hidden.splice(i, 1)"
             ></span>
-            <user-view :character="getCharacter(user)"></user-view>
+            <span class="ms-2">{{ user }}</span>
           </div>
         </template>
         <template v-else>{{ l('settings.hideAds.empty') }}</template>
