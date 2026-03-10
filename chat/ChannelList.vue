@@ -303,7 +303,6 @@
 
   .channel-list .channel-row .form-check-label {
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
   }
 </style>

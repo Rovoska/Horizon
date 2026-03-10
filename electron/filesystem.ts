@@ -250,7 +250,7 @@ function loadIndex(name: string): Index {
         index[file.slice(0, -4).toLowerCase()] = item;
       } catch (e) {
         console.error(e);
-        alert(l('logs.corruption.desktop'));
+        core.notifications.alert(l('logs.corruption.desktop'));
       }
   return index;
 }
@@ -289,7 +289,7 @@ export class Logs implements Logging {
       return messages;
     } catch (e) {
       console.error(e);
-      alert(l('logs.corruption.desktop'));
+      core.notifications.alert(l('logs.corruption.desktop'));
       return [];
     } finally {
       fs.closeSync(fd);
@@ -349,7 +349,7 @@ export class Logs implements Logging {
       return messages;
     } catch (e) {
       console.error(e);
-      alert(l('logs.corruption.desktop'));
+      core.notifications.alert(l('logs.corruption.desktop'));
       return [];
     } finally {
       fs.closeSync(fd);

@@ -717,13 +717,13 @@
       <h5>{{ l('settings.tabs.hideAds') }}</h5>
       <div class="mb-3 p-2">
         <template v-if="hidden.length">
-          <div v-for="(user, i) in hidden">
+          <div v-for="(user, i) in hidden" :key="`hidden-${user}-${i}`">
             <span
               class="fa fa-times"
               style="cursor: pointer"
               @click.stop="hidden.splice(i, 1)"
             ></span>
-            {{ user }}
+            <span class="ms-2">{{ user }}</span>
           </div>
         </template>
         <template v-else>{{ l('settings.hideAds.empty') }}</template>
@@ -820,7 +820,7 @@
               :aria-label="l('user.unignore')"
               @click.stop="unignore(user)"
             ></span>
-            {{ user }}
+            <user-view :character="getCharacter(user)"></user-view>
           </div>
         </template>
         <template v-else>{{
@@ -1138,6 +1138,7 @@
   import _ from 'lodash';
   import { matchesSmartFilters } from '../learn/filter/smart-filter';
   import { EventBus } from './preview/event-bus';
+  import UserView from './UserView.vue';
 
   const bbcodeParser = new UserInterfaceBBCodeParser();
 
@@ -1147,7 +1148,8 @@
       editor: Editor,
       tabs: Tabs,
       bbcode: BBCodeView(bbcodeParser),
-      'settings-checkbox': SettingsCheckbox
+      'settings-checkbox': SettingsCheckbox,
+      'user-view': UserView
     }
   })
   export default class SettingsView extends CustomDialog {
@@ -1524,6 +1526,9 @@
 
     setSmartFilter(key: keyof SmartFilterSelection, value: any): void {
       this.risingFilter.smartFilters[key] = value.target.checked;
+    }
+    getCharacter(name: string): Character {
+      return core.characters.get(name);
     }
   }
 </script>

@@ -6,14 +6,28 @@
   >
     <div v-html="styling"></div>
     <div
-      style="display: flex; align-items: stretch; border-bottom-width: 1px"
+      :style="`
+        display: ${!(hideWindowControls && !hideSingleTab) | (tabs.length > 1) ? 'flex' : 'none'};
+        align-items: stretch;
+        border-bottom-width: 1px;
+        min-height: 31px;
+      `"
       class="border-bottom"
       id="window-tabs"
     >
-      <h4 style="padding: 2px 0" class="d-md-block d-none">
+      <h4
+        style="padding: 2px 0"
+        class="d-md-block d-none"
+        v-if="!hideWindowControls"
+      >
         {{ l(windowTitleKey) }}
       </h4>
-      <div class="btn btn-light" @click="openMenu" id="settings">
+      <div
+        class="btn btn-light"
+        @click="openMenu"
+        id="settings"
+        v-if="!hideWindowControls"
+      >
         <i class="fas fa-bars"></i>
       </div>
       <div
@@ -101,6 +115,7 @@
         "
         id="windowButtons"
         class="btn-group"
+        v-if="!hideWindowControls"
       >
         <span
           @click.stop="openSettingsMenu()"
@@ -234,6 +249,8 @@
     windowTitleKey: string =
       process.env.NODE_ENV === 'production' ? 'title' : 'title.dev';
     isClosing = false;
+    hideWindowControls = false;
+    hideSingleTab = true;
 
     @Hook('mounted')
     async mounted(): Promise<void> {
@@ -244,6 +261,11 @@
       if (remote.process.argv.includes('--devtools')) {
         browserWindow.webContents.openDevTools({ mode: 'detach' });
       }
+
+      //double check for MacOS here because I don't want to deal with issues caused by imported settings
+      this.hideWindowControls =
+        this.settings.forceNativeWindowControls && this.platform !== 'darwin';
+      this.hideSingleTab = this.settings.nativeWindowShowSingleTab;
 
       updateSupportedLanguages(
         browserWindow.webContents.session.availableSpellCheckerLanguages
@@ -663,7 +685,7 @@
       // electron.ipcRenderer.send('active-tab', { webContentsId: tab.view.webContents.id });
     }
 
-    remove(tab: Tab, shouldConfirm: boolean = true): void {
+    async remove(tab: Tab, shouldConfirm: boolean = true): Promise<void> {
       if (
         this.lockTab ||
         (shouldConfirm &&
@@ -680,7 +702,15 @@
       if (this.tabs.length === 0) {
         browserWindow.setBrowserView(null!); //tslint:disable-line:no-null-keyword
         if (process.env.NODE_ENV === 'production') browserWindow.close();
-      } else if (this.activeTab === tab) this.show(this.tabs[0]);
+      } else {
+        await this.$nextTick();
+
+        if (this.activeTab === tab) {
+          this.show(this.tabs[0]);
+        } else {
+          this.activeTab!.view.setBounds(getWindowBounds());
+        }
+      }
       destroyTab(tab);
     }
 

@@ -10,7 +10,7 @@
     <div class="window-modal modal" :class="getThemeClass()" tabindex="-1">
       <div class="modal-dialog modal-xl" style="height: 100vh">
         <div class="modal-content" style="height: 100vh">
-          <div class="modal-header">
+          <div class="modal-header" v-if="!showTitle">
             <h5 class="modal-title" style="-webkit-app-region: drag">
               <i class="fa-solid fa-fw fa-gear"></i>
               {{ l('settings.action') }}
@@ -582,6 +582,13 @@
                         <span class="far fa-fw fa-folder-open"></span>
                       </button></div
                   ></label>
+                  <div
+                    id="logDirNoteOnedrive"
+                    class="form-text text-muted"
+                    v-if="isWindows"
+                  >
+                    <span>{{ `${l('settings.logDir.note.onedrive')} ` }}</span>
+                  </div>
                   <div id="logDirNote" class="form-text text-muted">
                     <a
                       href="#"
@@ -621,6 +628,52 @@
                     <label class="form-check-label" for="windowTitleCharacter">
                       {{ l('settings.windowTitleCharacter') }}
                     </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="forceNativeWindowControls"
+                      v-model="settings.forceNativeWindowControls"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="forceNativeWindowControls"
+                    >
+                      {{
+                        l(
+                          'settings.experimental',
+                          l('settings.forceNativeWindowControls')
+                        )
+                      }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="nativeWindowShowSingleTab"
+                      v-model="settings.nativeWindowShowSingleTab"
+                      :disabled="!settings.forceNativeWindowControls"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="nativeWindowShowSingleTab"
+                    >
+                      {{ l('settings.nativeWindowShowSingleTab') }}
+                    </label>
+                    <div
+                      id="nativeWindowShowSingleTabNote"
+                      class="form-text text-muted"
+                    >
+                      {{ l('settings.nativeWindowShowSingleTab.note') }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -950,6 +1003,8 @@
     isWindows = process.platform === 'win32';
     isMac = process.platform === 'darwin';
 
+    showTitle: boolean = true;
+
     platformName = process.platform;
 
     get styling(): string {
@@ -983,6 +1038,7 @@
       this.browserArgs = this.settings.browserArgs;
       this.logDirectory = this.settings.logDirectory;
       this.logLevel = this.settings.risingSystemLogLevel;
+      this.showTitle = this.settings.forceNativeWindowControls && !this.isMac;
       this.availableThemes = fs
         .readdirSync(path.join(__dirname, 'themes'))
         .filter(x => x.substr(-4) === '.css')
@@ -1299,11 +1355,9 @@
       ipcRenderer.send('open-dir', this.settings.logDirectory);
     }
 
-    filterLanguage(
-      filter: RegExp,
-      languageEntry: { lang: string; name: string }
-    ): boolean {
-      return filter.test(languageEntry.name);
+    filterLanguage(filter: RegExp, languageEntry: string): boolean {
+      console.log(languageEntry);
+      return filter.test(this.formatLanguage(languageEntry));
     }
 
     externalUrlHandler(url: string) {
