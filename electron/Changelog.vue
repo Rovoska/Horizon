@@ -43,7 +43,7 @@
               v-html="changeLogText"
               ref="mdContainer"
             ></div>
-            <div class="modal-footer">
+            <div class="modal-footer d-flex">
               <a
                 class="btn btn-outline-primary"
                 href="https://discord.gg/JYuxqNVNtP"
@@ -52,7 +52,7 @@
                 style="margin-left: 8px"
               >
                 <span class="fab fa-discord"></span>
-                <span style="margin-left: 6px">{{
+                <span style="margin-left: 6px" v-if="!updateVersion">{{
                   l('chat.joinDiscord')
                 }}</span>
               </a>
@@ -65,8 +65,11 @@
                 title="Support us on Ko-Fi"
               >
                 <span class="fa fa-coffee"></span>
-                <span style="margin-left: 6px">Ko-Fi</span>
+                <span style="margin-left: 6px" v-if="!updateVersion"
+                  >Ko-Fi</span
+                >
               </a>
+              <div class="d-inline-block flex-grow-1"></div>
               <button
                 type="button"
                 class="btn btn-secondary"
