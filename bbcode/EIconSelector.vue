@@ -302,10 +302,14 @@
           this.allResults.splice(oldIndex, 1);
           this.allResults.splice(newIndex, 0, eicon);
 
+          this.results.splice(oldIndex, 1);
+          this.results.splice(newIndex, 0, eicon);
+
           const newFavorites: Record<string, boolean> = {};
           for (const eicon of this.allResults) {
-            if (!this.isFavorite(eicon)) continue;
-            newFavorites[eicon] = true;
+            if (this.isFavorite(eicon)) {
+              newFavorites[eicon] = true;
+            }
           }
           core.state.favoriteEIcons = newFavorites;
 
