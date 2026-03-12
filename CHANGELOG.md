@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed CTRL+Z undo not working correctly in the BBCode editor. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/e068d8347a41a17da5ec96b8da5d603df2bf02db)
 - Fixed refreshing a profile not correctly saving the updated data to the local cache database. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/cfb10691318c971534234e0313d7343342510bac)
 - Your character's cache now refreshes when you connect, so you're always working with up-to-date profile data. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/1456ef989db5e32b24f74dbce3d9a38506b7f674)
+- Fixed the 'Close and download' button in the update prompt being knocked onto a different row because of the Discord and Ko-Fi buttons. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b0365aad106a188b0d0d18271b6fbcb3dea81c70)
 
 ### Development
 
@@ -29,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - https://github.com/Fchat-Horizon/Horizon/pull/681 by @amonodrama
 - https://github.com/Fchat-Horizon/Horizon/pull/661 by @freenutsxd
-- https://github.com/Fchat-Horizon/Horizon/pull/673 by @Fchat-Horizon
+- https://github.com/Fchat-Horizon/Horizon/pull/673 by @FatCatClient
 
 ## [1.36.0] 10-03-2026
 
