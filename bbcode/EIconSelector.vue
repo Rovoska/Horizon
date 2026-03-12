@@ -301,11 +301,13 @@
 
           this.allResults.splice(oldIndex, 1);
           this.allResults.splice(newIndex, 0, eicon);
+          this.results = this.allResults.slice(0, this.displayedCount);
 
           const newFavorites: Record<string, boolean> = {};
           for (const eicon of this.allResults) {
-            if (!this.isFavorite(eicon)) continue;
-            newFavorites[eicon] = true;
+            if (this.isFavorite(eicon)) {
+              newFavorites[eicon] = true;
+            }
           }
           core.state.favoriteEIcons = newFavorites;
 
