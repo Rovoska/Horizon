@@ -76,7 +76,7 @@ abstract class Conversation implements Interfaces.Conversation {
   // private loadedMore = false;
   adManager: AdManager;
   cacheActive = false;
-  protected cacheInterval: NodeJS.Timer | undefined;
+  protected cacheInterval: ReturnType<typeof setInterval> | undefined;
 
   public static readonly conversationThroat = throat(1); // make sure user posting and ad posting won't get in each others' way
 
