@@ -4,7 +4,7 @@ import { Connection } from '../fchat';
 import { Channel, Character } from '../fchat/interfaces';
 import { AdManager } from './ads/ad-manager';
 import { SmartFilterSettings } from '../learn/filter/types';
-export { Connection, Channel, Character } from '../fchat/interfaces';
+export { type Connection, Channel, type Character } from '../fchat/interfaces';
 export const userStatuses: ReadonlyArray<Character.Status> = [
   'online',
   'looking',
@@ -172,6 +172,7 @@ export namespace Conversation {
     readonly unread: UnreadState;
     settings: Settings;
     readonly adManager: AdManager;
+    addMessage(message: Message): Promise<void>;
     send(): Promise<void>;
     clear(): void;
     loadLastSent(): void;
@@ -327,6 +328,9 @@ export namespace Settings {
 
     readonly risingCharacterTheme: string | undefined;
     readonly soundTheme: string;
+    readonly soundThemeSoundVolumes: {
+      readonly [theme: string]: { readonly [sound: string]: number };
+    };
   }
 }
 
