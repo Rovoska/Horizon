@@ -367,6 +367,7 @@
                       :options="availableSoundThemes"
                       style="flex: 1; margin-right: 10px"
                       :title="l('settings.soundTheme')"
+                      :placeholder="l('filter')"
                     >
                       <template v-slot="s">
                         {{ capitalizeSoundThemeName(s.option) }}
