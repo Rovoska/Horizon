@@ -466,7 +466,7 @@ export class ProfileCache extends AsyncCache<CharacterCacheRecord> {
   async register(
     c: ComplexCharacter,
     skipStore: boolean = false,
-    shouldMatch: boolean = true
+    _shouldMatch: boolean = true
   ): Promise<CharacterCacheRecord> {
     const k = AsyncCache.nameKey(c.character.name);
     const match = ProfileCache.match(c);
