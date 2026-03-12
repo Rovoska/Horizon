@@ -51,7 +51,7 @@
     "raw-loader": "^4.0.2",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
-    "sass-embedded": "^1.89.2",
+    "sass-embedded": "^1.98.0",
     "sass-loader": "^16.0.5",
     "sortablejs": "^1.15.6",
     "style-loader": "^2.0.0",
