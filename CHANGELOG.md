@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [Releases]
 
+## [1.36.2] 12-03-2026
+
+### Fixed
+
+- Hotfix for a bug in 1.36.1 where switching tabs or windows while connecting in a second tab would keep you stuck connecting forever. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/cc24d1b874cc7c98424997038cbd7e59815a8dd6)
+
+### Merged Pull Requests
+
+- https://github.com/Fchat-Horizon/Horizon/pull/690 by @freenutsxd
+
 ## [1.36.1] 11-03-2026
 
 ### Fixed
