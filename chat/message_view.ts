@@ -274,7 +274,8 @@ const userPostfix: { [key: number]: string | undefined } = {
       children.push(bbcodeNode);
     }
 
-    if (isModern) classes += ' message-modern';
+    if (isModern && message.type !== Conversation.Message.Type.Event)
+      classes += ' message-modern';
     if (this.selectable) {
       classes += ' message-selectable';
       const checkbox = createElement('input', {

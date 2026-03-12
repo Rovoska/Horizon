@@ -262,6 +262,8 @@ export default function (this: void, connection: Connection): Interfaces.State {
       // tslint:disable-next-line no-unnecessary-type-assertion
       core.cache.setProfile(state.ownProfile as CharacterProfile);
 
+      core.cache.profileCache.updateOverrides(state.ownProfile as any);
+
       const hqPortraitUrl = ProfileCache.extractHighQualityPortraitURL(
         state.ownProfile.character.description
       );
