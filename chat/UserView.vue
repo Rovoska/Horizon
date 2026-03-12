@@ -329,7 +329,7 @@
     props: {
       character: { required: true as const },
       channel: {},
-      showStatus: { default: true },
+      showStatus: { default: false },
       bookmark: { default: true },
       match: { default: false },
       preview: { default: true },
