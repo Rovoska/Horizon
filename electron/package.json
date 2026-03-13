@@ -9,7 +9,7 @@
   "build": {
     "appId": "net.flist.fchat",
     "productName": "Horizon",
-    "artifactName": "F-Chat.${productName}-${os}-${arch}.${ext}",
+    "artifactName": "F-Chat.${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "app": "app",
       "output": "dist"
