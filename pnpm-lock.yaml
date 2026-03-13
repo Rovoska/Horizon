@@ -246,6 +246,9 @@ importers:
 
   electron:
     dependencies:
+      '@ghostery/adblocker-electron-preload':
+        specifier: ^2.0.0
+        version: 2.11.6(electron@39.2.7(supports-color@10.0.0))
       '@mdit/plugin-alert':
         specifier: ^0.22.2
         version: 0.22.3(markdown-it@14.1.1)
