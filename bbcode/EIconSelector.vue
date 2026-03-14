@@ -226,10 +226,10 @@
         search: '' as string,
         refreshing: false,
         isLoadingMore: false,
-        searchUpdateDebounce: debounce(function (this: any) {
+        searchUpdateDebounce: debounce(() => {
           this.runSearch();
         }, 350),
-        handleScroll: debounce(function (this: any) {
+        handleScroll: debounce(() => {
           const resultsContainer = this.$refs[
             'resultsContainer'
           ] as HTMLElement;
