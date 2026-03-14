@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0-beta.0] - 2026-03-14
+
 _Nothing yet._
 
 ## [1.36.2] 12-03-2026
@@ -1166,3 +1168,6 @@ _Nothing yet._
 
 - IOS build removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/41261d1ba7043eb7dfd5a1a6331dc604ff338814)]
 - Webchat removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/b894a180b9be31f68d1458aaa3c59f9c4470da89)]
+
+[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0-beta.0...development
+[2.0.0-beta.0]: https://github.com/Fchat-Horizon/Horizon/compare/v1.36.2...v2.0.0-beta.0
