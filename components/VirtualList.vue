@@ -332,7 +332,8 @@
     }
 
     measureRows(): void {
-      if (this.isScrolling || this.measureCooldown) return;
+      if (this.isScrolling || this.scrollbarHeld || this.measureCooldown)
+        return;
       const el = this.scroller;
       if (!el) return;
       const listWindow = el.querySelector('.virtual-list-window');
