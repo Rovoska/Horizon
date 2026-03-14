@@ -4,6 +4,8 @@
     linkClass="form-select"
     :keepOpen="multiple"
     :gap="0"
+    @opened="selectOpened"
+    ref="dropdown"
   >
     <template slot="title" v-if="multiple">{{ label }}</template>
     <slot v-else slot="title" :option="selected">{{ label }}</slot>
@@ -15,6 +17,8 @@
         :placeholder="placeholder"
         @mousedown.stop
         @click.stop
+        @keydown.enter="enterPressed"
+        ref="filterInput"
       />
     </div>
     <div class="overflow-auto dropdown-items">
@@ -39,6 +43,7 @@
           @click="select(option)"
           v-for="option in filtered"
           class="dropdown-item"
+          :class="value === option ? 'selected' : ''"
         >
           <slot :option="option">{{ option }}</slot>
         </a>
@@ -97,6 +102,21 @@
       return (<object[]>this.selected).indexOf(option) !== -1;
     }
 
+    selectOpened() {
+      this.$nextTick(() => {
+        (this.$refs['filterInput'] as HTMLInputElement).focus();
+      });
+    }
+
+    enterPressed() {
+      if (this.filtered.length > 0) {
+        this.select(this.filtered[0]);
+        if (!this.multiple) {
+          (this.$refs['dropdown'] as any).isOpen = false;
+        }
+      }
+    }
+
     get filtered(): object[] {
       return this.options.filter(x => this.filterFunc(this.filterRegex, x));
     }
@@ -119,6 +139,10 @@
   .filterable-select {
     .dropdown-items {
       max-height: 200px;
+      .dropdown-item.selected {
+        background-color: var(--bs-dropdown-link-active-bg);
+        color: var(--bs-dropdown-link-active-color);
+      }
     }
 
     button {
