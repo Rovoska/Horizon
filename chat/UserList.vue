@@ -511,7 +511,13 @@
     }
 
     get friends(): Character[] {
-      let friendsList = core.characters.friends.slice();
+      const seenNames = new Set<string>();
+      let friendsList = core.characters.friends.filter(f => {
+        const key = f.name.toLowerCase();
+        if (seenNames.has(key)) return false;
+        seenNames.add(key);
+        return true;
+      });
 
       // If per-character friends are shown, filter them out to avoid duplicates
       if (this.showPerCharacterFriends) {
