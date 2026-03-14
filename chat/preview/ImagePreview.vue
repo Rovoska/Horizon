@@ -999,10 +999,11 @@
     }
 
     &.interactive {
-      pointer-events: auto;
+      pointer-events: none;
 
-      .image-preview-local,
-      .image-preview-auto {
+      .image-preview-toolbar,
+      .image-preview-external,
+      .image-preview-local {
         pointer-events: auto;
       }
     }
