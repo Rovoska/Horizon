@@ -18,15 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Notification count badges on conversations, windows, and the tray icon. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9994f25fd5bf6553fcd7a639d1471015aaa55cf1)
-- "No humans" and "no furries" smart filter options. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/69772b8b824fbdfd7c6f6e36997d65c3d2017cda)
+- "No humans" and "no furries" smart filter options, which hides ads from characters who have marked themselves as not interested in your species. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/0e8e6bcf95dc11f1c6556fb80778199b58d59d4a)
 - Filterable select dropdowns now show the selected value, auto-focus the filter input on open, and select the first result on Enter. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/32f2923ffb1cf7dbc1391c794dd2f2946a480cd0)
-- Link preview pins no longer block clicks on areas of the UI beneath them. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c64944b4dff2c10916bc7d4c33f430dc2d22e41a)
 
 ### Fixed
 
 - Scrollbar thumb jitter during row measurement. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c3f2d8075d9c9664578a99329aa77b5259542b19)
 - Duplicate entries in the friend list when multiple characters share the same friend. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d26d31cb6789c974d8d002c6b744059c605627e7)
-- Profile cache now refreshes on connection so data is always current. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/7240fddf05d941325506f343ad148c01d92c079d)
+- Link preview pins no longer block clicks on areas of the UI beneath them. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c64944b4dff2c10916bc7d4c33f430dc2d22e41a)
 
 ## [1.36.2] 12-03-2026
 
