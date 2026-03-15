@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0-beta.1] - 2025-03-14
+
+### Fixed
+
+- Regression where the eicon picker wouldn't load any extra eicons while scrolling anymore. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/beb19475be9bbf28b45c0da3195dcaa50b3d7157)
+
 ## [2.0.0-beta.0] - 2026-03-14
 
 ### Changed
