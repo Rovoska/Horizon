@@ -5,7 +5,7 @@ on:
     workflows:
       - PR Build
       - Build & Create Draft Release
-      - Nightly Build
+      - Nightly Dev Build
     types: [completed]
 
 permissions:
