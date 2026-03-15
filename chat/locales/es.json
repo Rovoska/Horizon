@@ -76,7 +76,7 @@
   "admgr.stopAll": "Detener Todos los Anuncios",
   "admgr.tags": "Etiquetas de anuncios",
   "admgr.tags.help": "Publicar anuncios que correspondan a cualquiera de estas etiquetas:",
-  "admgr.tags.placeholder": "Entra una o más etiquetas, ej. 'romántico'",
+  "admgr.tags.placeholder": "Escribe una o más etiquetas, ej. 'romántico'",
   "admgr.timeout": "Penalizado",
   "admgr.toggleAutoPost": "Publicar anuncios automáticamente",
   "admgr.useEditorPrefix": "Usa el",
