@@ -274,7 +274,7 @@
           const el = this.scroller;
           if (el) {
             this.programmaticScroll = true;
-            el.scrollTop = targetScrollTop;
+            el.scrollTop = el.scrollHeight - el.clientHeight;
           }
         }
 
@@ -285,11 +285,6 @@
         const nextScrollTop = Math.min(this.scrollTop, maxScrollTop);
         if (nextScrollTop !== this.scrollTop) {
           this.scrollTop = nextScrollTop;
-          const el = this.scroller;
-          if (el) {
-            this.programmaticScroll = true;
-            el.scrollTop = nextScrollTop;
-          }
         }
 
         let start = this.findStartIndex(nextScrollTop);
