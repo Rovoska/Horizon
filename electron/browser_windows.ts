@@ -153,8 +153,7 @@ electron.ipcMain.on('has-new', (e: IpcMainEvent, hasNew: number) => {
     (sum, item) => sum + newMessagesMap[item.id],
     0
   );
-  if (process.platform === 'darwin' && app.dock !== undefined)
-    app.dock.setBadge(totalCount > 0 ? totalCount.toString() : '');
+  if (process.platform !== 'win32') app.setBadgeCount(totalCount);
   else {
     windows.forEach(item => {
       applyOverlayIcon(item, totalCount);
