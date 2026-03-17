@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Redrawn notification badge icons for Windows. They should now be more legible on lower display scales too. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/3a4e4d1bd878f71c7c55f75de9fabf1a1464b6fd)
+
+### Fixed
+
+- Channel join dialog jitter when scrolling down too far. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c947f85442a176b10536c840879ae00005d29a3a)
+- Issues with the nightly builds not using updated version numbers, leading to repeated update prompts. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/43b570f6eaebb17120379ca8c33bdd36736859e7)
+- F-List.net character previews from [url] BBCode tags no longer cut off if they contain a dash (-). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c2f2369f438d077b386fb02e52ff0e444ad833df)
+
 ## [2.0.0-beta.1] - 2026-03-15
 
 ### Fixed
