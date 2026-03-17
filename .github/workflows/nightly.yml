@@ -19,7 +19,20 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.RELEASE_TOKEN }}
 
-      - name: Check for new commits and tag
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for new commits
+        id: check
         run: |
           set -euo pipefail
 
@@ -29,33 +42,20 @@ jobs:
             COMMITS=$(git rev-list "${LAST_TAG}..HEAD" --count)
             if [ "$COMMITS" -eq "0" ]; then
               echo "No new commits since ${LAST_TAG} — skipping dev build."
-              exit 0
+              echo "skip=true" >> $GITHUB_OUTPUT
+            else
+              echo "${COMMITS} new commit(s) since ${LAST_TAG}."
+              echo "skip=false" >> $GITHUB_OUTPUT
             fi
-            echo "${COMMITS} new commit(s) since ${LAST_TAG}."
-          fi
-
-          # Compute the base version for the next release.
-          # If current version is already a pre-release (e.g. 1.37.0-beta.1),
-          # use that base (1.37.0). Otherwise bump the patch.
-          CURRENT=$(jq -r '.version' package.json)
-          if [[ "$CURRENT" == *"-"* ]]; then
-            NEXT_BASE="${CURRENT%%-*}"
           else
-            IFS=. read -r MAJOR MINOR PATCH <<< "$CURRENT"
-            NEXT_BASE="${MAJOR}.${MINOR}.$((PATCH + 1))"
+            echo "skip=false" >> $GITHUB_OUTPUT
           fi
 
-          # Find the highest existing dev N for this base version and increment.
-          LATEST_N=$(git tag -l "v${NEXT_BASE}-dev.*" | sed "s/.*-dev\.//" | sort -n | tail -1)
-          if [ -z "$LATEST_N" ]; then
-            NEXT_N=1
-          else
-            NEXT_N=$((LATEST_N + 1))
-          fi
-          NEW_TAG="v${NEXT_BASE}-dev.${NEXT_N}"
-
-          echo "Creating tag ${NEW_TAG}..."
+      - name: Bump version and tag
+        if: steps.check.outputs.skip != 'true'
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "$NEW_TAG"
-          git push origin "$NEW_TAG"
+          pnpm release-it --ci --preRelease=dev -c .release-it.nightly.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
