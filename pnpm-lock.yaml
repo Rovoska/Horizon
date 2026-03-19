@@ -58,6 +58,9 @@ importers:
       node-fetch:
         specifier: ^2.7.0
         version: 2.7.0(encoding@0.1.13)
+      vuedraggable:
+        specifier: ^2.24.3
+        version: 2.24.3
     devDependencies:
       '@electron/remote':
         specifier: ^2.1.2
@@ -5356,6 +5359,9 @@ packages:
     resolution: {integrity: sha512-HLpt+uLy/pxB+bum/9DzAgiKS8CX1EvbWxI4zlmgGCExImLdiad2iCwXT5Z4c9c3Eq8rP2318mPW2c+QbtjK8A==}
     engines: {node: '>= 10.0.0', npm: '>= 3.0.0'}
 
+  sortablejs@1.10.2:
+    resolution: {integrity: sha512-YkPGufevysvfwn5rfdlGyrGjt7/CRHwvRPogD/lC+TnvcN29jDpCifKP+rBqf+LRldfXSTh+0CGLcSg0VIxq3A==}
+
   sortablejs@1.15.6:
     resolution: {integrity: sha512-aNfiuwMEpfBM/CN6LY0ibyhxPfPbyFeBTYJKCvzkJ2GkUpazIt3H+QIPAMHwqQ7tMKaHz1Qj+rJJCqljnf4p3A==}
 
@@ -5909,6 +5915,9 @@ packages:
     resolution: {integrity: sha512-4gCtFXaAA3zYZdTp5s4Hl2sozuySsgz4jy1EnpBHNfpMa9dK1ZCG7viqBPCwXtmgc8nHqUsAu3G4gtmXkkY3Sw==}
     deprecated: Vue 2 has reached EOL and is no longer actively maintained. See https://v2.vuejs.org/eol/ for more details.
 
+  vuedraggable@2.24.3:
+    resolution: {integrity: sha512-6/HDXi92GzB+Hcs9fC6PAAozK1RLt1ewPTLjK0anTYguXLAeySDmcnqE8IC0xa7shvSzRjQXq3/+dsZ7ETGF3g==}
+
   watchpack@2.4.4:
     resolution: {integrity: sha512-c5EGNOiyxxV5qmTtAB7rbiXxi1ooX1pQKMLX/MIabJjRA0SJBQOjKF+KSVfHkr9U1cADPon0mRiVe/riyaiDUA==}
     engines: {node: '>=10.13.0'}
@@ -6212,7 +6221,7 @@ snapshots:
       node-gyp: 9.4.1(bluebird@3.7.2)(supports-color@10.0.0)
       ora: 5.4.1
       read-binary-file-arch: 1.0.6(supports-color@10.0.0)
-      semver: 7.7.3
+      semver: 7.7.4
       tar: 6.2.1
       yargs: 17.7.2
     transitivePeerDependencies:
@@ -7354,7 +7363,7 @@ snapshots:
       minimatch: 10.1.1
       resedit: 1.7.2
       sanitize-filename: 1.6.3
-      semver: 7.7.3
+      semver: 7.7.4
       tar: 6.2.1
       temp-file: 3.4.0
     transitivePeerDependencies:
@@ -7394,7 +7403,7 @@ snapshots:
       minimatch: 10.1.1
       resedit: 1.7.2
       sanitize-filename: 1.6.3
-      semver: 7.7.3
+      semver: 7.7.4
       tar: 6.2.1
       temp-file: 3.4.0
     transitivePeerDependencies:
@@ -10493,7 +10502,7 @@ snapshots:
 
   node-abi@3.85.0:
     dependencies:
-      semver: 7.7.3
+      semver: 7.7.4
 
   node-abi@4.24.0:
     dependencies:
@@ -11895,6 +11904,8 @@ snapshots:
       ip-address: 10.1.0
       smart-buffer: 4.2.0
 
+  sortablejs@1.10.2: {}
+
   sortablejs@1.15.6: {}
 
   source-list-map@2.0.1: {}
@@ -12507,6 +12518,10 @@ snapshots:
     dependencies:
       '@vue/compiler-sfc': 2.7.16
       csstype: 3.1.3
+
+  vuedraggable@2.24.3:
+    dependencies:
+      sortablejs: 1.10.2
 
   watchpack@2.4.4:
     dependencies:

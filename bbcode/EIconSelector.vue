@@ -138,7 +138,52 @@
         </div>
 
         <div class="carousel slide w-100 results">
+          <draggable
+            v-if="search === 'category:favorites'"
+            v-model="allResults"
+            class="carousel-inner w-100 hidden-scrollbar"
+            role="listbox"
+            :animation="150"
+            @end="saveFavoritesOrder"
+          >
+            <div
+              class="carousel-item"
+              v-for="eicon in allResults"
+              :key="eicon"
+              role="img"
+              :aria-label="eicon"
+              tabindex="0"
+            >
+              <img
+                class="eicon"
+                :alt="eicon"
+                :src="
+                  'https://static.f-list.net/images/eicon/' + eicon + '.gif'
+                "
+                :title="eicon"
+                role="button"
+                :aria-label="eicon"
+                @click.prevent.stop="selectIcon(eicon, $event)"
+              />
+
+              <div
+                class="btn favorite-toggle"
+                :class="{ favorited: isFavorite(eicon) }"
+                @click.prevent.stop="toggleFavorite(eicon)"
+                role="button"
+                :aria-label="
+                  isFavorite(eicon)
+                    ? l('eicon.removeFromFavorites')
+                    : l('eicon.addToFavorites')
+                "
+              >
+                <i class="fas fa-thumbtack"></i>
+              </div>
+            </div>
+          </draggable>
+
           <div
+            v-else
             class="carousel-inner w-100 hidden-scrollbar"
             role="listbox"
             ref="resultsContainer"
@@ -185,7 +230,7 @@
 </template>
 
 <script lang="ts">
-  import Sortable from 'sortablejs';
+  import draggable from 'vuedraggable';
   import { EIconStore } from '../learn/eicon/store';
   import core from '../chat/core';
   import modal from '../components/Modal.vue';
@@ -209,14 +254,13 @@
   let store: EIconStore | undefined;
 
   export default CustomDialog.extend({
-    components: { modal },
+    components: { modal, draggable },
     props: {
       onSelect: {}
     },
     data() {
       return {
         l: l,
-        sortable: undefined as Sortable | undefined,
         storeLoaded: false as boolean,
         results: [] as string[],
         allResults: [] as string[],
@@ -254,13 +298,11 @@
       });
       this.searchWithString('category:favorites');
 
-      // add scroll listener to the results container
       this.$nextTick(() => {
         const resultsContainer = this.$refs['resultsContainer'] as HTMLElement;
         if (resultsContainer) {
           resultsContainer.addEventListener('scroll', this.handleScroll);
         }
-        this.initializeSortable();
       });
     },
     beforeDestroy(): void {
@@ -268,49 +310,20 @@
       if (resultsContainer) {
         resultsContainer.removeEventListener('scroll', this.handleScroll);
       }
-      this.destroySortable();
     },
     methods: {
-      initializeSortable(): void {
-        if (this.sortable || this.search !== 'category:favorites') return;
-
-        const resultsContainer = this.$refs['resultsContainer'] as HTMLElement;
-        if (!resultsContainer) return;
-
-        this.sortable = Sortable.create(resultsContainer, {
-          animation: 150,
-          onEnd: e => {
-            //sanity check, in case our sortableJS object hasnt been destroyed somehow (this has happened before!)
-            if (this.search !== 'category:favorites') return;
-            const oldIndex = e.oldIndex!;
-            const newIndex = e.newIndex!;
-
-            if (oldIndex === newIndex) return;
-
-            this.allResults.splice(oldIndex, 1);
-            this.allResults.splice(newIndex, 0, eicon);
-            this.results = this.allResults.slice(0, this.displayedCount);
-
-            const newFavorites: Record<string, boolean> = {};
-            for (const fav of this.allResults) {
-              if (!this.isFavorite(fav)) continue;
-              newFavorites[fav] = true;
-            }
-            core.state.favoriteEIcons = newFavorites;
-
-            void core.settingsStore.set(
-              'favoriteEIcons',
-              core.state.favoriteEIcons
-            );
-          }
-        });
-      },
-
-      destroySortable(): void {
-        if (this.sortable) {
-          this.sortable.destroy();
-          this.sortable = undefined;
+      saveFavoritesOrder(e: { oldIndex: number; newIndex: number }): void {
+        if (e.oldIndex === e.newIndex) return;
+        const newFavorites: Record<string, boolean> = {};
+        for (const fav of this.allResults) {
+          if (!this.isFavorite(fav)) continue;
+          newFavorites[fav] = true;
         }
+        core.state.favoriteEIcons = newFavorites;
+        void core.settingsStore.set(
+          'favoriteEIcons',
+          core.state.favoriteEIcons
+        );
       },
 
       loadMoreResults(): void {
@@ -363,17 +376,14 @@
         this.results = this.allResults.slice(0, this.displayedCount);
 
         this.$nextTick(() => {
-          // returns user to top after changing search
+          // returns user to top after changing search; also ensures scroll
+          // listener is attached whenever the non-favorites container renders
           const resultsContainer = this.$refs[
             'resultsContainer'
           ] as HTMLElement;
           if (resultsContainer) {
             resultsContainer.scrollTop = 0;
-          }
-          this.destroySortable();
-
-          if (this.search === 'category:favorites') {
-            this.initializeSortable();
+            resultsContainer.addEventListener('scroll', this.handleScroll);
           }
         });
       },
@@ -785,12 +795,6 @@
           ] as HTMLElement;
           if (resultsContainer) {
             resultsContainer.addEventListener('scroll', this.handleScroll);
-          }
-
-          this.destroySortable();
-
-          if (this.search === 'category:favorites') {
-            this.initializeSortable();
           }
         });
       },
