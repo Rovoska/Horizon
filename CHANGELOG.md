@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Redrawn notification badge icons for Windows. Again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/7ab8f8ca9619b7c8834e4e7d7b5b7594d1f080a5)
+  - This time they should also look a bit nicer on hiDPI screens.
+
+### Fixed
+
+- Click-dragging pinned eicons to sort them has been completely rewritten with a different dragging library. Hopefully to solve any problems with this once and for all, so it should hopefully now save your changes again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5bb5016b0aed38133c1ba4a64d3525d83e7e9d54)
+
 ## [2.0.0-beta.2] - 2026-03-17
 
 ### Changed
