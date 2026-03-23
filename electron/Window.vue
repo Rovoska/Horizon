@@ -7,7 +7,7 @@
     <div v-html="styling"></div>
     <div
       :style="`
-        display: ${!(hideWindowControls && !hideSingleTab) | (tabs.length > 1) ? 'flex' : 'none'};
+        display: ${!(hideWindowControls && !hideSingleTab) || tabs.length > 1 ? 'flex' : 'none'};
         align-items: stretch;
         border-bottom-width: 1px;
         min-height: 31px;
@@ -83,7 +83,7 @@
               }}</span>
               <span
                 class="badge rounded-pill text-bg-danger ms-1"
-                v-if="tab.hasNew > 0"
+                v-if="shouldShowNotificationBadge(tab)"
               >
                 {{ tab.hasNew }}</span
               >
@@ -416,7 +416,9 @@
             tab.hasNew = 0;
             electron.ipcRenderer.send(
               'has-new',
-              this.tabs.reduce((cur, t) => cur + t.hasNew, 0)
+
+              this.tabs.reduce((cur, t) => cur + t.hasNew, 0),
+              this.settings.horizonShowNotificationBadge
             );
           }
           tab.user = undefined;
@@ -786,6 +788,9 @@
             ['platform-' + this.platform]: true
           };
         }
+      },
+      shouldShowNotificationBadge(tab: Tab): boolean {
+        return this.settings.horizonShowNotificationBadge && tab.hasNew > 0;
       }
     }
   });

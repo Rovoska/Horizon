@@ -487,6 +487,34 @@
                     {{ l('settings.soundTheme.noSounds') }}
                   </div>
                 </div>
+                <h5>
+                  {{ l('settings.notifications.badges') }}
+                </h5>
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="horizonShowNotificationBadge"
+                      v-model="settings.horizonShowNotificationBadge"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="horizonShowNotificationBadge"
+                    >
+                      {{ l('settings.notifications.badges.shouldShow') }}
+                    </label>
+                  </div>
+                  <div
+                    id="horizonShowNotificationBadgeNote"
+                    class="form-text text-muted"
+                    v-if="!isWindows && !isMac"
+                  >
+                    {{
+                      l('settings.notifications.badges.shouldShow.linuxNote')
+                    }}
+                  </div>
+                </div>
                 <div class="mb-3" v-if="!isMac">
                   <div class="form-check">
                     <input

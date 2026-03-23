@@ -108,7 +108,7 @@
             {{ conversations.consoleTab.name }}
             <span
               class="badge rounded-pill text-bg-danger"
-              v-show="conversations.consoleTab.unreadCount > 0"
+              v-show="shouldShowNotificationBadge(conversations.consoleTab)"
               >{{ conversations.consoleTab.unreadCount }}</span
             >
           </a>
@@ -170,7 +170,7 @@
                 ></span>
                 <span
                   class="badge rounded-pill text-bg-danger"
-                  v-show="conversation.unreadCount > 0"
+                  v-show="shouldShowNotificationBadge(conversation)"
                   >{{ conversation.unreadCount }}</span
                 >
                 <span
@@ -241,7 +241,7 @@
             <span>
               <span
                 class="badge align-text-bottom rounded-pill text-bg-danger"
-                v-show="conversation.unreadCount > 0"
+                v-show="shouldShowNotificationBadge(conversation)"
                 >{{ conversation.unreadCount }}</span
               >
 
@@ -579,7 +579,10 @@
       },
 
       needsReply(conversation: Conversation): boolean {
-        if (!core.state.settings.showNeedsReply || conversation.unreadCount > 0)
+        if (
+          !core.state.settings.showNeedsReply ||
+          this.shouldShowNotificationBadge(conversation)
+        )
           return false;
         for (let i = conversation.messages.length - 1; i >= 0; --i) {
           const sender = (<Partial<Conversation.ChatMessage>>(
@@ -797,6 +800,13 @@
         _.forEach(styling[status].icon, (name: string) => (cls[name] = true));
 
         return cls;
+      },
+
+      shouldShowNotificationBadge(conversation: Conversation): boolean {
+        return (
+          (core.state.generalSettings?.horizonShowNotificationBadge || true) &&
+          conversation.unreadCount > 0
+        );
       },
 
       logOut(): void {
