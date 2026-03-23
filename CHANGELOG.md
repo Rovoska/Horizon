@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-03-22
+
 ### Changed
 
 - Migrated all Vue components from the class API to the options API. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ffc9425c81cabdda2233c29032d0fe5bba0ac4eb)
@@ -1185,7 +1187,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IOS build removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/41261d1ba7043eb7dfd5a1a6331dc604ff338814)]
 - Webchat removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/b894a180b9be31f68d1458aaa3c59f9c4470da89)]
 
-[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0-beta.3...development
+[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0...development
+[2.0.0]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0-beta.3...v2.0.0
 [2.0.0-beta.3]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0-beta.2...v2.0.0-beta.3
 [2.0.0-beta.2]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0-dev.0...v2.0.0-beta.2
 [2.0.0-beta.1]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0-beta.0...v2.0.0-beta.1
