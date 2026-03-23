@@ -7,46 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.0-beta.3] - 2026-03-20
-
-### Changed
-
-- Redrawn notification badge icons for Windows. Again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/7ab8f8ca9619b7c8834e4e7d7b5b7594d1f080a5)
-  - This time they should also look a bit nicer on hiDPI screens.
-
-### Fixed
-
-- Click-dragging pinned eicons to sort them has been completely rewritten with a different dragging library. Hopefully to solve any problems with this once and for all, so it should hopefully now save your changes again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5bb5016b0aed38133c1ba4a64d3525d83e7e9d54)
-
-## [2.0.0-beta.2] - 2026-03-17
-
-### Changed
-
-- Redrawn notification badge icons for Windows. They should now be more legible on lower display scales too. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/3a4e4d1bd878f71c7c55f75de9fabf1a1464b6fd)
-
-### Fixed
-
-- Channel join dialog jitter when scrolling down too far. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c947f85442a176b10536c840879ae00005d29a3a)
-- Issues with the nightly builds not using updated version numbers, leading to repeated update prompts. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/43b570f6eaebb17120379ca8c33bdd36736859e7)
-- F-List.net character previews from [url] BBCode tags no longer cut off if they contain a dash (-). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c2f2369f438d077b386fb02e52ff0e444ad833df)
-
-## [2.0.0-beta.1] - 2026-03-15
-
-### Fixed
-
-- Regression where the eicon picker wouldn't load any extra eicons while scrolling anymore. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/beb19475be9bbf28b45c0da3195dcaa50b3d7157)
-
-## [2.0.0-beta.0] - 2026-03-14
-
 ### Changed
 
 - Migrated all Vue components from the class API to the options API. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ffc9425c81cabdda2233c29032d0fe5bba0ac4eb)
-- Upgraded to TypeScript 5 [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ffc9425c81cabdda2233c29032d0fe5bba0ac4eb)
+- Upgraded to TypeScript 5. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ffc9425c81cabdda2233c29032d0fe5bba0ac4eb)
 - Upgraded Node.js requirement to v24.14.0. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9eea00de0642d166cfe690478f86432ce210d0df)
 
 ### Added
 
-- Notification count badges on conversations, windows, and the tray icon. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9994f25fd5bf6553fcd7a639d1471015aaa55cf1)
+- Notification count badges on conversations, windows, and the tray icon, with redrawn icons on Windows for improved legibility on lower display scales and hiDPI screens. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9994f25fd5bf6553fcd7a639d1471015aaa55cf1) [[Commit 2]](https://github.com/Fchat-Horizon/Horizon/commit/3a4e4d1bd878f71c7c55f75de9fabf1a1464b6fd) [[Commit 3]](https://github.com/Fchat-Horizon/Horizon/commit/7ab8f8ca9619b7c8834e4e7d7b5b7594d1f080a5)
 - "No humans" and "no furries" smart filter options, which hides ads from characters who have marked themselves as not interested in your species. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/0e8e6bcf95dc11f1c6556fb80778199b58d59d4a)
 - Filterable select dropdowns now show the selected value, auto-focus the filter input on open, and select the first result on Enter. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/32f2923ffb1cf7dbc1391c794dd2f2946a480cd0)
 
@@ -55,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scrollbar thumb jitter during row measurement. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c3f2d8075d9c9664578a99329aa77b5259542b19)
 - Duplicate entries in the friend list when multiple characters share the same friend. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d26d31cb6789c974d8d002c6b744059c605627e7)
 - Link preview pins no longer block clicks on areas of the UI beneath them. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c64944b4dff2c10916bc7d4c33f430dc2d22e41a)
+- Regression where the eicon picker wouldn't load any extra eicons while scrolling anymore. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/beb19475be9bbf28b45c0da3195dcaa50b3d7157)
+- Click-dragging pinned eicons to sort them has been completely rewritten with a different dragging library, hopefully solving any remaining issues with this once and for all. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/5bb5016b0aed38133c1ba4a64d3525d83e7e9d54)
 
 ## [1.36.2] 12-03-2026
 
