@@ -515,6 +515,28 @@
                     }}
                   </div>
                 </div>
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="horizonShowWindowAndChatNotificationBadge"
+                      v-model="
+                        settings.horizonShowWindowAndChatNotificationBadge
+                      "
+                    />
+                    <label
+                      class="form-check-label"
+                      for="horizonShowWindowAndChatNotificationBadge"
+                    >
+                      {{
+                        l(
+                          'settings.notifications.badges.shouldShow.windowAndChat'
+                        )
+                      }}
+                    </label>
+                  </div>
+                </div>
                 <div class="mb-3" v-if="!isMac">
                   <div class="form-check">
                     <input

@@ -804,7 +804,8 @@
 
       shouldShowNotificationBadge(conversation: Conversation): boolean {
         return (
-          (core.state.generalSettings?.horizonShowNotificationBadge || true) &&
+          core.state.generalSettings
+            ?.horizonShowWindowAndChatNotificationBadge !== false &&
           conversation.unreadCount > 0
         );
       },

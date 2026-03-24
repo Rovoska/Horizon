@@ -790,7 +790,10 @@
         }
       },
       shouldShowNotificationBadge(tab: Tab): boolean {
-        return this.settings.horizonShowNotificationBadge && tab.hasNew > 0;
+        return (
+          this.settings.horizonShowWindowAndChatNotificationBadge !== false &&
+          tab.hasNew > 0
+        );
       }
     }
   });
