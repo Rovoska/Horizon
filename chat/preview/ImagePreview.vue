@@ -82,15 +82,11 @@
     RenderStyle
   } from './helper';
 
-  import { Point } from 'electron';
-  import * as remote from '@electron/remote';
-
-  import Timer = NodeJS.Timer;
   import IpcMessageEvent = Electron.IpcMessageEvent;
   import CharacterPreview from './CharacterPreview.vue';
   import l from '../localize';
 
-  const screen = remote.screen;
+  type TimerHandle = ReturnType<typeof setTimeout>;
 
   const FLIST_PROFILE_MATCH = _.cloneDeep(
     /https?:\/\/(www.)?f-list.net\/c\/([a-zA-Z0-9+%_.!~*'()-]+)\/?/
@@ -130,10 +126,12 @@
         state: 'hidden',
         shouldShowSpinner: false,
         shouldShowError: true,
-        interval: null as Timer | null,
-        exitInterval: null as Timer | null,
+        interval: null as TimerHandle | null,
+        exitInterval: null as TimerHandle | null,
         exitUrl: null as string | null,
-        initialCursorPosition: null as Point | null,
+        initialMouseMoveToken: null as number | null,
+        mouseMoveToken: 0,
+        pointerMoveListener: null as EventListener | null,
         shouldDismiss: false,
         visibleSince: 0,
         previewStyles: {} as Record<string, RenderStyle>
@@ -484,7 +482,7 @@
           (this.visible && !this.exitInterval && !this.shouldDismiss) ||
           this.interval
         )
-          this.initialCursorPosition = screen.getCursorScreenPoint();
+          this.initialMouseMoveToken = this.mouseMoveToken;
 
         if (
           this.visible &&
@@ -501,8 +499,30 @@
         this.shouldShowSpinner = this.testSpinner();
         this.shouldShowError = this.testError();
       }, 50);
+
+      this.pointerMoveListener = () => {
+        this.mouseMoveToken += 1;
+      };
+
+      window.addEventListener('pointermove', this.pointerMoveListener, {
+        passive: true
+      });
+    },
+    beforeDestroy(): void {
+      this.cancelExitTimer();
+      this.cancelTimer();
+
+      if (!this.pointerMoveListener) {
+        return;
+      }
+
+      window.removeEventListener('pointermove', this.pointerMoveListener);
+      this.pointerMoveListener = null;
     },
     methods: {
+      setMouseMovementBaseline(): void {
+        this.initialMouseMoveToken = this.mouseMoveToken;
+      },
       reRenderStyles(): void {
         this.previewStyles = this.previewManager.renderStyles();
       },
@@ -718,7 +738,7 @@
         // when dealing with situations such as quickly scrolling text that moves the cursor away
         // from the link
         // tslint:disable-next-line no-unnecessary-type-assertion
-        this.exitInterval = setTimeout(() => this.hide(), due) as Timer;
+        this.exitInterval = setTimeout(() => this.hide(), due) as TimerHandle;
       },
       show(initialUrl: string): void {
         const url = this.jsMutator.mutateUrl(initialUrl);
@@ -791,7 +811,7 @@
           this.visibleSince = Date.now();
           this.shouldDismiss = false;
 
-          this.initialCursorPosition = screen.getCursorScreenPoint();
+          this.setMouseMovementBaseline();
 
           this.reRenderStyles();
 
@@ -800,22 +820,12 @@
           } else {
             this.setState('loaded');
           }
-        }, due) as Timer;
+        }, due) as TimerHandle;
       },
       hasMouseMovedSince(): boolean {
-        if (!this.initialCursorPosition) return true;
+        if (this.initialMouseMoveToken === null) return true;
 
-        try {
-          const p = screen.getCursorScreenPoint();
-
-          return (
-            p.x !== this.initialCursorPosition.x ||
-            p.y !== this.initialCursorPosition.y
-          );
-        } catch (err) {
-          console.error('ImagePreview', err);
-          return true;
-        }
+        return this.mouseMoveToken !== this.initialMouseMoveToken;
       },
       cancelTimer(): void {
         if (this.interval) clearTimeout(this.interval);
@@ -912,8 +922,8 @@
       getWebview(): Electron.WebviewTag {
         return this.$refs.imagePreviewExt as Electron.WebviewTag;
       },
-      getCharacterPreview(): CharacterPreview {
-        return this.$refs.characterPreview as CharacterPreview;
+      getCharacterPreview(): any {
+        return this.$refs.characterPreview as any;
       },
       reset(): void {
         this.previewManager = new PreviewManager(this as any, [
@@ -937,7 +947,8 @@
 
         this.exitUrl = null;
 
-        this.initialCursorPosition = null;
+        this.initialMouseMoveToken = null;
+        this.mouseMoveToken = 0;
         this.shouldDismiss = false;
         this.visibleSince = 0;
         this.shouldShowSpinner = false;
