@@ -357,10 +357,11 @@ class PrivateConversation
           'attention'
         );
         unreadState = Interfaces.UnreadState.Mention;
+      }
+      if (this !== state.selectedConversation || !state.windowFocused) {
+        this.unread = unreadState;
         this.unreadCount++;
       }
-      if (this !== state.selectedConversation || !state.windowFocused)
-        this.unread = unreadState;
       this.typingStatus = 'clear';
     }
   }
