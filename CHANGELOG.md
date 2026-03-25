@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-03-25
+
 ### Added
 
 - You can now disable the numbered unread message counters, both for the app icon on the task bar/ dock or just the ones inside the window. It's in the app settings on the top left, under 'Notifications'. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/38584d3b6ca7f56cb3a7b6ec30bbf302958622a5)
@@ -1196,7 +1198,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IOS build removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/41261d1ba7043eb7dfd5a1a6331dc604ff338814)]
 - Webchat removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/b894a180b9be31f68d1458aaa3c59f9c4470da89)]
 
-[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0...development
+[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.1...development
+[2.0.1]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0-beta.3...v2.0.0
 [2.0.0-beta.3]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0-beta.2...v2.0.0-beta.3
 [2.0.0-beta.2]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0-dev.0...v2.0.0-beta.2
