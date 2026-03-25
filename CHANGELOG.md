@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- You can now disable the numbered unread message counters, both for the app icon on the task bar/ dock or just the ones inside the window. It's in the app settings on the top left, under 'Notifications'. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/38584d3b6ca7f56cb3a7b6ec30bbf302958622a5)
+
+### Fixed
+
+- PMs you're actively looking at won't increase the amount of unread messages anymore. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/35c3fb4a00c7a26ed8b87f643d501a35c334a86c)
+- Fixed an issue for Electron 39.8.1+ builds from specific Linux package managers while using Wayland (what a mouthful!), where the image and profile preview would never disappear after moving your mouse cursor away. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/df26d5513d8838b4f3f240a1bec5ad5979c55920)
+
 ## [2.0.0] - 2026-03-22
 
 ### Changed
