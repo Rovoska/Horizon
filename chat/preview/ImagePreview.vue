@@ -1043,7 +1043,8 @@
 
       .image-preview-toolbar,
       .image-preview-external,
-      .image-preview-local {
+      .image-preview-local,
+      .character-preview {
         pointer-events: auto;
       }
     }
