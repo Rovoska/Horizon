@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed 'Show numbered badges on the app icon' being disabled on Windows not really working. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/2a667cb49e66106a1651dddfb6399cb53e9809f1)
+  - This is what happens when you write Windows-specific code and then proceed not to test on Windows, folks.
+
 ## [2.0.1] - 2026-03-25
 
 ### Added
