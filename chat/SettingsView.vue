@@ -382,6 +382,20 @@
         </div>
       </div>
 
+      <div class="mb-3">
+        <div class="d-flex p-2 justify-content-between align-items-start">
+          <div class="w-50">
+            <label class="control-label" for="forceQuickConvoList">
+              {{ l('settings.forceQuickConvoList') }}
+            </label>
+          </div>
+          <settings-checkbox
+            v-model="forceQuickConvoList"
+            :name="'forceQuickConvoList'"
+          ></settings-checkbox>
+        </div>
+      </div>
+
       <h5>{{ l('settings.appearance.messages') }}</h5>
 
       <div class="mb-3 p-2">
@@ -1207,6 +1221,7 @@
         horizonHighlightUsers: undefined as any as string,
         chatLayoutMode: undefined as any as 'classic' | 'modern',
         messageGrouping: undefined as any as boolean,
+        forceQuickConvoList: undefined as any as boolean,
         horizonUseColorPicker: undefined as any as boolean,
 
         horizonCacheDraftMessages: undefined as any as boolean,
@@ -1288,6 +1303,7 @@
         this.horizonChangeOfflineColor = settings.horizonChangeOfflineColor;
         this.chatLayoutMode = settings.chatLayoutMode || 'classic';
         this.messageGrouping = settings.messageGrouping;
+        this.forceQuickConvoList = settings.forceQuickConvoList;
         this.horizonUseColorPicker = settings.horizonUseColorPicker;
 
         this.horizonCacheDraftMessages = settings.horizonCacheDraftMessages;
@@ -1441,6 +1457,7 @@
             .filter(x => x.length),
           chatLayoutMode: this.chatLayoutMode,
           messageGrouping: this.messageGrouping,
+          forceQuickConvoList: this.forceQuickConvoList,
           horizonCacheDraftMessages: this.horizonCacheDraftMessages,
           horizonSaveDraftMessagesToDiskTimer:
             diskDraftTimer === null

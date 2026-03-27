@@ -278,7 +278,11 @@
         padding-bottom: 10px;
       "
     >
-      <div id="quick-switcher" class="list-group">
+      <div
+        id="quick-switcher"
+        class="list-group"
+        :class="{ forced: forceQuickConvoList }"
+      >
         <a
           :class="getClasses(conversations.consoleTab)"
           href="#"
@@ -286,30 +290,48 @@
           class="list-group-item list-group-item-action"
         >
           <span class="fas fa-home conversation-icon"></span>
+          <span
+            class="position-absolute top-50 start-50 translate-middle badge rounded-pill text-bg-danger"
+            v-if="shouldShowNotificationBadge(conversations.consoleTab)"
+          >
+            {{ conversations.consoleTab.unreadCount }}
+          </span>
           {{ conversations.consoleTab.name }}
         </a>
         <a
           v-for="conversation in conversations.privateConversations"
           href="#"
           @click.prevent="conversation.show()"
+          @click.middle.prevent.stop="conversation.close()"
+          :data-character="conversation.character.name"
+          data-bs-touch="false"
           :class="getClasses(conversation)"
           class="list-group-item list-group-item-action"
           :key="conversation.key"
+          :title="conversation.character.name"
         >
           <img
             :src="characterImage(conversation.character.name)"
             v-if="showAvatars"
           />
           <span class="far fa-user-circle conversation-icon" v-else></span>
+          <span
+            class="position-absolute top-50 start-50 translate-middle badge rounded-pill text-bg-danger"
+            v-if="shouldShowNotificationBadge(conversation)"
+          >
+            {{ conversation.unreadCount }}
+          </span>
           <div class="name">{{ conversation.character.name }}</div>
         </a>
         <a
           v-for="conversation in conversations.channelConversations"
           href="#"
           @click.prevent="conversation.show()"
+          @click.middle.prevent.stop="conversation.close()"
           :class="getClasses(conversation)"
           class="list-group-item list-group-item-action"
           :key="conversation.key"
+          :title="conversation.name"
         >
           <span
             class="conversation-icon"
@@ -319,6 +341,12 @@
                 : 'fas fa-hashtag'
             "
           ></span>
+          <span
+            class="position-absolute top-50 start-50 translate-middle badge rounded-pill text-bg-danger"
+            v-if="shouldShowNotificationBadge(conversation)"
+          >
+            {{ conversation.unreadCount }}
+          </span>
           <div class="name">{{ conversation.name }}</div>
         </a>
       </div>
@@ -430,6 +458,9 @@
       },
       ownCharacter(): Character {
         return core.characters.ownCharacter;
+      },
+      forceQuickConvoList(): boolean {
+        return core.state.settings.forceQuickConvoList;
       },
       ownCharacterLink(): string {
         return profileLink(core.characters.ownCharacter.name);
@@ -882,7 +913,6 @@
       isColorblindModeActive(): boolean {
         return core.state.settings.risingColorblindMode;
       },
-
       getImagePreview(): ImagePreview | undefined {
         return this.$refs['imagePreview'] as ImagePreview;
       },
@@ -1022,6 +1052,12 @@
     @media (max-width: breakpoint-max(md)) {
       display: flex;
     }
+    &.forced {
+      display: flex;
+      @media (min-width: breakpoint-min(md)) {
+        margin: 0 5px 5px;
+      }
+    }
 
     a {
       width: 40px;
@@ -1051,8 +1087,11 @@
     }
 
     .conversation-icon {
-      font-size: 2em;
+      font-size: 1.6rem;
       height: 30px;
+    }
+    .badge {
+      --bs-badge-font-size: 0.9em;
     }
   }
 

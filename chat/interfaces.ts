@@ -320,6 +320,7 @@ export namespace Settings {
 
     readonly chatLayoutMode: 'classic' | 'modern';
     readonly messageGrouping: boolean;
+    readonly forceQuickConvoList: boolean;
 
     readonly horizonCacheDraftMessages: boolean;
     readonly horizonSaveDraftMessagesToDiskTimer: number;
