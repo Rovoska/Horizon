@@ -1,4 +1,5 @@
 node_modules/
+.pnpm-store/
 /electron/app
 /electron/dist
 /electron/release_artifacts

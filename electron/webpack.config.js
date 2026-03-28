@@ -1,14 +1,38 @@
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const { execSync } = require('child_process');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const { EsbuildPlugin } = require('esbuild-loader');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const vueTransformer = require('@f-list/vue-ts/transform').default;
 const CopyPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const packageJson = require('./package.json');
 const { DefinePlugin } = require('webpack');
 const APP_VERSION = process.env.APP_VERSION || packageJson.version;
+const APP_COMMIT =
+  process.env.APP_COMMIT ||
+  (() => {
+    try {
+      return execSync('git rev-parse --short HEAD', {
+        cwd: path.resolve(__dirname, '..'),
+        stdio: ['ignore', 'pipe', 'ignore']
+      })
+        .toString()
+        .trim();
+    } catch (error) {
+      return 'unknown';
+    }
+  })();
+
+const nodeModulesPath = path.resolve(__dirname, '../node_modules');
+
+const sharedConfig = {
+  snapshot: {
+    managedPaths: [nodeModulesPath, path.resolve(__dirname, 'node_modules')]
+  }
+};
 
 const mainConfig = {
     entry: [
@@ -25,10 +49,10 @@ const mainConfig = {
       rules: [
         {
           test: /\.ts$/,
-          loader: 'ts-loader',
+          loader: 'esbuild-loader',
           options: {
-            configFile: __dirname + '/tsconfig-main.json',
-            transpileOnly: true
+            target: 'es2022',
+            tsconfig: path.join(__dirname, 'tsconfig-main.json')
           }
         },
         {
@@ -51,12 +75,14 @@ const mainConfig = {
     },
     plugins: [
       new DefinePlugin({
-        'process.env.APP_VERSION': JSON.stringify(APP_VERSION)
+        'process.env.APP_VERSION': JSON.stringify(APP_VERSION),
+        'process.env.APP_COMMIT': JSON.stringify(APP_COMMIT)
       })
     ],
     resolve: {
       extensions: ['.ts', '.js']
     },
+    experiments: { cacheUnaffected: true },
     optimization: {
       moduleIds: 'named',
       chunkIds: 'named'
@@ -114,12 +140,11 @@ const mainConfig = {
         },
         {
           test: /\.ts$/,
-          loader: 'ts-loader',
+          loader: 'esbuild-loader',
           options: {
-            appendTsSuffixTo: [/\.vue$/],
-            configFile: __dirname + '/tsconfig-renderer.json',
-            transpileOnly: true,
-            getCustomTransformers: () => ({ before: [vueTransformer] })
+            loader: 'ts',
+            target: 'es2022',
+            tsconfig: path.join(__dirname, 'tsconfig-renderer.json')
           }
         },
         { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
@@ -151,12 +176,12 @@ const mainConfig = {
                   quietDeps: true,
                   // Add any specific codes here; '*' not supported, so rely on custom logger below.
                   silenceDeprecations: [
-                    'mixed-decls',
                     'import',
                     'color-functions',
                     'global-builtin',
                     'slash-div',
-                    'function-units'
+                    'function-units',
+                    'if-function'
                   ],
                   verbose: false
                 }
@@ -185,12 +210,12 @@ const mainConfig = {
                 sassOptions: {
                   quietDeps: true,
                   silenceDeprecations: [
-                    'mixed-decls',
                     'import',
                     'color-functions',
                     'global-builtin',
                     'slash-div',
-                    'function-units'
+                    'function-units',
+                    'if-function'
                   ],
                   verbose: false
                 }
@@ -207,7 +232,13 @@ const mainConfig = {
     },
     plugins: [
       new DefinePlugin({
-        'process.env.APP_VERSION': JSON.stringify(APP_VERSION)
+        'process.env.APP_VERSION': JSON.stringify(APP_VERSION),
+        'process.env.APP_COMMIT': JSON.stringify(APP_COMMIT)
+      }),
+      new ForkTsCheckerWebpackPlugin({
+        typescript: {
+          configFile: path.join(__dirname, 'tsconfig-renderer.json')
+        }
       }),
       new VueLoaderPlugin(),
       new MiniCssExtractPlugin({
@@ -252,6 +283,7 @@ const mainConfig = {
       extensions: ['.ts', '.js', '.vue', '.css']
       // alias: {qs: 'querystring'}
     },
+    experiments: { cacheUnaffected: true },
     optimization: {
       splitChunks: { chunks: 'all', minChunks: 2, name: 'common' },
       moduleIds: 'named',
@@ -286,16 +318,17 @@ const storeWorkerEndpointConfig = _.assign(_.cloneDeep(mainConfig), {
     rules: [
       {
         test: /\.ts$/,
-        loader: 'ts-loader',
+        loader: 'esbuild-loader',
         options: {
-          configFile: __dirname + '/tsconfig-renderer.json',
-          transpileOnly: true,
-          getCustomTransformers: () => ({ before: [vueTransformer] })
+          loader: 'ts',
+          target: 'es2022',
+          tsconfig: path.join(__dirname, 'tsconfig-renderer.json')
         }
       }
     ]
   },
 
+  experiments: { cacheUnaffected: true },
   optimization: {
     moduleIds: 'named',
     chunkIds: 'named'
@@ -303,7 +336,8 @@ const storeWorkerEndpointConfig = _.assign(_.cloneDeep(mainConfig), {
 
   plugins: [
     new DefinePlugin({
-      'process.env.APP_VERSION': JSON.stringify(APP_VERSION)
+      'process.env.APP_VERSION': JSON.stringify(APP_VERSION),
+      'process.env.APP_COMMIT': JSON.stringify(APP_COMMIT)
     })
   ]
 });
@@ -331,6 +365,49 @@ module.exports = function (mode) {
     ...themeEntries
   };
 
+  const cacheVersion = `${APP_VERSION}-${APP_COMMIT}`;
+  const watchOptions = { ignored: /node_modules/, aggregateTimeout: 300 };
+  for (const cfg of [mainConfig, rendererConfig, storeWorkerEndpointConfig]) {
+    Object.assign(cfg, sharedConfig);
+    cfg.watchOptions = watchOptions;
+  }
+  const sharedBuildDeps = [
+    __filename,
+    path.resolve(__dirname, '..', 'pnpm-lock.yaml'),
+    path.resolve(__dirname, '..', 'tsconfig.json')
+  ];
+
+  mainConfig.cache = {
+    type: 'filesystem',
+    name: `main-${mode}`,
+    version: cacheVersion,
+    buildDependencies: {
+      config: [...sharedBuildDeps, path.join(__dirname, 'tsconfig-main.json')]
+    }
+  };
+  rendererConfig.cache = {
+    type: 'filesystem',
+    name: `renderer-${mode}`,
+    version: cacheVersion,
+    buildDependencies: {
+      config: [
+        ...sharedBuildDeps,
+        path.join(__dirname, 'tsconfig-renderer.json')
+      ]
+    }
+  };
+  storeWorkerEndpointConfig.cache = {
+    type: 'filesystem',
+    name: `store-worker-${mode}`,
+    version: cacheVersion,
+    buildDependencies: {
+      config: [
+        ...sharedBuildDeps,
+        path.join(__dirname, 'tsconfig-renderer.json')
+      ]
+    }
+  };
+
   if (mode === 'production') {
     process.env.NODE_ENV = 'production';
 
@@ -338,13 +415,21 @@ module.exports = function (mode) {
     rendererConfig.devtool = false;
     storeWorkerEndpointConfig.devtool = false;
 
-    rendererConfig.plugins.push(new OptimizeCssAssetsPlugin());
+    const esbuildMinifier = new EsbuildPlugin({ target: 'es2022' });
+    mainConfig.optimization.minimizer = [esbuildMinifier];
+    storeWorkerEndpointConfig.optimization.minimizer = [esbuildMinifier];
+    rendererConfig.optimization.minimizer = [
+      esbuildMinifier,
+      new CssMinimizerPlugin()
+    ];
   } else {
-    // mainConfig.devtool = rendererConfig.devtool = 'none';
+    mainConfig.devtool = 'eval-source-map';
+    rendererConfig.devtool = 'eval-source-map';
+    storeWorkerEndpointConfig.devtool = 'eval-source-map';
 
-    mainConfig.devtool = 'inline-source-map';
-    rendererConfig.devtool = 'inline-source-map';
-    storeWorkerEndpointConfig.devtool = 'inline-source-map';
+    mainConfig.output.pathinfo = false;
+    rendererConfig.output.pathinfo = false;
+    storeWorkerEndpointConfig.output.pathinfo = false;
   }
 
   return [storeWorkerEndpointConfig, mainConfig, rendererConfig];

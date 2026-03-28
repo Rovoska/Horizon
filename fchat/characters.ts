@@ -1,8 +1,10 @@
 import core from '../chat/core';
+import { EventMessage } from '../chat/common';
 import { methods } from '../site/character_page/data_store';
 import { decodeHTML } from './common';
 import { Character as Interfaces, Connection } from './interfaces';
 import { Character as CharacterProfile } from '../site/character_page/interfaces';
+import { ProfileCache } from '../learn/profile-cache';
 import Vue from 'vue';
 
 class Character implements Interfaces.Character {
@@ -259,6 +261,21 @@ export default function (this: void, connection: Connection): Interfaces.State {
 
       // tslint:disable-next-line no-unnecessary-type-assertion
       core.cache.setProfile(state.ownProfile as CharacterProfile);
+
+      await core.cache.profileCache.register(state.ownProfile as any);
+
+      core.cache.profileCache.updateOverrides(state.ownProfile as any);
+
+      const hqPortraitUrl = ProfileCache.extractHighQualityPortraitURL(
+        state.ownProfile.character.description
+      );
+      if (hqPortraitUrl && ProfileCache.isImgurURL(hqPortraitUrl)) {
+        core.conversations.consoleTab.addMessage(
+          new EventMessage(
+            '[color=red][b]Warning:[/b][/color] [i]Your high-quality portrait uses Imgur, which is no longer supported[/i]. [b]We suggest you move your Imgur portrait to F-List itself[/b], but other hosts are also supported (freeimage.host, e621.net, iili.io, imgchest.com, toyhou.se, or redgifs.com.) Once imgur is removed from your profile, this warning will not appear after login.'
+          )
+        );
+      }
     }
 
     character.name = data.identity;
@@ -307,10 +324,17 @@ export default function (this: void, connection: Connection): Interfaces.State {
           state.bookmarks.splice(state.bookmarks.indexOf(character), 1);
         break;
       case 'friendadd':
-        // Always add to global friends
-        state.friendList.push(data.name);
+        // Always add to global friends (guard against duplicates when multiple characters share a friend)
+        if (state.friendList.indexOf(data.name) === -1) {
+          state.friendList.push(data.name);
+        }
         character.isFriend = true;
-        if (character.status !== 'offline') state.friends.push(character);
+        if (
+          character.status !== 'offline' &&
+          state.friends.indexOf(character) === -1
+        ) {
+          state.friends.push(character);
+        }
 
         // Always update character-specific friends list. This shouldn't add any excessive overhead.
         const friendAddResponse = await connection.queryApi<{
