@@ -875,6 +875,17 @@
     column-count: 2;
     column-gap: 0.5rem;
 
+    &.thumbnails {
+      column-count: auto;
+    }
+
+    .character-image-thumb-wrapper {
+      display: inline-block;
+      a {
+        cursor: pointer;
+      }
+    }
+
     .character-image-wrapper {
       display: inline-block;
       background-color: var(--characterImageWrapperBg);
@@ -1084,7 +1095,6 @@
   .character-card-header {
     position: sticky;
     top: -1rem;
-    z-index: 1000;
     background: var(--headerBackgroundMaskColor) !important;
   }
 

@@ -255,9 +255,29 @@
   img {
     padding: 5px;
     background: white;
-    z-index: 1100;
+    z-index: 1500;
     max-height: 100%;
     max-width: 100%;
+  }
+  .image-preview-info-outer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 20%;
+    z-index: 1501;
+
+    .image-preview-info {
+      padding: 1em 5em;
+      opacity: 0;
+      transition: opacity linear 0.3s;
+      background: var(--bs-card-bg);
+      color: var(--bs-card-color);
+      border-top: 1px solid var(--bs-card-border-color);
+    }
+    &:hover .image-preview-info {
+      visibility: visible;
+      opacity: 1;
+    }
   }
 }
 
