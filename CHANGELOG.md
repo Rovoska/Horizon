@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Recently picked EIcons are now their own category in the EIcon picker. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/8b34333993c8965be9f63be87314a660ad8e6cb7)
+
+### Changed
+
+- The 'quick switch' conversation list on the top of the window when you're in a narrow view mode has had a few tweaks to bring it up to snuff with its widescreen counterpart: [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/c756570aa4afdf8230177eb87e0aa36de4536f34)
+  - Middle clicking closes the relevant conversation.
+  - Right clicking a PM opens the user context menu.
+  - Unread message badges are visible.
+  - There is a setting to force the list to always be visible, regardless of how wide your window is.
+
+### Fixed
+
+- Pinning a character preview with the middle mouse button now makes the buttons interactable again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/7e09975cdbddb070e8a727966929742dbbc5fb4c)
+- Numbered notification badges. Again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b4cc20669c57c36b4520ef847a40fb9cae743884)
+
+### Development
+
+- Upgraded Electron to version 39.8.3 (from 39.2.7). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/51b77f4854aadc8228e1d6f0169dc30b16c136b3)
+
+### Merged pull requests
+
+- https://github.com/Fchat-Horizon/Horizon/pull/707 by @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/711 by @freenutsxd
+- https://github.com/Fchat-Horizon/Horizon/pull/712 by @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/713 by @FatCatClient
+
 ## [2.0.2] - 2026-03-26
 
 ### Fixed
