@@ -2,7 +2,7 @@
   <modal
     :action="l('chat.setStatus')"
     @submit="setStatus"
-    @close="reset"
+    @after-leave="reset"
     dialogClass="w-100 modal-70 statusEditor"
     :iconClass="getStatusIcon(status)"
   >
