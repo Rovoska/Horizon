@@ -107,8 +107,10 @@ export class CoreBBCodeParser extends BBCodeParser {
           parser.warning('Unexpected parameter on eicon tag.');
         const uregex = /^[a-zA-Z0-9_\-\s]+$/;
         if (!uregex.test(content)) return;
-        let extension = '.gif';
-        if (!Utils.settings.animateEicons) extension = '.png';
+        const extension =
+          core.connection.isOpen && !core.state.settings.animatedEicons
+            ? '.png'
+            : '.gif';
         const img = parser.createElement('img');
         img.src = `https://static.f-list.net/images/eicon/${content.toLowerCase()}${extension}`;
         img.title = img.alt = content;
