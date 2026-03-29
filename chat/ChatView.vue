@@ -107,7 +107,7 @@
           >
             {{ conversations.consoleTab.name }}
             <span
-              class="badge rounded-pill text-bg-danger"
+              class="badge rounded-pill text-bg-danger conversation-badge conversation-badge-inline-end"
               v-show="shouldShowNotificationBadge(conversations.consoleTab)"
               >{{ conversations.consoleTab.unreadCount }}</span
             >
@@ -152,24 +152,31 @@
             :key="conversation.key"
             @click.middle.prevent.stop="conversation.close()"
           >
-            <img
-              :src="
-                characterImage(
-                  conversation.character.name,
-                  !coreState.settings.horizonMessagePortraitHighQuality
-                )
-              "
-              v-if="showAvatars"
-            />
+            <div class="avatar-wrapper" v-if="showAvatars">
+              <img
+                :src="
+                  characterImage(
+                    conversation.character.name,
+                    !coreState.settings.horizonMessagePortraitHighQuality
+                  )
+                "
+              />
+              <span
+                class="badge text-bg-danger conversation-badge"
+                v-show="shouldShowNotificationBadge(conversation)"
+                >{{ conversation.unreadCount }}</span
+              >
+            </div>
             <div class="name">
               <span>{{ conversation.character.name }}</span>
-              <div style="line-height: 0; display: flex">
+              <div class="conversation-meta">
                 <span
                   class="fas fa-reply"
                   v-show="needsReply(conversation)"
                 ></span>
                 <span
-                  class="badge rounded-pill text-bg-danger"
+                  class="badge rounded-pill text-bg-danger conversation-badge"
+                  v-if="!showAvatars"
                   v-show="shouldShowNotificationBadge(conversation)"
                   >{{ conversation.unreadCount }}</span
                 >
@@ -238,9 +245,9 @@
             @click.middle.prevent.stop="conversation.close()"
           >
             <span class="name">{{ conversation.name }}</span>
-            <span>
+            <span class="conversation-actions">
               <span
-                class="badge align-text-bottom rounded-pill text-bg-danger"
+                class="badge rounded-pill text-bg-danger conversation-badge"
                 v-show="shouldShowNotificationBadge(conversation)"
                 >{{ conversation.unreadCount }}</span
               >
@@ -287,11 +294,11 @@
           :class="getClasses(conversations.consoleTab)"
           href="#"
           @click.prevent="conversations.consoleTab.show()"
-          class="list-group-item list-group-item-action"
+          class="list-group-item list-group-item-action quick-switcher-item"
         >
           <span class="fas fa-home conversation-icon"></span>
           <span
-            class="position-absolute top-50 start-50 translate-middle badge rounded-pill text-bg-danger"
+            class="badge text-bg-danger quick-switcher-badge"
             v-if="shouldShowNotificationBadge(conversations.consoleTab)"
           >
             {{ conversations.consoleTab.unreadCount }}
@@ -306,7 +313,7 @@
           :data-character="conversation.character.name"
           data-bs-touch="false"
           :class="getClasses(conversation)"
-          class="list-group-item list-group-item-action"
+          class="list-group-item list-group-item-action quick-switcher-item"
           :key="conversation.key"
           :title="conversation.character.name"
         >
@@ -316,7 +323,7 @@
           />
           <span class="far fa-user-circle conversation-icon" v-else></span>
           <span
-            class="position-absolute top-50 start-50 translate-middle badge rounded-pill text-bg-danger"
+            class="badge text-bg-danger quick-switcher-badge"
             v-if="shouldShowNotificationBadge(conversation)"
           >
             {{ conversation.unreadCount }}
@@ -329,7 +336,7 @@
           @click.prevent="conversation.show()"
           @click.middle.prevent.stop="conversation.close()"
           :class="getClasses(conversation)"
-          class="list-group-item list-group-item-action"
+          class="list-group-item list-group-item-action quick-switcher-item"
           :key="conversation.key"
           :title="conversation.name"
         >
@@ -342,7 +349,7 @@
             "
           ></span>
           <span
-            class="position-absolute top-50 start-50 translate-middle badge rounded-pill text-bg-danger"
+            class="badge text-bg-danger quick-switcher-badge"
             v-if="shouldShowNotificationBadge(conversation)"
           >
             {{ conversation.unreadCount }}
@@ -955,6 +962,37 @@
       color: var(--bs-success);
     }
 
+    .conversation-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      min-width: 1.65em;
+      line-height: 1;
+      box-shadow: 0 0 0 2px var(--bs-body-bg);
+    }
+
+    .conversation-badge-inline-end {
+      margin-left: auto;
+    }
+
+    .conversation-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      line-height: 1;
+      min-width: 0;
+      margin-top: 0.15rem;
+    }
+
+    .conversation-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      flex-shrink: 0;
+      margin-left: 0.5rem;
+    }
+
     .list-group-item {
       padding: 5px;
       display: flex;
@@ -992,6 +1030,31 @@
         padding-left: 1px;
         padding-top: 1px;
         padding-bottom: 1px;
+
+        .avatar-wrapper {
+          position: relative;
+          flex-shrink: 0;
+          margin-right: 5px;
+
+          img {
+            height: 40px;
+            width: 40px;
+            margin: 0;
+          }
+
+          .conversation-badge {
+            position: absolute;
+            bottom: 0;
+            right: -1px;
+            font-size: 9px;
+            min-width: 14px;
+            height: 14px;
+            padding: 0 3px;
+            margin: 0;
+            border-radius: 7px;
+            box-shadow: 0 0 0 2px var(--bs-list-group-bg, var(--bs-body-bg));
+          }
+        }
 
         .online-status {
           padding-left: 1px;
@@ -1033,10 +1096,12 @@
         width: 40px;
         margin: -1px 5px -1px -1px;
       }
-      &:first-child img {
+      &:first-child img,
+      &:first-child .avatar-wrapper img {
         border-top-left-radius: 4px;
       }
-      &:last-child img {
+      &:last-child img,
+      &:last-child .avatar-wrapper img {
         border-bottom-left-radius: 4px;
       }
     }
@@ -1061,6 +1126,7 @@
 
     a {
       width: 40px;
+      position: relative;
       text-align: center;
       line-height: 1;
       padding: 5px 5px 0;
@@ -1090,8 +1156,22 @@
       font-size: 1.6rem;
       height: 30px;
     }
-    .badge {
-      --bs-badge-font-size: 0.9em;
+
+    .quick-switcher-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 11px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      z-index: 1;
+      box-shadow: 0 0 0 3px var(--bs-list-group-bg, var(--bs-body-bg));
     }
   }
 
