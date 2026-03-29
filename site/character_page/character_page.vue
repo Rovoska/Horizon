@@ -141,6 +141,7 @@
                     :character="character"
                     ref="tab2"
                     :use-preview="imagePreview"
+                    :animated-thumbs="animatedThumbs"
                     :injected-images="images"
                   ></character-images>
                 </div>
@@ -246,7 +247,8 @@
       id: {},
       authenticated: { required: true as const },
       oldApi: {},
-      imagePreview: {}
+      imagePreview: { type: Boolean, default: true },
+      animatedThumbs: { type: Boolean, default: false }
     },
     data() {
       return {

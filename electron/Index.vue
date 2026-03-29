@@ -203,7 +203,8 @@
         :authenticated="true"
         :oldApi="true"
         :name="profileName"
-        :image-preview="true"
+        :image-preview="useProfileThumbViewer()"
+        :animated-thumbs="animateProfileViewerThumbs()"
         ref="characterPage"
       ></character-page>
       <template slot="title">
@@ -907,6 +908,12 @@
         const character = core.characters.get(name);
 
         this.profileStatus = character.statusText || '';
+      },
+      useProfileThumbViewer(): boolean {
+        return this.settings.profileViewerGalleryType === 'thumbnail';
+      },
+      animateProfileViewerThumbs(): boolean {
+        return this.settings.profileViewerThumbAnimate;
       },
       getActiveThemeName(): string {
         return (

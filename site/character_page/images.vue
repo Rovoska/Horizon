@@ -93,6 +93,7 @@
   const props = defineProps<{
     character: Character;
     usePreview?: boolean;
+    animatedThumbs?: boolean;
     injectedImages?: CharacterImage[] | null;
   }>();
 
@@ -104,7 +105,11 @@
   const error = ref('');
 
   const imageUrl = (image: CharacterImage) => methods.imageUrl(image);
-  const thumbUrl = (image: CharacterImage) => methods.imageThumbUrl(image);
+  const thumbUrl = (image: CharacterImage) => {
+    return props.animatedThumbs && image.extension === 'gif'
+      ? methods.imageUrl(image)
+      : methods.imageThumbUrl(image);
+  };
 
   const resolveImages = (): CharacterImage[] => {
     log.debug('profile.images.sync.injected', {

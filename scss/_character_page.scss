@@ -197,12 +197,25 @@
 // Character Images
 .character-images {
   .character-image {
-    @extend .img-thumbnail;
     vertical-align: middle;
     border: none;
     display: inline-block;
     background: transparent;
     text-align: center;
+    padding: 0.25em;
+    border-radius: 0px;
+  }
+  .character-image-thumb-wrapper {
+    display: inline-block;
+    width: 110px;
+    height: 110px;
+    margin: auto;
+  }
+  .img-thumbnail {
+    margin: 5px;
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain;
   }
 }
 
