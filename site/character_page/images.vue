@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
   import log from 'electron-log'; //tslint:disable-line:match-default-export-name
-  import { ref } from 'vue';
+  import { ref, watch } from 'vue';
   import { CharacterImage } from '../../interfaces';
   import * as Utils from '../utils';
   import { methods } from './data_store';
@@ -51,6 +51,15 @@
   const images = ref<CharacterImage[]>([]);
   const loading = ref(true);
   const error = ref('');
+
+  watch(
+    () => props.character,
+    () => {
+      shown.value = false;
+      images.value = [];
+      loading.value = true;
+    }
+  );
 
   const imageUrl = (image: CharacterImage) => methods.imageUrl(image);
   const thumbUrl = (image: CharacterImage) => methods.imageThumbUrl(image);
@@ -110,12 +119,19 @@
     });
 
     if (shown.value) return;
+    const expectedName = props.character.character.name;
     try {
       error.value = '';
       shown.value = true;
       loading.value = true;
-      images.value = await resolveImagesAsync();
+      const result = await resolveImagesAsync();
+      if (props.character.character.name !== expectedName) {
+        shown.value = false;
+        return;
+      }
+      images.value = result;
     } catch (err) {
+      if (props.character.character.name !== expectedName) return;
       shown.value = false;
       if (Utils.isJSONError(err)) error.value = <string>err.response.data.error;
       Utils.ajaxError(err, l('profile.images.unableRefresh'));
