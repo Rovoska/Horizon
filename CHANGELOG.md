@@ -18,15 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Right clicking a PM opens the user context menu.
   - Unread message badges are visible.
   - There is a setting to force the list to always be visible, regardless of how wide your window is.
+- Notification badges inside the chat window were tweaked in their design. They should look a lot less obnoxious now. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/6e5b5b90f2a2d208450430c1119bdbfeed6d8a1f)
 
 ### Fixed
 
 - Pinning a character preview with the middle mouse button now makes the buttons interactable again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/7e09975cdbddb070e8a727966929742dbbc5fb4c)
 - Numbered notification badges. Again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b4cc20669c57c36b4520ef847a40fb9cae743884)
+- The bookmark button on the profile viewer is now based on the actual bookmark state, rather than pulled from the cache. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/e79cf76cd2b1bfe8a4711d2c1cbe4b010eee9590)
+- Fixed setting a status and closing the dialogue popup briefly showing the old status during the animation. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/59741af4bbc0f1a65faa23c5fe88d950f10b7378)
+- Updating the "Animated [eicon]s" setting now no longer requires you to restart. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/a28a2e3bf82623daddf12a6419ff04d18b22f558)
 
 ### Development
 
 - Upgraded Electron to version 39.8.3 (from 39.2.7). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/51b77f4854aadc8228e1d6f0169dc30b16c136b3)
+  - This also includes an update to the packages used for the Nix development flake. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/84839173fcc1f8be1ab3ccd5d8e2babde2ca5d82)
 
 ### Merged pull requests
 
