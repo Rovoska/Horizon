@@ -5,7 +5,6 @@
       {{ l('profile.images.loading') }}
     </div>
     <template v-if="!loading">
-      <!-- @click="handleImageClick($event, image)" -->
       <template v-if="usePreview">
         <div
           v-for="image in images"
@@ -46,6 +45,27 @@
       @click="previewImage = undefined"
     >
       <img :src="imageUrl(previewImage)" />
+      <div class="image-preview-buttons-container d-flex flex-grow-1">
+        <div class="preview-buttons-left preview-buttons">
+          <button
+            type="button"
+            @click.stop="previewPrev()"
+            class="btn btn-outline-secondary"
+          >
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+        </div>
+        <div class="preview-buttons-spacer flex-grow-1"></div>
+        <div class="preview-buttons-right preview-buttons">
+          <button
+            type="button"
+            @click.stop="previewNext()"
+            class="btn btn-outline-secondary"
+          >
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
       <div class="image-preview-info-outer d-flex align-items-end">
         <div class="image-preview-info d-flex flex-grow-1">
           <p class="flex-grow-1">
@@ -54,6 +74,11 @@
             </span>
             <i v-else> No description set yet. </i>
           </p>
+          <span
+            class="image-preview-numbers border bg-body-tertiary border-secondary-subtle"
+          >
+            {{ `${images.indexOf(previewImage) + 1}/${images.length}` }}
+          </span>
           <div class="inline-box">
             <a :href="imageUrl(previewImage)" class="btn btn-lg btn-link">
               <i class="fa-solid fa-fw fa-arrow-up-right-from-square"></i>
@@ -201,6 +226,26 @@
       previewImage.value = image;
       e.preventDefault();
     }
+  };
+
+  const previewPrev = async (e: MouseEvent): Promise<void> => {
+    if (!previewImage) return;
+    let targetIndex = images.value.indexOf(
+      previewImage.value as CharacterImage
+    );
+    if (targetIndex <= 0) targetIndex = images.value.length;
+    targetIndex--;
+    previewImage.value = images.value[targetIndex];
+  };
+
+  const previewNext = async (e: MouseEvent): Promise<void> => {
+    if (!previewImage) return;
+    let targetIndex = images.value.indexOf(
+      previewImage.value as CharacterImage
+    );
+    targetIndex++;
+    if (targetIndex >= images.value.length) targetIndex = 0;
+    previewImage.value = images.value[targetIndex];
   };
 
   const copyImageLink = (image: CharacterImage): void => {
