@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numbered notification badges. Again. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b4cc20669c57c36b4520ef847a40fb9cae743884)
 - The bookmark button on the profile viewer is now based on the actual bookmark state, rather than pulled from the cache. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/e79cf76cd2b1bfe8a4711d2c1cbe4b010eee9590)
 - Fixed setting a status and closing the dialogue popup briefly showing the old status during the animation. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/59741af4bbc0f1a65faa23c5fe88d950f10b7378)
+- Fixed a 3.0 issue where large messages wrapped entirely within `[sub]` or `[sup]` tags would have their entire contents overlapping on a single line when exporting logs to HTML. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/a648b3b7808fe79a84266c1672cb7260229975ad)
+- Fixed issues where trying to load two characters' data at the same time (for instance, when hovering over one with the mouse preview while another one is being loaded) would cause the wrong character's images and guestbook posts to appear. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/eafad995937527b009912b66f2c3d4d91f23c3c9)
+  - If a profile is already cached with incorrect data from before this fix, you might need to manually refresh it by clicking the refresh button on the top left of the profile viewer.
 - Updating the "Animated [eicon]s" setting now no longer requires you to restart. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/a28a2e3bf82623daddf12a6419ff04d18b22f558)
 
 ### Development
