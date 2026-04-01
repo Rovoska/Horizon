@@ -141,6 +141,7 @@
                     :character="character"
                     ref="tab2"
                     :use-preview="imagePreview"
+                    :animated-thumbs="animatedThumbs"
                     :injected-images="images"
                   ></character-images>
                 </div>
@@ -246,7 +247,8 @@
       id: {},
       authenticated: { required: true as const },
       oldApi: {},
-      imagePreview: {}
+      imagePreview: { type: Boolean, default: true },
+      animatedThumbs: { type: Boolean, default: false }
     },
     data() {
       return {
@@ -899,6 +901,17 @@
     column-count: 2;
     column-gap: 0.5rem;
 
+    &.thumbnails {
+      column-count: auto;
+    }
+
+    .character-image-thumb-wrapper {
+      display: inline-block;
+      a {
+        cursor: pointer;
+      }
+    }
+
     .character-image-wrapper {
       display: inline-block;
       background-color: var(--characterImageWrapperBg);
@@ -1108,7 +1121,6 @@
   .character-card-header {
     position: sticky;
     top: -1rem;
-    z-index: 1000;
     background: var(--headerBackgroundMaskColor) !important;
   }
 
