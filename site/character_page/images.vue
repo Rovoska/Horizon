@@ -75,7 +75,7 @@
             <i v-else> No description set yet. </i>
           </p>
           <span
-            class="image-preview-numbers border bg-body-tertiary border-secondary-subtle"
+            class="image-preview-numbers border bg-body-secondary border-secondary-subtle"
           >
             {{ `${images.indexOf(previewImage) + 1}/${images.length}` }}
           </span>

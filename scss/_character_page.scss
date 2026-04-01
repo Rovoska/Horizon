@@ -278,7 +278,14 @@
     width: 100%;
     height: 100%;
     align-items: center;
+
     .preview-buttons {
+      background: linear-gradient(
+        var(--gradient-angle),
+        var(--bs-body-bg) 0%,
+        rgba(var(--bs-body-bg-rgb), 0) 75%
+      );
+      --gradient-angle: 90deg;
       height: 100%;
       width: 35%;
       transition: opacity linear 0.2s;
@@ -286,19 +293,21 @@
       display: flex;
       align-items: center;
       .btn {
+        --bs-btn-border-color: transparent;
         margin: 1rem;
         border-radius: 90px;
-        font-size: 3rem;
+        font-size: 2.2rem;
         display: inline;
       }
       &:hover {
         opacity: 1;
       }
-    }
-    .preview-buttons-right {
-      flex-direction: row-reverse;
-      .btn {
-        right: 0;
+      &.preview-buttons-right {
+        --gradient-angle: -90deg;
+        flex-direction: row-reverse;
+        .btn {
+          right: 0;
+        }
       }
     }
   }
