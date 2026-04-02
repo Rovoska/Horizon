@@ -73,7 +73,7 @@ class State implements Interfaces.State {
       char.isBookmarked = this.bookmarkList.indexOf(name) !== -1;
       char.isChatOp = this.opList.indexOf(name) !== -1;
       char.isIgnored = this.ignoreList.indexOf(key) !== -1;
-      this.characters[key] = char;
+      Vue.set(this.characters, key, char);
     }
     return char;
   }
