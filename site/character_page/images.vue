@@ -42,7 +42,7 @@
     <div
       class="image-preview"
       v-if="previewImage !== undefined"
-      @click="previewImage = undefined"
+      @click="handlePreviewClick($event)"
     >
       <img :src="imageUrl(previewImage)" />
       <div class="image-preview-buttons-container d-flex flex-grow-1">
@@ -72,7 +72,7 @@
             <span v-if="previewImage.description">
               {{ previewImage.description }}
             </span>
-            <i v-else> No description set yet. </i>
+            <i v-else> {{ l('profile.noDescription') }} </i>
           </p>
           <span
             class="image-preview-numbers border bg-body-secondary border-secondary-subtle"
@@ -114,6 +114,8 @@
   import core from '../../chat/core';
   import _ from 'lodash';
   import l from '../../chat/localize';
+  import { Keys } from '../../keys';
+  import { getKey } from '../../chat/common';
 
   const props = defineProps<{
     character: Character;
@@ -237,14 +239,49 @@
     showAsync().catch(err => log.error('profile.images.error', { err }));
   };
 
+  const showPreview = (image: CharacterImage): void => {
+    previewImage.value = image;
+    window.addEventListener('keydown', handleKeydown);
+  };
+
+  const hidePreview = (): void => {
+    previewImage.value = undefined;
+    window.removeEventListener('keydown', handleKeydown);
+  };
+
   const handleImageClick = (e: MouseEvent, image: CharacterImage): void => {
     if (props.usePreview) {
-      previewImage.value = image;
+      showPreview(image);
       e.preventDefault();
     }
   };
 
-  const previewPrev = async (e: MouseEvent): Promise<void> => {
+  const handlePreviewClick = (e: MouseEvent): void => {
+    hidePreview();
+    e.preventDefault();
+  };
+
+  const handleKeydown = (e: KeyboardEvent): void => {
+    const key = getKey(e);
+    if (!previewImage.value) return;
+    // 2026-04-03: Escape key handling has not been enabled because it conflicts with the global Escape key handling for modals.
+    // This will be enabled once that system has been overhauled to use native HTML modals instead of a custom implementation.
+    /*
+    if (key === Keys.Escape) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      hidePreview();
+    } else */ if (key === Keys.ArrowLeft) {
+      previewPrev();
+      e.preventDefault();
+    } else if (key === Keys.ArrowRight) {
+      previewNext();
+      e.preventDefault();
+    }
+  };
+
+  const previewPrev = async (): Promise<void> => {
     if (!previewImage) return;
     let targetIndex = images.value.indexOf(
       previewImage.value as CharacterImage
@@ -254,7 +291,7 @@
     previewImage.value = images.value[targetIndex];
   };
 
-  const previewNext = async (e: MouseEvent): Promise<void> => {
+  const previewNext = async (): Promise<void> => {
     if (!previewImage) return;
     let targetIndex = images.value.indexOf(
       previewImage.value as CharacterImage
