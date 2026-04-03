@@ -208,7 +208,6 @@
     try {
       error.value = '';
       shown.value = true;
-      loading.value = true;
       const result = await resolveImagesAsync();
       if (props.character.character.name !== expectedName) {
         shown.value = false;
@@ -236,6 +235,10 @@
     }
 
     images.value = resolveImages();
+
+    if (images.value.length > 0) {
+      loading.value = false;
+    }
 
     // this promise is intentionally not part of a chain
     showAsync().catch(err => log.error('profile.images.error', { err }));
