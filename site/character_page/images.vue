@@ -74,12 +74,14 @@
             </span>
             <i v-else> {{ l('profile.noDescription') }} </i>
           </p>
-          <span
-            class="image-preview-numbers border bg-body-secondary border-secondary-subtle"
-          >
-            {{ `${images.indexOf(previewImage) + 1}/${images.length}` }}
-          </span>
-          <div class="inline-box">
+
+          <div class="d-inline-block info-buttons">
+            <span
+              class="image-preview-numbers border bg-body-secondary border-secondary-subtle"
+              v-if="images.length > 1"
+            >
+              {{ `${images.indexOf(previewImage) + 1}/${images.length}` }}
+            </span>
             <a :href="imageUrl(previewImage)" class="btn btn-lg btn-link">
               <i class="fa-solid fa-fw fa-arrow-up-right-from-square"></i>
             </a>

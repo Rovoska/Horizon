@@ -258,6 +258,7 @@
 
 .image-preview {
   position: fixed;
+  z-index: 1500;
   top: 0;
   bottom: 0;
   right: 0;
@@ -287,7 +288,7 @@
       );
       --gradient-angle: 90deg;
       height: 100%;
-      width: 35%;
+      width: 20%;
       transition: opacity linear 0.2s;
       opacity: 0;
       display: flex;
@@ -319,6 +320,9 @@
     z-index: 1501;
 
     .image-preview-info {
+      @include media-breakpoint-up(md) {
+        padding: 0.5em 1em;
+      }
       padding: 1em 5em;
       opacity: 0;
       transition: opacity linear 0.3s;
@@ -329,6 +333,12 @@
         font-size: 1.3em;
         padding: 5px 16px;
         border-radius: 9px;
+      }
+      .info-buttons {
+        width: 50vw;
+        @include media-breakpoint-up(md) {
+          width: 20%;
+        }
       }
     }
     &:hover .image-preview-info {
