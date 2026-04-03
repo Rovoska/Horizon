@@ -450,6 +450,17 @@ async function onReady(): Promise<void> {
           return;
         }
 
+        if (
+          permission === 'clipboard-sanitized-write' &&
+          partitionName === 'persist:fchat'
+        ) {
+          log.debug('permissions.allowed.clipboard-sanitized-write', {
+            partition: partitionName
+          });
+          callback(true);
+          return;
+        }
+
         log.debug('permissions.blocked', {
           partition: partitionName,
           permission: permission
@@ -463,6 +474,13 @@ async function onReady(): Promise<void> {
       (_webContents, permission, _details) => {
         if (
           permission === 'notifications' &&
+          partitionName === 'persist:fchat'
+        ) {
+          return true;
+        }
+
+        if (
+          permission === 'clipboard-sanitized-write' &&
           partitionName === 'persist:fchat'
         ) {
           return true;
