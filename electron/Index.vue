@@ -203,7 +203,7 @@
         :authenticated="true"
         :oldApi="true"
         :name="profileName"
-        :image-preview="useProfileThumbViewer()"
+        :previewType="getProfileGalleryType()"
         :animated-thumbs="animateProfileViewerThumbs()"
         ref="characterPage"
       ></character-page>
@@ -338,6 +338,7 @@
   import { BBCodeView } from '../bbcode/view';
   import { EIconStore } from '../learn/eicon/store';
   import { SecureStore } from './secure-store';
+  import { ProfileViewerGalleryType } from '../site/utils';
 
   // import ImagePreview from '../chat/preview/ImagePreview.vue';
   // import Bluebird from 'bluebird';
@@ -909,8 +910,8 @@
 
         this.profileStatus = character.statusText || '';
       },
-      useProfileThumbViewer(): boolean {
-        return this.settings.profileViewerGalleryType === 'thumbnail';
+      getProfileGalleryType(): ProfileViewerGalleryType {
+        return this.settings.profileViewerGalleryType;
       },
       animateProfileViewerThumbs(): boolean {
         return this.settings.profileViewerThumbAnimate;

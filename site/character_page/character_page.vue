@@ -140,7 +140,7 @@
                   <character-images
                     :character="character"
                     ref="tab2"
-                    :use-preview="imagePreview"
+                    :previewType="previewType"
                     :animated-thumbs="animatedThumbs"
                     :injected-images="images"
                   ></character-images>
@@ -217,6 +217,7 @@
   import ProfileAnalysis from '../../learn/recommend/ProfileAnalysis.vue';
   import { CharacterImage, SimpleCharacter } from '../../interfaces';
   import l from '../../chat/localize';
+  import { ProfileViewerGalleryType } from '../utils';
 
   const CHARACTER_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
   const CHARACTER_META_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
@@ -247,7 +248,10 @@
       id: {},
       authenticated: { required: true as const },
       oldApi: {},
-      imagePreview: { type: Boolean, default: true },
+      previewType: {
+        type: String as () => ProfileViewerGalleryType,
+        default: 'carousel'
+      },
       animatedThumbs: { type: Boolean, default: false }
     },
     data() {

@@ -196,6 +196,11 @@
 
 // Character Images
 .character-images {
+  &.thumbnails {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
   .character-image {
     vertical-align: middle;
     border: none;
@@ -207,14 +212,13 @@
   }
   .character-image-thumb-wrapper {
     display: inline-block;
-    width: 110px;
-    height: 110px;
-    margin: auto;
+    width: 180px;
+    height: 180px;
   }
   .img-thumbnail {
     margin: 5px;
-    max-width: 100px;
-    max-height: 100px;
+    width: 170px;
+    height: 170px;
     object-fit: contain;
   }
 }
@@ -266,24 +270,51 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  img {
-    padding: 5px;
-    background: white;
+  max-width: 100vw;
+  max-height: 100vh;
+  .image-preview-scroll-area {
+    position: fixed;
+    inset: 0;
     z-index: 1500;
-    max-height: 100%;
-    max-width: 100%;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .image-preview-link {
+    margin: auto;
+    z-index: 1500;
+    --zoom-level: 100;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: calc(100vw * var(--zoom-level) / 100);
+    height: calc(100vh * var(--zoom-level) / 100);
+    max-width: none;
+    max-height: none;
+    img {
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
+      padding: 5px;
+      object-fit: contain;
+    }
   }
   .image-preview-buttons-container {
     position: fixed;
+    pointer-events: none;
     z-index: 1501;
     width: 100%;
     height: 100%;
     align-items: center;
 
     .preview-buttons {
+      pointer-events: all;
       background: linear-gradient(
         var(--gradient-angle),
-        var(--bs-body-bg) 0%,
+        rgba(var(--bs-body-bg-rgb), 0.8) 0%,
         rgba(var(--bs-body-bg-rgb), 0) 75%
       );
       --gradient-angle: 90deg;
@@ -329,19 +360,67 @@
       background: var(--bs-card-bg);
       color: var(--bs-card-color);
       border-top: 1px solid var(--bs-card-border-color);
+      flex-wrap: wrap;
+      align-items: end;
+      .info-description {
+        flex-grow: 1;
+        font-size: 1.25em;
+        @include media-breakpoint-up(md) {
+          max-width: 55%;
+        }
+
+        @include media-breakpoint-up(xl) {
+          max-width: 65%;
+        }
+      }
       .image-preview-numbers {
         font-size: 1.3em;
         padding: 5px 16px;
         border-radius: 9px;
       }
       .info-buttons {
-        width: 50vw;
+        justify-content: flex-end;
+        width: 100%;
+        .zoom-btn {
+          font-size: 2em;
+
+          @include media-breakpoint-up(md) {
+            font-size: 1em;
+          }
+        }
         @include media-breakpoint-up(md) {
+          width: 45%;
+        }
+
+        @include media-breakpoint-up(xl) {
+          width: 35%;
+        }
+
+        .buttons-numbers {
+          width: auto;
+          flex: 0 0 auto;
+          margin-left: auto;
+        }
+
+        .zoom-number {
+          flex-grow: 0;
           width: 20%;
+          display: none;
+          @include media-breakpoint-up(lg) {
+            display: inline-block;
+          }
+        }
+
+        .zoom-range-container {
+          flex-grow: 1;
+          .zoom-range {
+            //width: 80%;
+          }
         }
       }
     }
-    &:hover .image-preview-info {
+    &:hover .image-preview-info,
+    & .force-show-info.image-preview-info {
       visibility: visible;
       opacity: 1;
     }
