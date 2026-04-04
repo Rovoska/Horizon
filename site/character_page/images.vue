@@ -189,7 +189,7 @@
   import { methods } from './data_store';
   import { Character } from './interfaces';
   import core from '../../chat/core';
-  import _, { template } from 'lodash';
+  import _ from 'lodash';
   import l from '../../chat/localize';
   import { Keys } from '../../keys';
   import { getKey } from '../../chat/common';
@@ -224,6 +224,14 @@
       shown.value = false;
       images.value = [];
       loading.value = true;
+    }
+  );
+  watch(
+    () => props.previewType,
+    previewType => {
+      if (previewType !== 'thumbnail') {
+        hidePreview();
+      }
     }
   );
 
@@ -368,15 +376,10 @@
   const handleKeydown = (e: KeyboardEvent): void => {
     const key = getKey(e);
     if (!previewImage.value) return;
-    // 2026-04-03: Escape key handling has not been enabled because it conflicts with the global Escape key handling for modals.
-    // This will be enabled once that system has been overhauled to use native HTML modals instead of a custom implementation.
-    /*
-    if (key === Keys.Escape) {
-      e.stopPropagation();
-      e.preventDefault();
 
+    if (key === Keys.Escape) {
       hidePreview();
-    } else */ if (key === Keys.ArrowLeft) {
+    } else if (key === Keys.ArrowLeft) {
       previewPrev();
       e.preventDefault();
     } else if (key === Keys.ArrowRight) {
