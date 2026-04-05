@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.3-beta.1] - 2026-04-05
+
 ### Changed
 
 - Image gallery improvements: zoom in/out, arrow key navigation, an info panel, copy images with right-click, bigger thumbnails, and a new "hover thumbnails" gallery type that expands images on mouseover. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/0bd9bd6)
@@ -1273,7 +1275,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IOS build removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/41261d1ba7043eb7dfd5a1a6331dc604ff338814)]
 - Webchat removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/b894a180b9be31f68d1458aaa3c59f9c4470da89)]
 
-[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.3-beta.0...development
+[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.3-beta.1...development
+[2.0.3-beta.1]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.3-beta.0...v2.0.3-beta.1
 [2.0.3-beta.0]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.2...v2.0.3-beta.0
 [2.0.2]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/Fchat-Horizon/Horizon/compare/v2.0.0...v2.0.1
