@@ -184,9 +184,10 @@ export default function (this: void, connection: Connection): Interfaces.State {
       };
     for (const key in state.characters) {
       const character = state.characters[key]!;
-      character.isFriend = state.friendList.indexOf(character.name) !== -1;
-      character.isBookmarked =
-        state.bookmarkList.indexOf(character.name) !== -1;
+      character.isFriend = state.friendList.some(f => f.toLowerCase() === key);
+      character.isBookmarked = state.bookmarkList.some(
+        b => b.toLowerCase() === key
+      );
       character.status = 'offline';
       character.statusText = '';
     }
