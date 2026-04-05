@@ -18,7 +18,7 @@ export default class Notifications extends BaseNotifications {
     if (!this.shouldNotify(conversation)) return;
     this.playSound(sound);
     body = body
-      .replace(/\[spoiler\].*?\[\/spoiler\]/gi, '██████')
+      .replace(/\[spoiler\][\s\S]*?\[\/spoiler\]/gi, '██████')
       .replace(/\[eicon\](.*?)\[\/eicon\]/gi, ':$1:')
       .replace(/\[url=([^\]]+)\]\[\/url\]/gi, '$1')
       .replace(/\[\/?[a-zA-Z][a-zA-Z0-9]*(?:=[^\]]*)?\]/g, '');
