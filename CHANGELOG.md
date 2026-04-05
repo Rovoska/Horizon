@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Image gallery improvements: zoom in/out, arrow key navigation, an info panel, copy images with right-click, bigger thumbnails, and a new "hover thumbnails" gallery type that expands images on mouseover. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/0bd9bd6)
+
+### Fixed
+
+- The bookmark button when right-clicking a user is no longer case sensitive. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/cda8da9)
+- Character colors in the recent conversations list now update properly when a user logs in. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d096b44)
+- BBCode is now stripped from OS notifications. Spoilered text is hidden and eicons are shown as `:name:`. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/3d525fc) (fixes #112)
+- Friend and bookmark matching on reconnect is now case-insensitive, matching the fix above. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/0a273ea)
+- Multiline spoiler content is now fully redacted in notifications. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/f639b36)
+- EIcon syncing is more consistent. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/cfe0440)
+- Reduced-motion users no longer experience scroll stutter in virtual lists. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/7d2eaec)
+
+### Pre-release fixes
+
+- Fixed image gallery loading state so cached images display immediately instead of showing a loading spinner. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/bea5617)
+- Fixed character page CSS regression and width issues. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/784696f)
+- Fixed keyboard event cleanup in the image gallery. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/cef5aa8)
+- Fixed image preview arrow key scrolling. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/230f32d)
+- Allowed clipboard write permission for image copying. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d7273f0)
+
+### Merged pull requests
+
+- https://github.com/Fchat-Horizon/Horizon/pull/725 by @freenutsxd
+- https://github.com/Fchat-Horizon/Horizon/pull/726 by @Kannamoris (This is their first contribution!)
+
 ## [2.0.3-beta.0] - 2026-04-02
 
 ### Added
