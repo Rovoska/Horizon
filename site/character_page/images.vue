@@ -72,7 +72,25 @@
           class="image-preview-link"
           :style="{ '--zoom-level': zoomLevel }"
         >
-          <img :src="imageUrl(previewImage)" />
+          <div
+            v-if="previewLoading"
+            class="position-fixed top-50 start-50 spinner-border text-dark"
+            role="status"
+            aria-label="Loading"
+          ></div>
+
+          <img
+            v-show="previewLoading"
+            class="blurred"
+            :src="thumbUrl(previewImage)"
+          />
+
+          <img
+            v-if="!previewLoading && previewSrc"
+            :src="previewSrc"
+            @load="onPreviewLoad"
+            @error="onPreviewError"
+          />
         </a>
       </div>
       <div
@@ -211,6 +229,9 @@
 
   const shown = ref(false);
   const previewImage = ref<CharacterImage>();
+  const previewLoading = ref(false);
+  const previewSrc = ref('');
+  const previewLoadRequestId = ref(0);
   const zoomLevel = ref(ZOOM_LEVEL_MIN);
   const forceShowInfo = ref(false);
   const copySuccess = ref(false);
@@ -338,13 +359,50 @@
   };
 
   const showPreview = (image: CharacterImage): void => {
-    previewImage.value = image;
+    setPreviewImage(image);
     window.addEventListener('keydown', handleKeydown);
     browseTimeOut();
   };
 
+  const onPreviewLoad = (): void => {
+    previewLoading.value = false;
+  };
+
+  const onPreviewError = (): void => {
+    previewLoading.value = false;
+  };
+
+  const setPreviewImage = (image: CharacterImage): void => {
+    const requestId = ++previewLoadRequestId.value;
+    previewLoading.value = true;
+    previewSrc.value = '';
+
+    const url = imageUrl(image);
+    const pre = new Image();
+
+    pre.onload = () => {
+      if (requestId !== previewLoadRequestId.value) return;
+      previewSrc.value = url;
+      previewLoading.value = false;
+    };
+
+    pre.onerror = () => {
+      if (requestId !== previewLoadRequestId.value) return;
+      previewLoading.value = false;
+    };
+
+    pre.src = url;
+
+    previewImage.value = image;
+    zoomLevel.value = ZOOM_LEVEL_MIN;
+    browseTimeOut();
+  };
+
   const hidePreview = (): void => {
+    previewLoadRequestId.value++;
     previewImage.value = undefined;
+    previewLoading.value = true;
+    previewSrc.value = '';
     window.removeEventListener('keydown', handleKeydown);
     zoomLevel.value = ZOOM_LEVEL_MIN;
   };
@@ -398,9 +456,7 @@
     );
     if (targetIndex <= 0) targetIndex = images.value.length;
     targetIndex--;
-    previewImage.value = images.value[targetIndex];
-    zoomLevel.value = ZOOM_LEVEL_MIN;
-    browseTimeOut();
+    setPreviewImage(images.value[targetIndex]);
   };
 
   const previewNext = async (): Promise<void> => {
@@ -410,9 +466,7 @@
     );
     targetIndex++;
     if (targetIndex >= images.value.length) targetIndex = 0;
-    previewImage.value = images.value[targetIndex];
-    zoomLevel.value = ZOOM_LEVEL_MIN;
-    browseTimeOut();
+    setPreviewImage(images.value[targetIndex]);
   };
 
   const browseTimeOut = (): void => {
