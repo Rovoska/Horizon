@@ -131,22 +131,22 @@
           </p>
 
           <div class="d-flex info-buttons flex-wrap">
-            <div class="input-group mb-2 buttons-numbers">
+            <div class="input-group w-auto buttons-numbers">
               <span
-                class="image-preview-numbers input-group-text"
+                class="image-preview-numbers input-group-text font-monospace"
                 v-if="images.length > 1"
               >
                 {{ `${images.indexOf(previewImage) + 1}/${images.length}` }}
               </span>
               <a
                 :href="imageUrl(previewImage)"
-                class="btn btn-lg btn-outline-secondary"
+                class="btn btn-outline-secondary"
               >
                 <i class="fa-solid fa-fw fa-arrow-up-right-from-square"></i>
               </a>
               <button
                 type="button"
-                class="btn btn-lg"
+                class="btn"
                 :class="copySuccess ? 'btn-success' : 'btn-outline-primary'"
                 @click.stop="copyImageLink(previewImage)"
               >
@@ -158,7 +158,7 @@
                 ></i>
               </button>
             </div>
-            <div class="input-group mb-3 w-100">
+            <div class="input-group w-auto zoom-controls">
               <button
                 class="btn btn-outline-secondary zoom-btn out"
                 type="button"
@@ -221,7 +221,7 @@
     injectedImages?: CharacterImage[] | null;
   }>();
 
-  const FORCE_SHOW_INFO_TIMEOUT = 2500;
+  const FORCE_SHOW_INFO_TIMEOUT = 1500;
   const COPY_SUCCESS_TIMEOUT = 3500;
   const ZOOM_LEVEL_MIN = 100;
   const ZOOM_LEVEL_MAX = 200;
