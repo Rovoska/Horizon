@@ -137,6 +137,60 @@
                   ></character-infotags>
                 </div>
                 <div role="tabpanel" v-show="tab === '2'">
+                  <div
+                    v-if="!loading"
+                    class="btn-group image-gallery-selector"
+                    role="group"
+                    :aria-label="l('settings.profileViewerGalleryType')"
+                  >
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="btnradio"
+                      id="btnRadioCarousel"
+                      autocomplete="off"
+                      :checked="previewType === 'thumbnail'"
+                    />
+                    <label
+                      class="btn btn-sm btn-outline-primary"
+                      for="btnRadioCarousel"
+                      @click="updateGalleryType('thumbnail')"
+                      :title="l('settings.profileViewerGalleryType.thumbnail')"
+                      ><i class="fa-solid fa-expand"></i>
+                    </label>
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="btnradio"
+                      id="btnRadioHover"
+                      autocomplete="off"
+                      :checked="previewType === 'hover'"
+                    />
+                    <label
+                      class="btn btn-sm btn-outline-primary"
+                      for="btnRadioHover"
+                      @click="updateGalleryType('hover')"
+                      :title="l('settings.profileViewerGalleryType.hover')"
+                    >
+                      <i class="fa-solid fa-grip"></i>
+                    </label>
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="btnradio"
+                      id="btnRadioFull"
+                      autocomplete="off"
+                      :checked="previewType === 'full'"
+                    />
+                    <label
+                      class="btn btn-sm btn-outline-primary"
+                      for="btnRadioFull"
+                      @click="updateGalleryType('full')"
+                      :title="l('settings.profileViewerGalleryType.full')"
+                    >
+                      <i class="fa-solid fa-images"></i>
+                    </label>
+                  </div>
                   <character-images
                     :character="character"
                     ref="tab2"
@@ -250,7 +304,7 @@
       oldApi: {},
       previewType: {
         type: String as () => ProfileViewerGalleryType,
-        default: 'carousel'
+        default: 'thumbnail'
       },
       animatedThumbs: { type: Boolean, default: false }
     },
@@ -665,6 +719,9 @@
         );
 
         // console.log('Match', this.selfCharacter.character.name, this.character.character.name, this.characterMatch);
+      },
+      updateGalleryType(profileGalleryType: ProfileViewerGalleryType): void {
+        this.$emit('gallery-type-updated', profileGalleryType);
       }
     }
   });

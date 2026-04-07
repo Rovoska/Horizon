@@ -23,7 +23,7 @@
               :href="imageUrl(image)"
               :title="image.description"
             >
-              <img :src="thumbUrl(image)" class="img-thumbnail" />
+              <img :src="thumbUrl(image)" class="img-thumbnail expandable" />
             </a>
           </template>
           <template v-else>

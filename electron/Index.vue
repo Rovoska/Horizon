@@ -205,6 +205,7 @@
         :name="profileName"
         :previewType="getProfileGalleryType()"
         :animated-thumbs="animateProfileViewerThumbs()"
+        @gallery-type-updated="galleryTypeUpdated"
         ref="characterPage"
       ></character-page>
       <template slot="title">
@@ -1054,6 +1055,9 @@
 
           EventBus.$emit('imagepreview-toggle-stickyness', { force: true });
         }
+      },
+      galleryTypeUpdated(profileGalleryType: ProfileViewerGalleryType): void {
+        electron.ipcRenderer.send('profile-gallery-type', profileGalleryType);
       }
     }
   });
