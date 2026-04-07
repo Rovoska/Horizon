@@ -339,14 +339,16 @@
 
     .preview-buttons {
       pointer-events: all;
+      cursor: pointer;
       background: linear-gradient(
         var(--gradient-angle),
         rgba(var(--bs-body-bg-rgb), 0.8) 0%,
-        rgba(var(--bs-body-bg-rgb), 0) 75%
+        rgba(var(--bs-body-bg-rgb), 0) 100%
       );
       --gradient-angle: 90deg;
       height: 100%;
       width: 20%;
+      max-width: 220px;
       transition: opacity linear 0.2s;
       opacity: 0;
       display: flex;

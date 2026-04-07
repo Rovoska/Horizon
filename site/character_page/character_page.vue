@@ -156,7 +156,9 @@
                       for="btnRadioCarousel"
                       @click="updateGalleryType('thumbnail')"
                       :title="l('settings.profileViewerGalleryType.thumbnail')"
-                      ><i class="fa-solid fa-expand"></i>
+                      ><i
+                        class="fa-solid fa-up-right-and-down-left-from-center"
+                      ></i>
                     </label>
                     <input
                       type="radio"
@@ -172,7 +174,7 @@
                       @click="updateGalleryType('hover')"
                       :title="l('settings.profileViewerGalleryType.hover')"
                     >
-                      <i class="fa-solid fa-grip"></i>
+                      <i class="fa-solid fa-picture-in-picture"></i>
                     </label>
                     <input
                       type="radio"

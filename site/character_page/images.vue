@@ -57,7 +57,7 @@
         </div>
       </template>
     </template>
-    <div v-if="!loading && !images.length" class="alert alert-info">
+    <div v-if="!loading && !images.length" class="alert alert-info w-100">
       {{ l('profile.images.none') }}
     </div>
     <div
@@ -97,7 +97,10 @@
         class="image-preview-buttons-container d-flex flex-grow-1"
         v-if="images.length > 1"
       >
-        <div class="preview-buttons-left preview-buttons">
+        <div
+          class="preview-buttons-left preview-buttons"
+          @click.stop="previewPrev()"
+        >
           <button
             type="button"
             @click.stop="previewPrev()"
@@ -107,7 +110,10 @@
           </button>
         </div>
         <div class="preview-buttons-spacer flex-grow-1"></div>
-        <div class="preview-buttons-right preview-buttons">
+        <div
+          class="preview-buttons-right preview-buttons"
+          @click.stop="previewPrev()"
+        >
           <button
             type="button"
             @click.stop="previewNext()"
