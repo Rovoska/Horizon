@@ -294,20 +294,33 @@
     inset: 0;
     z-index: 1500;
     overflow: auto;
+    cursor: grab;
+    touch-action: none;
+
+    &.is-panning {
+      cursor: grabbing;
+    }
+  }
+  .image-preview-stage {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: max-content;
+    height: max-content;
+    min-width: 100%;
+    min-height: 100%;
   }
   .image-preview-link {
-    margin: auto;
     z-index: 1500;
     --zoom-level: 100;
+    --image-width: 100vw;
+    --image-height: 100vh;
     display: flex;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: calc(100vw * var(--zoom-level) / 100);
-    height: calc(100vh * var(--zoom-level) / 100);
+    width: calc(var(--image-width) * var(--zoom-level) / 100);
+    height: calc(var(--image-height) * var(--zoom-level) / 100);
     max-width: none;
     max-height: none;
     .spinner-border {
@@ -322,7 +335,8 @@
       height: 100%;
       max-width: none;
       max-height: none;
-      padding: 5px;
+      padding: 0;
+      display: block;
       object-fit: contain;
       &.blurred {
         filter: blur(10px);
@@ -353,7 +367,7 @@
       opacity: 0;
       display: flex;
       align-items: center;
-      .btn {
+      .preview-arrow {
         --bs-btn-border-color: transparent;
         margin: 1rem;
         border-radius: 90px;
