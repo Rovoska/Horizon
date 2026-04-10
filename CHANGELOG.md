@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed components that have both a vertical and horizontal scrollbar having a tiny white corner in the bottom right. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9218162acc52f60d95950ca8680285f6d6b038e1)
+
+### Pre-release fixes and changes
+
+Mostly just stuff for the profile viewer's gallery tab again:
+
+- Opening or switching to an image in full screen previewer now shows a blurred preview to indicate it's loading. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/01205d41c7d8a032d5cf18b5020acaa47ebe70a5)
+- There are radio buttons to switch between gallery view styles on the fly. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/98b3eab8d964ff9019d587b5468b3f8541e31fdb)
+- Slimmed down the info box and (hopefully) made the time it's forced to show less annoying. [[Commit]](e8f93a7e63078d192e3c12a05caf2954d7103eec)
+- Other improvements grouped together: [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/48af441f08b279625c66dea7a9b7743e6d883ab6) [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9218162acc52f60d95950ca8680285f6d6b038e1)
+  - You can now click the dimmers on the left/ right instead of the buttons to navigate back and forward
+  - Zooming in/ out was rewritten with Javascript instead of pure CSS. Now it won't cut off the edges of the image when zoomed in.
+  - You can click-drag across a zoomed image to pan across it, instead of needing to scroll.
+  - Fixed issues where using the number and range inputs for zoom would make the zoom in button set the zoom level to 200%.
+
+### Development.
+
+- Updated to FontAwesome 7.2.0 (was 7.1.0). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/921dd498681f4e4e80559a11733144b6766c1a8c)
+
+### Known issues
+
 ## [2.0.3-beta.1] - 2026-04-05
 
 ### Changed
