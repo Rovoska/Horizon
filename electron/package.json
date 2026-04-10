@@ -101,10 +101,10 @@
   "devDependencies": {
     "commander": "^14.0.0",
     "electron": "39.8.3",
-    "electron-builder": "^26.3.2"
+    "electron-builder": "^26.8.1"
   },
   "dependencies": {
-    "@ghostery/adblocker-electron-preload": "^2.0.0",
+    "@ghostery/adblocker-electron-preload": "^2.14.1",
     "@mdit/plugin-alert": "^0.22.2",
     "markdown-it": "^14.1.1"
   }
