@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Hotfix for the zoom controls spanning two lines on Windows. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/29c52031359c5fd8a437d8370c2ba8295adaa385)
+
 ## [2.1.0] - 2026-04-13
 
 ### Added
