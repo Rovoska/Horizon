@@ -467,7 +467,7 @@
 
         .zoom-number {
           flex-grow: 0;
-          width: 20%;
+          max-width: 20%;
           display: none;
           font-size: 0.9em;
           @include media-breakpoint-up(xl) {
