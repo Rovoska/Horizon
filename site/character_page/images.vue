@@ -294,10 +294,17 @@
   watch(
     () => props.character,
     () => {
+      const wasShown = shown.value;
+
       hidePreview();
       shown.value = false;
       images.value = [];
       loading.value = true;
+      //The character prop can sometimes update while the image tab is active (ie, with automated periodic profile data refreshes).
+      //This resolves the issue where images are permanently shown as 'loading' after this refresh by re-resolving the image list.
+      if (wasShown) {
+        show();
+      }
     }
   );
   watch(
