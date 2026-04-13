@@ -186,6 +186,13 @@
     font-size: larger;
     border: none;
   }
+
+  .modal-backdrop {
+    z-index: 1502;
+  }
+  .modal {
+    z-index: 1503;
+  }
 }
 
 @media (min-width: breakpoint-min(md)) {
