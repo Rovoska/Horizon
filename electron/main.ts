@@ -55,6 +55,7 @@ import Axios from 'axios';
 import * as browserWindows from './browser_windows';
 import * as remoteMain from '@electron/remote/main';
 import { Event } from 'electron/main';
+import { ProfileViewerGalleryType } from '../site/utils';
 
 const configuredSessions = new WeakSet<electron.Session>();
 
@@ -155,9 +156,8 @@ EXAMPLES:
   }
 
   if (command === 'export') {
-    const { runExportCli } = await import(
-      './services/exporter/backup-export-cli'
-    );
+    const { runExportCli } =
+      await import('./services/exporter/backup-export-cli');
     const dataDir =
       get('--data-dir') || path.join(app.getPath('userData'), 'data');
     const out = get('--out') || path.join(process.cwd(), 'horizon-export.zip');
@@ -196,9 +196,8 @@ EXAMPLES:
   }
 
   if (command === 'import') {
-    const { runImportCli } = await import(
-      './services/importer/backup-import-cli'
-    );
+    const { runImportCli } =
+      await import('./services/importer/backup-import-cli');
     const zip = get('--zip');
     if (!zip) return false;
     const dataDir =
@@ -450,6 +449,17 @@ async function onReady(): Promise<void> {
           return;
         }
 
+        if (
+          permission === 'clipboard-sanitized-write' &&
+          partitionName === 'persist:fchat'
+        ) {
+          log.debug('permissions.allowed.clipboard-sanitized-write', {
+            partition: partitionName
+          });
+          callback(true);
+          return;
+        }
+
         log.debug('permissions.blocked', {
           partition: partitionName,
           permission: permission
@@ -463,6 +473,13 @@ async function onReady(): Promise<void> {
       (_webContents, permission, _details) => {
         if (
           permission === 'notifications' &&
+          partitionName === 'persist:fchat'
+        ) {
+          return true;
+        }
+
+        if (
+          permission === 'clipboard-sanitized-write' &&
           partitionName === 'persist:fchat'
         ) {
           return true;
@@ -911,6 +928,14 @@ async function onReady(): Promise<void> {
       const index = characters.indexOf(character);
       if (index !== -1) characters.splice(index, 1);
       broadcastConnectedCharacters();
+    }
+  );
+
+  electron.ipcMain.on(
+    'profile-gallery-type',
+    (_event: IpcMainEvent, profileGalleryType: ProfileViewerGalleryType) => {
+      settings.profileViewerGalleryType = profileGalleryType;
+      setGeneralSettings(settings);
     }
   );
 

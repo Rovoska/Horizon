@@ -54,22 +54,16 @@
               class="btn col-3"
               :title="
                 l(
-                  character.bookmarked
-                    ? 'userProfile.unbookmark'
-                    : 'userProfile.bookmark'
+                  bookmarked ? 'userProfile.unbookmark' : 'userProfile.bookmark'
                 )
               "
-              :class="{
-                'btn-outline-success': character.bookmarked,
-                'btn-outline-secondary': !character.bookmarked
-              }"
+              :class="
+                bookmarked ? 'btn-outline-success' : 'btn-outline-secondary'
+              "
             >
               <i
                 class="fa fa-fw"
-                :class="{
-                  'fa-bookmark': character.bookmarked,
-                  'far fa-bookmark': !character.bookmarked
-                }"
+                :class="bookmarked ? 'fa-bookmark' : 'far fa-bookmark'"
               ></i>
             </button>
 
@@ -336,6 +330,12 @@
       },
       authenticated(): boolean {
         return Store.authenticated;
+      },
+      bookmarked(): boolean {
+        return (
+          core.characters.get((this.character as Character).character.name)
+            ?.isBookmarked || false
+        );
       }
     },
     methods: {

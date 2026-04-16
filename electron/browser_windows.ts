@@ -174,7 +174,7 @@ export function updateNotificationBadges(numberedBadges: boolean) {
       app.setBadgeCount(totalCount);
     } else {
       if (app.dock) {
-        app.dock.setBadge(totalCount > 0 ? '*' : '');
+        app.dock.setBadge(totalCount > 0 ? '.' : '');
       }
     }
   } else {

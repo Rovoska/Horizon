@@ -107,7 +107,7 @@
           >
             {{ conversations.consoleTab.name }}
             <span
-              class="badge rounded-pill text-bg-danger"
+              class="badge rounded-pill text-bg-danger conversation-badge-inline-end"
               v-show="shouldShowNotificationBadge(conversations.consoleTab)"
               >{{ conversations.consoleTab.unreadCount }}</span
             >
@@ -152,24 +152,31 @@
             :key="conversation.key"
             @click.middle.prevent.stop="conversation.close()"
           >
-            <img
-              :src="
-                characterImage(
-                  conversation.character.name,
-                  !coreState.settings.horizonMessagePortraitHighQuality
-                )
-              "
-              v-if="showAvatars"
-            />
+            <div class="avatar-wrapper" v-if="showAvatars">
+              <img
+                :src="
+                  characterImage(
+                    conversation.character.name,
+                    !coreState.settings.horizonMessagePortraitHighQuality
+                  )
+                "
+              />
+              <span
+                class="badge text-bg-danger"
+                v-show="shouldShowNotificationBadge(conversation)"
+                >{{ conversation.unreadCount }}</span
+              >
+            </div>
             <div class="name">
               <span>{{ conversation.character.name }}</span>
-              <div style="line-height: 0; display: flex">
+              <div class="conversation-meta">
                 <span
                   class="fas fa-reply"
                   v-show="needsReply(conversation)"
                 ></span>
                 <span
                   class="badge rounded-pill text-bg-danger"
+                  v-if="!showAvatars"
                   v-show="shouldShowNotificationBadge(conversation)"
                   >{{ conversation.unreadCount }}</span
                 >
@@ -238,9 +245,9 @@
             @click.middle.prevent.stop="conversation.close()"
           >
             <span class="name">{{ conversation.name }}</span>
-            <span>
+            <span class="conversation-actions">
               <span
-                class="badge align-text-bottom rounded-pill text-bg-danger"
+                class="badge rounded-pill text-bg-danger"
                 v-show="shouldShowNotificationBadge(conversation)"
                 >{{ conversation.unreadCount }}</span
               >
@@ -278,38 +285,60 @@
         padding-bottom: 10px;
       "
     >
-      <div id="quick-switcher" class="list-group">
+      <div
+        id="quick-switcher"
+        class="list-group"
+        :class="{ forced: forceQuickConvoList }"
+      >
         <a
           :class="getClasses(conversations.consoleTab)"
           href="#"
           @click.prevent="conversations.consoleTab.show()"
-          class="list-group-item list-group-item-action"
+          class="list-group-item list-group-item-action quick-switcher-item"
         >
           <span class="fas fa-home conversation-icon"></span>
+          <span
+            class="badge text-bg-danger"
+            v-if="shouldShowNotificationBadge(conversations.consoleTab)"
+          >
+            {{ conversations.consoleTab.unreadCount }}
+          </span>
           {{ conversations.consoleTab.name }}
         </a>
         <a
           v-for="conversation in conversations.privateConversations"
           href="#"
           @click.prevent="conversation.show()"
+          @click.middle.prevent.stop="conversation.close()"
+          :data-character="conversation.character.name"
+          data-bs-touch="false"
           :class="getClasses(conversation)"
-          class="list-group-item list-group-item-action"
+          class="list-group-item list-group-item-action quick-switcher-item"
           :key="conversation.key"
+          :title="conversation.character.name"
         >
           <img
             :src="characterImage(conversation.character.name)"
             v-if="showAvatars"
           />
           <span class="far fa-user-circle conversation-icon" v-else></span>
+          <span
+            class="badge text-bg-danger"
+            v-if="shouldShowNotificationBadge(conversation)"
+          >
+            {{ conversation.unreadCount }}
+          </span>
           <div class="name">{{ conversation.character.name }}</div>
         </a>
         <a
           v-for="conversation in conversations.channelConversations"
           href="#"
           @click.prevent="conversation.show()"
+          @click.middle.prevent.stop="conversation.close()"
           :class="getClasses(conversation)"
-          class="list-group-item list-group-item-action"
+          class="list-group-item list-group-item-action quick-switcher-item"
           :key="conversation.key"
+          :title="conversation.name"
         >
           <span
             class="conversation-icon"
@@ -319,6 +348,12 @@
                 : 'fas fa-hashtag'
             "
           ></span>
+          <span
+            class="badge text-bg-danger"
+            v-if="shouldShowNotificationBadge(conversation)"
+          >
+            {{ conversation.unreadCount }}
+          </span>
           <div class="name">{{ conversation.name }}</div>
         </a>
       </div>
@@ -430,6 +465,9 @@
       },
       ownCharacter(): Character {
         return core.characters.ownCharacter;
+      },
+      forceQuickConvoList(): boolean {
+        return core.state.settings.forceQuickConvoList;
       },
       ownCharacterLink(): string {
         return profileLink(core.characters.ownCharacter.name);
@@ -579,11 +617,7 @@
       },
 
       needsReply(conversation: Conversation): boolean {
-        if (
-          !core.state.settings.showNeedsReply ||
-          this.shouldShowNotificationBadge(conversation)
-        )
-          return false;
+        if (!core.state.settings.showNeedsReply) return false;
         for (let i = conversation.messages.length - 1; i >= 0; --i) {
           const sender = (<Partial<Conversation.ChatMessage>>(
             conversation.messages[i]
@@ -882,7 +916,6 @@
       isColorblindModeActive(): boolean {
         return core.state.settings.risingColorblindMode;
       },
-
       getImagePreview(): ImagePreview | undefined {
         return this.$refs['imagePreview'] as ImagePreview;
       },
@@ -925,6 +958,39 @@
       color: var(--bs-success);
     }
 
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      min-width: 1.65em;
+      padding: 0;
+      height: 1.65em;
+      line-height: 1;
+      box-shadow: 0 0 0 2px var(--bs-body-bg);
+    }
+
+    .conversation-badge-inline-end {
+      margin-left: auto;
+    }
+
+    .conversation-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      line-height: 1;
+      min-width: 0;
+      margin-top: 0.15rem;
+    }
+
+    .conversation-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      flex-shrink: 0;
+      margin-left: 0.5rem;
+    }
+
     .list-group-item {
       padding: 5px;
       display: flex;
@@ -962,6 +1028,31 @@
         padding-left: 1px;
         padding-top: 1px;
         padding-bottom: 1px;
+
+        .avatar-wrapper {
+          position: relative;
+          flex-shrink: 0;
+          margin-right: 5px;
+
+          img {
+            height: 40px;
+            width: 40px;
+            margin: 0;
+          }
+
+          .badge {
+            position: absolute;
+            bottom: 0;
+            right: -1px;
+            font-size: 0.8em;
+            min-width: 1.7em;
+            height: 1.7em;
+            padding: 0 3px;
+            margin: 0;
+            border-radius: 90px;
+            box-shadow: 0 0 0 2px var(--bs-list-group-bg, var(--bs-body-bg));
+          }
+        }
 
         .online-status {
           padding-left: 1px;
@@ -1003,10 +1094,12 @@
         width: 40px;
         margin: -1px 5px -1px -1px;
       }
-      &:first-child img {
+      &:first-child img,
+      &:first-child .avatar-wrapper img {
         border-top-left-radius: 4px;
       }
-      &:last-child img {
+      &:last-child img,
+      &:last-child .avatar-wrapper img {
         border-bottom-left-radius: 4px;
       }
     }
@@ -1022,9 +1115,16 @@
     @media (max-width: breakpoint-max(md)) {
       display: flex;
     }
+    &.forced {
+      display: flex;
+      @media (min-width: breakpoint-min(md)) {
+        margin: 0 5px 5px;
+      }
+    }
 
     a {
       width: 40px;
+      position: relative;
       text-align: center;
       line-height: 1;
       padding: 5px 5px 0;
@@ -1051,8 +1151,25 @@
     }
 
     .conversation-icon {
-      font-size: 2em;
+      font-size: 1.6rem;
       height: 30px;
+    }
+
+    .badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 0.9em;
+      min-width: 2em;
+      height: 2em;
+      padding: 0 4px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      z-index: 1;
+      box-shadow: 0 0 0 3px var(--bs-list-group-bg, var(--bs-body-bg));
     }
   }
 

@@ -1,5 +1,6 @@
 import * as electron from 'electron';
 import * as path from 'path';
+import { ProfileViewerGalleryType } from '../site/utils';
 
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 
@@ -26,6 +27,8 @@ export class GeneralSettings {
   account = '';
   closeToTray = true;
   profileViewer = true;
+  profileViewerGalleryType: ProfileViewerGalleryType = 'thumbnail';
+  profileViewerThumbAnimate = false;
   proxy: string = '';
   host = defaultHost;
   logDirectory = path.join(electron.app.getPath('userData'), 'data');

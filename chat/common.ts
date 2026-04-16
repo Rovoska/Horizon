@@ -133,6 +133,7 @@ export class Settings implements ISettings {
 
   chatLayoutMode: 'classic' | 'modern' = 'classic';
   messageGrouping = true;
+  forceQuickConvoList = false;
 
   horizonCacheDraftMessages = true;
   horizonSaveDraftMessagesToDiskTimer = 60;

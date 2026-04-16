@@ -39,9 +39,11 @@ function createBBCodeParser(): BBCodeParser {
 }
 
 class State implements StateInterface {
+  generalSettings?: GeneralSettings | undefined;
   _settings: Settings | undefined = undefined;
   hiddenUsers: string[] = [];
   favoriteEIcons: Record<string, boolean> = {};
+  recentEIcons: string[] = [];
 
   get settings(): Settings {
     if (this._settings === undefined) throw new Error('Settings load failed.');
@@ -117,6 +119,9 @@ const data = {
 
     const favoriteEIcons = await core.settingsStore.get('favoriteEIcons');
     state.favoriteEIcons = favoriteEIcons !== undefined ? favoriteEIcons : {};
+
+    const recentEIcons = await core.settingsStore.get('recentEIcons');
+    state.recentEIcons = recentEIcons !== undefined ? recentEIcons : [];
   }
 };
 

@@ -137,10 +137,67 @@
                   ></character-infotags>
                 </div>
                 <div role="tabpanel" v-show="tab === '2'">
+                  <div
+                    v-if="!loading"
+                    class="btn-group image-gallery-selector"
+                    role="group"
+                    :aria-label="l('settings.profileViewerGalleryType')"
+                  >
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="btnradio"
+                      id="btnRadioCarousel"
+                      autocomplete="off"
+                      :checked="previewType === 'thumbnail'"
+                    />
+                    <label
+                      class="btn btn-sm btn-outline-primary"
+                      for="btnRadioCarousel"
+                      @click="updateGalleryType('thumbnail')"
+                      :title="l('settings.profileViewerGalleryType.thumbnail')"
+                      ><i
+                        class="fa-solid fa-up-right-and-down-left-from-center"
+                      ></i>
+                    </label>
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="btnradio"
+                      id="btnRadioHover"
+                      autocomplete="off"
+                      :checked="previewType === 'hover'"
+                    />
+                    <label
+                      class="btn btn-sm btn-outline-primary"
+                      for="btnRadioHover"
+                      @click="updateGalleryType('hover')"
+                      :title="l('settings.profileViewerGalleryType.hover')"
+                    >
+                      <i class="fa-solid fa-picture-in-picture"></i>
+                    </label>
+                    <input
+                      type="radio"
+                      class="btn-check"
+                      name="btnradio"
+                      id="btnRadioFull"
+                      autocomplete="off"
+                      :checked="previewType === 'full'"
+                    />
+                    <label
+                      class="btn btn-sm btn-outline-primary"
+                      for="btnRadioFull"
+                      @click="updateGalleryType('full')"
+                      :title="l('settings.profileViewerGalleryType.full')"
+                    >
+                      <i class="fa-solid fa-images"></i>
+                    </label>
+                  </div>
                   <character-images
                     :character="character"
                     ref="tab2"
-                    :use-preview="imagePreview"
+                    :previewType="previewType"
+                    :animated-thumbs="animatedThumbs"
                     :injected-images="images"
                   ></character-images>
                 </div>
@@ -216,6 +273,7 @@
   import ProfileAnalysis from '../../learn/recommend/ProfileAnalysis.vue';
   import { CharacterImage, SimpleCharacter } from '../../interfaces';
   import l from '../../chat/localize';
+  import { ProfileViewerGalleryType } from '../utils';
 
   const CHARACTER_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
   const CHARACTER_META_CACHE_EXPIRE = 7 * 24 * 60 * 60 * 1000; // 7 days (milliseconds)
@@ -246,7 +304,11 @@
       id: {},
       authenticated: { required: true as const },
       oldApi: {},
-      imagePreview: {}
+      previewType: {
+        type: String as () => ProfileViewerGalleryType,
+        default: 'thumbnail'
+      },
+      animatedThumbs: { type: Boolean, default: false }
     },
     data() {
       return {
@@ -396,36 +458,46 @@
 
         this.loading = false;
       },
-      async updateGuestbook(): Promise<void> {
+      async updateGuestbook(expectedName: string): Promise<void> {
         try {
           if (!this.character || !_.get(this.character, 'settings.guestbook')) {
             this.guestbook = null;
             return;
           }
 
-          this.guestbook = await methods.guestbookPageGet(
+          const result = await methods.guestbookPageGet(
             this.character.character.id,
             1
           );
+
+          if ((this as any).name !== expectedName) return;
+
+          this.guestbook = result;
         } catch (err) {
+          if ((this as any).name !== expectedName) return;
           console.error(err);
           this.guestbook = null;
         }
       },
-      async updateGroups(): Promise<void> {
+      async updateGroups(expectedName: string): Promise<void> {
         try {
           if (!this.character || (this as any).oldApi) {
             this.groups = null;
             return;
           }
 
-          this.groups = await methods.groupsGet(this.character.character.id);
+          const result = await methods.groupsGet(this.character.character.id);
+
+          if ((this as any).name !== expectedName) return;
+
+          this.groups = result;
         } catch (err) {
+          if ((this as any).name !== expectedName) return;
           console.error('Update groups', err);
           this.groups = null;
         }
       },
-      async updateFriends(): Promise<void> {
+      async updateFriends(expectedName: string): Promise<void> {
         try {
           if (
             !this.character ||
@@ -435,32 +507,46 @@
             return;
           }
 
-          this.friends = await methods.friendsGet(this.character.character.id);
+          const result = await methods.friendsGet(this.character.character.id);
+
+          if ((this as any).name !== expectedName) return;
+
+          this.friends = result;
         } catch (err) {
+          if ((this as any).name !== expectedName) return;
           console.error('Update friends', err);
           this.friends = null;
         }
       },
-      async updateImages(): Promise<void> {
+      async updateImages(expectedName: string): Promise<void> {
         try {
           if (!this.character) {
             this.images = null;
             return;
           }
 
-          this.images = await methods.imagesGet(this.character.character.id);
+          const fetchedImages = await methods.imagesGet(
+            this.character.character.id
+          );
+
+          if ((this as any).name !== expectedName) return;
+
+          this.images = fetchedImages;
         } catch (err) {
+          if ((this as any).name !== expectedName) return;
           console.error('Update images', err);
           this.images = null;
         }
       },
       async updateMeta(name: string): Promise<void> {
         await Promise.all([
-          this.updateImages(),
-          this.updateGuestbook(),
-          this.updateFriends(),
-          this.updateGroups()
+          this.updateImages(name),
+          this.updateGuestbook(name),
+          this.updateFriends(name),
+          this.updateGroups(name)
         ]);
+
+        if ((this as any).name !== name) return;
 
         await core.cache.profileCache.registerMeta(name, {
           lastMetaFetched: new Date(),
@@ -635,6 +721,9 @@
         );
 
         // console.log('Match', this.selfCharacter.character.name, this.character.character.name, this.characterMatch);
+      },
+      updateGalleryType(profileGalleryType: ProfileViewerGalleryType): void {
+        this.$emit('gallery-type-updated', profileGalleryType);
       }
     }
   });
@@ -875,6 +964,17 @@
     column-count: 2;
     column-gap: 0.5rem;
 
+    &.thumbnails {
+      column-count: auto;
+    }
+
+    .character-image-thumb-wrapper {
+      display: inline-block;
+      a {
+        cursor: pointer;
+      }
+    }
+
     .character-image-wrapper {
       display: inline-block;
       background-color: var(--characterImageWrapperBg);
@@ -1084,7 +1184,7 @@
   .character-card-header {
     position: sticky;
     top: -1rem;
-    z-index: 1000;
+    z-index: 1100;
     background: var(--headerBackgroundMaskColor) !important;
   }
 

@@ -222,26 +222,30 @@
     messages: ReadonlyArray<Conversation.Message>,
     html: boolean
   ): string {
+    //The CSS rules for these are normally found in a Vue SFC.
+    //That's why we need to include this manually, otherwise multiline sub/sup tags fuck up and don't span multiple lines
+    const exportCssFix =
+      'sub, sup { line-height: 1em; } .bbcode sub p, .bbcode sup p { margin: 0; }';
     const start = html
-      ? `<meta charset="utf-8"><style>body { padding: 10px; }${document.getElementById('themeStyle')!.innerText}</style>`
+      ? `<meta charset="utf-8"><style>body { padding: 10px; }${document.getElementById('themeStyle')!.innerText}${exportCssFix}</style>`
       : '';
     return (
       '<div class="messages bbcode">' +
       messages.reduce(
-        (acc, x) =>
-          acc +
+        (accumilated, currentMessage) =>
+          accumilated +
           messageToString(
-            x,
+            currentMessage,
             date => formatTime(date, true),
             html
-              ? c => {
-                  const gender = core.characters.get(c).gender;
-                  return `<span class="user-view gender-${gender ? gender.toLowerCase() : 'none'}">${c}</span>`;
+              ? character => {
+                  const gender = core.characters.get(character).gender;
+                  return `<span class="user-view gender-${gender ? gender.toLowerCase() : 'none'}">${character}</span>`;
                 }
               : undefined,
             html
-              ? t => {
-                  const parsedElement = core.bbCodeParser.parseEverything(t);
+              ? text => {
+                  const parsedElement = core.bbCodeParser.parseEverything(text);
                   //TODO: If we want to instead use a custom BBCode parser (so we can also have a different kind of Spoiler tag for logs
                   //Then we would need to remove this
                   parsedElement

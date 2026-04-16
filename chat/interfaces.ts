@@ -246,6 +246,7 @@ export namespace Settings {
     recentChannels: Conversation.RecentChannelConversation[];
     hiddenUsers: string[];
     favoriteEIcons: Record<string, boolean>;
+    recentEIcons: string[];
     statusHistory: string[];
     statusPins: string[];
     searchHistory: (ExtendedSearchData | SearchData)[];
@@ -320,6 +321,7 @@ export namespace Settings {
 
     readonly chatLayoutMode: 'classic' | 'modern';
     readonly messageGrouping: boolean;
+    readonly forceQuickConvoList: boolean;
 
     readonly horizonCacheDraftMessages: boolean;
     readonly horizonSaveDraftMessagesToDiskTimer: number;
@@ -356,4 +358,5 @@ export interface State {
   settings: Settings;
   hiddenUsers: string[];
   favoriteEIcons: Record<string, boolean>;
+  recentEIcons: string[];
 }
