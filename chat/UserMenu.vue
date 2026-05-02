@@ -25,7 +25,7 @@
         />
         <div id="userMenu-userInfo">
           <h4 style="margin: 0; line-height: 1" class="userInfo-name">
-            {{ character.name }}
+            {{ displayName || character.name }}
           </h4>
           <span class="userInfo-status">{{
             l('status.' + character.status)
@@ -232,7 +232,10 @@
       'ad-view': CharacterAdView
     },
     props: {
-      reportDialog: { required: true as const }
+      reportDialog: {
+        type: Object as () => InstanceType<typeof ReportDialog>,
+        required: true
+      }
     },
     data() {
       return {
@@ -240,6 +243,7 @@
         showContextMenu: false,
         getByteLength,
         character: undefined as Character | undefined,
+        displayName: undefined as string | undefined,
         position: { left: '', top: '' },
         characterImage: undefined as string | undefined,
         touchedElement: undefined as HTMLElement | undefined,
@@ -259,7 +263,8 @@
         return member !== undefined && member.rank > Channel.Rank.Member;
       },
       isHidden(): boolean {
-        return core.state.hiddenUsers.indexOf(this.character!.name) !== -1;
+        void core.state.hiddenUsers;
+        return core.isHidden(this.character!.name);
       },
       isChatOp(): boolean {
         return core.characters.ownCharacter.isChatOp;
@@ -294,12 +299,10 @@
           .catch((e: object) => core.notifications.alert(errorToString(e)));
       },
       setHidden(): void {
-        const index = core.state.hiddenUsers.indexOf(this.character!.name);
-        if (index !== -1) core.state.hiddenUsers.splice(index, 1);
-        else core.state.hiddenUsers.push(this.character!.name);
+        core.toggleHidden(this.character!.name);
       },
       report(): void {
-        (this.reportDialog as any).report(this.character!);
+        this.reportDialog.report(this.character!);
       },
       channelKick(): void {
         core.connection.send('CKU', {
@@ -315,7 +318,7 @@
         this.memo = '';
         this.memoManager = new MemoManager(this.character!.name);
 
-        (<Modal>this.$refs['memo']).show();
+        (this.$refs['memo'] as InstanceType<typeof Modal>).show();
 
         try {
           await this.memoManager.load();
@@ -336,7 +339,9 @@
           return;
         }
 
-        (<CharacterAdView>this.$refs['adViewDialog']).show();
+        (
+          this.$refs['adViewDialog'] as InstanceType<typeof CharacterAdView>
+        ).show();
       },
       hasAdLogs(): boolean {
         if (!this.character) {
@@ -360,6 +365,7 @@
           HTMLElement & {
             character?: Character;
             channel?: Channel;
+            displayName?: string;
             touched?: boolean;
           }
         >touch.target;
@@ -393,7 +399,12 @@
             if (node.dataset['character'] === undefined)
               if (node === this.touchedElement)
                 // tslint:disable-next-line no-floating-promises
-                this.openMenu(touch, node.character, node.channel || undefined);
+                this.openMenu(
+                  touch,
+                  node.character,
+                  node.channel || undefined,
+                  node.displayName
+                );
               else this.onClick(node.character);
             e.preventDefault();
             break;
@@ -402,7 +413,12 @@
             break;
           case 'contextmenu':
             // tslint:disable-next-line no-floating-promises
-            this.openMenu(touch, node.character, node.channel || undefined);
+            this.openMenu(
+              touch,
+              node.character,
+              node.channel || undefined,
+              node.displayName
+            );
             e.preventDefault();
         }
       },
@@ -421,10 +437,12 @@
       async openMenu(
         touch: MouseEvent | Touch,
         character: Character,
-        channel: Channel | undefined
+        channel: Channel | undefined,
+        displayName?: string
       ): Promise<void> {
         this.channel = channel;
         this.character = character;
+        this.displayName = displayName;
         this.characterImage = undefined;
         this.showContextMenu = true;
         this.position = {
