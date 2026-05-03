@@ -1,5 +1,6 @@
 import * as electron from 'electron';
 import * as path from 'path';
+import { ProfileViewerGalleryType } from '../site/utils';
 
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 
@@ -26,6 +27,8 @@ export class GeneralSettings {
   account = '';
   closeToTray = true;
   profileViewer = true;
+  profileViewerGalleryType: ProfileViewerGalleryType = 'thumbnail';
+  profileViewerThumbAnimate = false;
   proxy: string = '';
   host = defaultHost;
   logDirectory = path.join(electron.app.getPath('userData'), 'data');
@@ -63,6 +66,8 @@ export class GeneralSettings {
   fuzzyDates: boolean = true;
   flashWindow: boolean = true;
   allowWindowTransparency: boolean = false;
+  forceNativeWindowControls: boolean = false;
+  nativeWindowShowSingleTab: boolean = false;
   horizonForceAsciiProfiles: boolean = false;
   hasImportedVanillaLogs: boolean = false;
   hasDismissedVanillaImport: boolean = false;
@@ -81,6 +86,8 @@ export class GeneralSettings {
   autoBackupIncludeHidden: boolean = true;
   autoBackupRetention: number = 5;
   autoBackupDirectory: string = '';
+  horizonShowNotificationBadge: boolean = true;
+  horizonShowWindowAndChatNotificationBadge: boolean = true;
 }
 
 log.debug('init.common.done');

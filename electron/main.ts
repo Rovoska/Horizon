@@ -2,7 +2,7 @@
  * @license
  * Originally licensed under MIT License
  *
- * Copyright (c) 2018 F-List
+ * Copyright (c) 2018-2026 Dragonfruit Ventures, LLC
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,15 @@
  *
  * ---
  *
- * This file is now also licensed under GPLv3 (see LICENSE file).
- * Modifications made after the original MIT release are licensed under GPLv3.
+ * This file is now also licensed under MPL-2.0 (see LICENSE.md).
+ * Modifications made after the original MIT release are licensed under MPL-2.0.
  *
  * This license header applies to this file and all of the non-third-party assets it includes.
  * @file The entry point for the Electron main thread of F-Chat 3.0.
- * @copyright 2018 F-List
+ * @copyright 2018-2026 Dragonfruit Ventures, LLC
+ * @copyright 2024-2026 Sylvia Roselie & Respective Horizon Contributors
+ * @version 1.0
+ * @see {@link https://github.com/Fchat-Horizon/Horizon|GitHub repo}
  * @author Maya Wolf <maya@f-list.net>
  * @version 3.0
  * @see {@link https://github.com/f-list/exported|GitHub repo}
@@ -52,6 +55,7 @@ import Axios from 'axios';
 import * as browserWindows from './browser_windows';
 import * as remoteMain from '@electron/remote/main';
 import { Event } from 'electron/main';
+import { ProfileViewerGalleryType } from '../site/utils';
 
 const configuredSessions = new WeakSet<electron.Session>();
 
@@ -155,9 +159,8 @@ EXAMPLES:
   }
 
   if (command === 'export') {
-    const { runExportCli } = await import(
-      './services/exporter/backup-export-cli'
-    );
+    const { runExportCli } =
+      await import('./services/exporter/backup-export-cli');
     const dataDir =
       get('--data-dir') || path.join(app.getPath('userData'), 'data');
     const out = get('--out') || path.join(process.cwd(), 'horizon-export.zip');
@@ -196,9 +199,8 @@ EXAMPLES:
   }
 
   if (command === 'import') {
-    const { runImportCli } = await import(
-      './services/importer/backup-import-cli'
-    );
+    const { runImportCli } =
+      await import('./services/importer/backup-import-cli');
     const zip = get('--zip');
     if (!zip) return false;
     const dataDir =
@@ -450,6 +452,17 @@ async function onReady(): Promise<void> {
           return;
         }
 
+        if (
+          permission === 'clipboard-sanitized-write' &&
+          partitionName === 'persist:fchat'
+        ) {
+          log.debug('permissions.allowed.clipboard-sanitized-write', {
+            partition: partitionName
+          });
+          callback(true);
+          return;
+        }
+
         log.debug('permissions.blocked', {
           partition: partitionName,
           permission: permission
@@ -463,6 +476,13 @@ async function onReady(): Promise<void> {
       (_webContents, permission, _details) => {
         if (
           permission === 'notifications' &&
+          partitionName === 'persist:fchat'
+        ) {
+          return true;
+        }
+
+        if (
+          permission === 'clipboard-sanitized-write' &&
           partitionName === 'persist:fchat'
         ) {
           return true;
@@ -627,6 +647,26 @@ async function onReady(): Promise<void> {
             (window as electron.BrowserWindow).webContents.send('previous-tab');
           }
         }
+      },
+      {
+        label: l('navigation.nextTab'),
+        accelerator: 'Ctrl+PageDown',
+        visible: false,
+        click: (_m, window) => {
+          if (window && 'webContents' in window) {
+            (window as electron.BrowserWindow).webContents.send('switch-tab');
+          }
+        }
+      },
+      {
+        label: l('navigation.previousTab'),
+        accelerator: 'Ctrl+PageUp',
+        visible: false,
+        click: (_m, window) => {
+          if (window && 'webContents' in window) {
+            (window as electron.BrowserWindow).webContents.send('previous-tab');
+          }
+        }
       }
     ]
   };
@@ -682,8 +722,7 @@ async function onReady(): Promise<void> {
                 window
               );
             },
-            accelerator:
-              process.platform === 'darwin' ? 'CmdOrCtrl+,' : undefined
+            accelerator: 'CmdOrCtrl+,'
           },
           {
             label: l('fixLogs.action'),
@@ -734,12 +773,17 @@ async function onReady(): Promise<void> {
       },
       {
         label: `&${l('settings.export.manageData')}`,
-        click: (_m: electron.MenuItem, w: electron.BrowserWindow) => {
-          browserWindows.createExporterWindow(settings, 'none', w);
+        click: (_m, w) => {
+          if (w)
+            browserWindows.createExporterWindow(
+              settings,
+              'none',
+              w as electron.BrowserWindow
+            );
         }
-      },
+      } as MenuItemConstructorOptions,
       viewItem,
-      ...(process.platform === 'darwin' ? [windowItem] : []),
+      windowItem,
       {
         label: `&${l('help')}`,
         submenu: [
@@ -780,73 +824,7 @@ async function onReady(): Promise<void> {
             visible: process.env.NODE_ENV !== 'production'
           }
         ] as MenuItemConstructorOptions[]
-      },
-      ...(process.platform !== 'darwin'
-        ? ([
-            {
-              label: l('navigation'),
-              visible: false,
-              submenu: [
-                {
-                  id: 'nextTab',
-                  accelerator: 'Ctrl+Tab',
-                  label: l('navigation.nextTab'),
-                  click: (
-                    _menuItem: electron.MenuItem,
-                    browserWindow: electron.BrowserWindow | undefined,
-                    _event: KeyboardEvent
-                  ) => {
-                    if (browserWindow) {
-                      browserWindow.webContents.send('switch-tab');
-                    }
-                  }
-                } as MenuItemConstructorOptions,
-                {
-                  id: 'nextTabAlt',
-                  accelerator: 'CmdOrCtrl+PageDown',
-                  label: l('navigation.nextTab'),
-                  click: (
-                    _menuItem: electron.MenuItem,
-                    browserWindow: electron.BrowserWindow | undefined,
-                    _event: KeyboardEvent
-                  ) => {
-                    if (browserWindow) {
-                      browserWindow.webContents.send('switch-tab');
-                    }
-                  }
-                } as MenuItemConstructorOptions,
-                {
-                  id: 'previousTab',
-                  accelerator: 'Ctrl+Shift+Tab',
-                  label: l('navigation.previousTab'),
-                  click: (
-                    _menuItem: electron.MenuItem,
-                    browserWindow: electron.BrowserWindow | undefined,
-                    _event: KeyboardEvent
-                  ) => {
-                    if (browserWindow) {
-                      browserWindow.webContents.send('previous-tab');
-                    }
-                  }
-                } as MenuItemConstructorOptions,
-                {
-                  id: 'previousTabAlt',
-                  accelerator: 'CmdOrCtrl+PageUp',
-                  label: l('navigation.previousTab'),
-                  click: (
-                    _menuItem: electron.MenuItem,
-                    browserWindow: electron.BrowserWindow | undefined,
-                    _event: KeyboardEvent
-                  ) => {
-                    if (browserWindow) {
-                      browserWindow.webContents.send('previous-tab');
-                    }
-                  }
-                } as MenuItemConstructorOptions
-              ] as MenuItemConstructorOptions[]
-            } as MenuItemConstructorOptions
-          ] as MenuItemConstructorOptions[])
-        : [])
+      }
     ])
   );
 
@@ -962,6 +940,14 @@ async function onReady(): Promise<void> {
     }
   );
 
+  electron.ipcMain.on(
+    'profile-gallery-type',
+    (_event: IpcMainEvent, profileGalleryType: ProfileViewerGalleryType) => {
+      settings.profileViewerGalleryType = profileGalleryType;
+      setGeneralSettings(settings);
+    }
+  );
+
   electron.ipcMain.handle('get-connected-characters', () => {
     return characters.slice();
   });
@@ -1063,6 +1049,9 @@ async function onReady(): Promise<void> {
           settings.horizonCustomCssEnabled !==
             _options.horizonCustomCssEnabled ||
           settings.horizonCustomCss !== _options.horizonCustomCss;
+        let badgeChange =
+          settings.horizonShowNotificationBadge !==
+          _options.horizonShowNotificationBadge;
         Object.assign(settings, _options);
         //Now we save it to a file
         setGeneralSettings(_options);
@@ -1075,6 +1064,11 @@ async function onReady(): Promise<void> {
         }
         if (autoBackupScheduler) {
           autoBackupScheduler.reload();
+        }
+        if (badgeChange) {
+          browserWindows.updateNotificationBadges(
+            settings.horizonShowNotificationBadge
+          );
         }
       }
     }

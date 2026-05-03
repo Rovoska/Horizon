@@ -9,8 +9,6 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
 
   protected urlMutator = new ImageUrlMutator(this.parent.debug);
 
-  protected ratio: number | null = null;
-
   hide(): void {
     const wasVisible = this.visible;
 
@@ -19,11 +17,6 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
     if (wasVisible) {
       const webview = this.parent.getWebview();
 
-      // if (this.allowCachedUrl) {
-      //     // tslint:disable-next-line:no-floating-promises
-      //     webview.executeJavaScript(this.parent.jsMutator.getHideMutator());
-      // } else {
-
       // tslint:disable-next-line:no-floating-promises
       webview.stop();
 
@@ -31,14 +24,8 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
         console.warn('webview.loadURL() in hide()', err);
       });
 
-      //}
-
       this.visible = false;
     }
-  }
-
-  setRatio(ratio: number): void {
-    this.ratio = ratio;
   }
 
   getName(): string {
@@ -78,24 +65,11 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
       throw new Error('Empty URL!');
     }
 
-    // const oldUrl = this.url;
-    // const oldLastExternalUrl = this.lastExternalUrl;
-
     this.url = url;
     this.lastExternalUrl = url;
     this.visible = true;
 
     try {
-      // if ((this.allowCachedUrl) && ((webview.getURL() === url) || (url === oldLastExternalUrl))) {
-      //     if (this.debug)
-      //         console.log('ImagePreview: exec re-show mutator');
-      //
-      //     // tslint:disable-next-line:no-floating-promises
-      //     webview.executeJavaScript(this.parent.jsMutator.getReShowMutator());
-      // } else {
-      //     if (this.debug)
-      //         console.log('ImagePreview: must load; skip re-show because urls don\'t match', this.url, webview.getURL());
-
       this.ratio = null;
 
       webview.stop();
@@ -139,40 +113,6 @@ export class ExternalImagePreviewHelper extends ImagePreviewHelper {
       ImagePreviewHelper.HTTP_TESTER.test(url) &&
       !(domainName === 'f-list.net' || domainName === 'static.f-list.net')
     );
-  }
-
-  determineScalingRatio(): Record<string, any> {
-    // ratio = width / height
-    const ratio = this.ratio;
-
-    if (!ratio) {
-      return {};
-    }
-
-    const ww = window.innerWidth;
-    const wh = window.innerHeight;
-
-    const maxWidth = Math.round(ww * 0.5);
-    const maxHeight = Math.round(wh * 0.7);
-
-    if (ratio >= 1) {
-      const presumedWidth = maxWidth;
-      const presumedHeight = presumedWidth / ratio;
-
-      return {
-        width: `${presumedWidth}px`,
-        height: `${presumedHeight}px`
-      };
-      // tslint:disable-next-line:unnecessary-else
-    } else {
-      const presumedHeight = maxHeight;
-      const presumedWidth = presumedHeight * ratio;
-
-      return {
-        width: `${presumedWidth}px`,
-        height: `${presumedHeight}px`
-      };
-    }
   }
 
   renderStyle(): Record<string, any> {

@@ -1,4 +1,3 @@
-import { Component, Hook, Prop } from '@f-list/vue-ts';
 import {
   CreateElement,
   default as Vue,
@@ -20,22 +19,14 @@ const userPostfix: { [key: number]: string | undefined } = {
   [Conversation.Message.Type.Ad]: ': ',
   [Conversation.Message.Type.Action]: ''
 };
-@Component({
-  render(this: MessageView, createElement: CreateElement): VNode {
+export default Vue.extend({
+  render(this: any, createElement: CreateElement): VNode {
     const message = this.message;
     const layoutMode = core.connection.isOpen
       ? core.state.settings.chatLayoutMode || 'classic'
       : 'classic';
     const isModern = layoutMode === 'modern';
     let modernInner: VNode | null = null; // track modern inner wrapper
-
-    // setTimeout(
-    //     () => {
-    //         console.log('Now scoring high!', message.text.substr(0, 64));
-    //         message.score = Scoring.MATCH;
-    //     },
-    //     5000
-    // );
 
     // Classic layout: existing inline format.
     // Modern layout: avatar-first with header (name + time) and bubble content.
@@ -191,10 +182,15 @@ const userPostfix: { [key: number]: string | undefined } = {
 
     //3.0 (and Horizon's classic view) users often prepend their message with an empty linefeed to format things like eicon collages
     //Therefore, we filter that out in modern view mode, since it's unnecessary there.
+    const hadLeadingNewline = message.text.startsWith('\n');
     let messageAdjustment = message.text.replace(/^\n/, '');
     switch (message.type) {
       case Conversation.Message.Type.Action:
-        messageAdjustment = ' ' + message.sender.name + messageAdjustment;
+        messageAdjustment =
+          ' ' +
+          message.sender.name +
+          (hadLeadingNewline ? '\n' : '') +
+          messageAdjustment;
         break;
       case Conversation.Message.Type.Roll:
         messageAdjustment = ' ' + message.sender.name + ' ' + messageAdjustment;
@@ -213,24 +209,25 @@ const userPostfix: { [key: number]: string | undefined } = {
                 if (isModern) {
                   // Pushes elm up three times rather than one with modern to make it parent to the top level of a message.
                   elm = elm.parentElement!.parentElement!.parentElement!;
-                  if (elm.scrollHeight > elm.offsetHeight) {
-                    const expand = document.createElement('div');
-                    expand.className = 'expand fas fa-caret-down';
-                    expand.addEventListener('click', function (): void {
-                      this.parentElement!.className += ' expanded';
-                    });
-                    elm.appendChild(expand);
-                  }
                 } else {
                   elm = elm.parentElement!;
-                  if (elm.scrollHeight > elm.offsetHeight) {
-                    const expand = document.createElement('div');
-                    expand.className = 'expand fas fa-caret-down';
-                    expand.addEventListener('click', function (): void {
-                      this.parentElement!.className += ' expanded';
-                    });
-                    elm.appendChild(expand);
-                  }
+                }
+                if (elm.scrollHeight > elm.offsetHeight) {
+                  const expand = document.createElement('div');
+                  expand.className = 'expand fas fa-caret-down';
+                  expand.addEventListener('click', function (): void {
+                    const ad = this.parentElement!;
+                    ad.className += ' expanded';
+                    // * Restart eicon GIF animations so mosaics re-sync
+                    const eicons =
+                      ad.querySelectorAll<HTMLImageElement>('img.eicon');
+                    for (const eicon of eicons) {
+                      const src = eicon.src;
+                      eicon.src = '';
+                      eicon.src = src;
+                    }
+                  });
+                  elm.appendChild(expand);
                 }
               });
             }
@@ -274,7 +271,8 @@ const userPostfix: { [key: number]: string | undefined } = {
       children.push(bbcodeNode);
     }
 
-    if (isModern) classes += ' message-modern';
+    if (isModern && message.type !== Conversation.Message.Type.Event)
+      classes += ' message-modern';
     if (this.selectable) {
       classes += ' message-selectable';
       const checkbox = createElement('input', {
@@ -293,85 +291,76 @@ const userPostfix: { [key: number]: string | undefined } = {
     const node = createElement('div', { attrs: { class: classes } }, children);
     node.key = message.id;
     return node;
-  }
-})
-export default class MessageView extends Vue {
-  @Prop({ required: true })
-  readonly message!: Conversation.Message;
-  @Prop
-  readonly classes?: string;
-  @Prop
-  readonly channel?: Channel;
-  @Prop
-  readonly logs?: true;
-  @Prop
-  readonly previous?: Conversation.Message;
-  @Prop
-  readonly selectable?: boolean;
-  @Prop
-  readonly selected?: boolean;
-
-  scoreClasses = this.getMessageScoreClasses(this.message);
-  filterClasses = this.getMessageFilterClasses(this.message);
-
-  scoreWatcher: (() => void) | null =
-    this.message.type === Conversation.Message.Type.Ad &&
-    this.message.score === 0
-      ? this.$watch('message.score', () => this.scoreUpdate())
-      : null;
-
-  @Hook('beforeDestroy')
-  onBeforeDestroy(): void {
-    // console.log('onbeforedestroy');
-
+  },
+  props: {
+    message: { required: true as const },
+    classes: {},
+    channel: {},
+    logs: {},
+    previous: {},
+    selectable: {},
+    selected: {}
+  },
+  data() {
+    return {
+      scoreClasses: (this as any).getMessageScoreClasses((this as any).message),
+      filterClasses: (this as any).getMessageFilterClasses(
+        (this as any).message
+      ),
+      scoreWatcher: ((this as any).message.type ===
+        Conversation.Message.Type.Ad && (this as any).message.score === 0
+        ? (this as any).$watch('message.score', () =>
+            (this as any).scoreUpdate()
+          )
+        : null) as (() => void) | null
+    };
+  },
+  beforeDestroy() {
     if (this.scoreWatcher) {
-      // console.log('onbeforedestroy killed');
-
       this.scoreWatcher(); // stop watching
       this.scoreWatcher = null;
     }
-  }
+  },
+  methods: {
+    // @Watch('message.score')
+    scoreUpdate(): void {
+      const oldScoreClasses = this.scoreClasses;
+      const oldFilterClasses = this.filterClasses;
 
-  // @Watch('message.score')
-  scoreUpdate(): void {
-    const oldScoreClasses = this.scoreClasses;
-    const oldFilterClasses = this.filterClasses;
+      this.scoreClasses = this.getMessageScoreClasses(this.message);
+      this.filterClasses = this.getMessageFilterClasses(this.message);
 
-    this.scoreClasses = this.getMessageScoreClasses(this.message);
-    this.filterClasses = this.getMessageFilterClasses(this.message);
+      if (
+        this.scoreClasses !== oldScoreClasses ||
+        this.filterClasses !== oldFilterClasses
+      ) {
+        this.$forceUpdate();
+      }
 
-    if (
-      this.scoreClasses !== oldScoreClasses ||
-      this.filterClasses !== oldFilterClasses
-    ) {
-      this.$forceUpdate();
+      if (this.scoreWatcher) {
+        this.scoreWatcher(); // stop watching
+        this.scoreWatcher = null;
+      }
+    },
+
+    getMessageScoreClasses(message: Conversation.Message): string {
+      if (!core.connection.character) return '';
+      if (
+        !core.state.settings.risingAdScore ||
+        message.type !== Conversation.Message.Type.Ad
+      ) {
+        return '';
+      }
+
+      return `message-score ${Score.getClasses(message.score as Scoring)}`;
+    },
+
+    getMessageFilterClasses(message: Conversation.Message): string {
+      if (!message.filterMatch) {
+        return '';
+      }
+
+      return 'filter-match';
     }
-
-    if (this.scoreWatcher) {
-      // console.log('watch killed');
-
-      this.scoreWatcher(); // stop watching
-      this.scoreWatcher = null;
-    }
   }
-
-  getMessageScoreClasses(message: Conversation.Message): string {
-    if (!core.connection.character) return '';
-    if (
-      !core.state.settings.risingAdScore ||
-      message.type !== Conversation.Message.Type.Ad
-    ) {
-      return '';
-    }
-
-    return `message-score ${Score.getClasses(message.score as Scoring)}`;
-  }
-
-  getMessageFilterClasses(message: Conversation.Message): string {
-    if (!message.filterMatch) {
-      return '';
-    }
-
-    return 'filter-match';
-  }
-}
+});

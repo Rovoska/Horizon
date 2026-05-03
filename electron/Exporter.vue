@@ -9,7 +9,10 @@
     <div class="window-modal modal" :class="getThemeClass()" tabindex="-1">
       <div class="modal-dialog modal-xl" style="height: 100vh">
         <div class="modal-content" style="height: 100vh">
-          <div class="modal-header">
+          <div
+            class="modal-header"
+            v-if="!settings.forceNativeWindowControls || isMac"
+          >
             <h5 class="modal-title" style="-webkit-app-region: drag">
               <i class="fas fa-fw fa-database"></i>
               {{ l('settings.export.manageData') }}
@@ -1245,7 +1248,6 @@
 </template>
 
 <script lang="ts">
-  import { Component, Hook } from '@f-list/vue-ts';
   import * as remote from '@electron/remote';
   import Vue from 'vue';
   import l from '../chat/localize';
@@ -1256,286 +1258,314 @@
   import * as ImportExport from './services';
   import type { VanillaContext } from './services/importer/vanilla-importer';
   import type { BackupCharacterInfo } from './services/importer/backup-import';
+  import type { ExportManifest } from './services';
 
   const browserWindow = remote.getCurrentWindow();
 
-  @Component({})
-  export default class ExporterWindow extends Vue {
-    settings!: GeneralSettings;
-    importHint:
-      | 'auto'
-      | 'vanilla'
-      | 'vanilla-advanced'
-      | 'slimcat'
-      | undefined = undefined;
-    l = l;
-    osIsDark: boolean = remote.nativeTheme.shouldUseDarkColors;
-    selectedSection: 'auto-backup' | 'export' | 'import' | 'vanilla' =
-      'auto-backup';
-    isMac = process.platform === 'darwin';
-    platform = process.platform;
+  export default Vue.extend({
+    data() {
+      return {
+        settings: undefined as any as GeneralSettings,
+        importHint: undefined as
+          | 'auto'
+          | 'vanilla'
+          | 'vanilla-advanced'
+          | 'slimcat'
+          | undefined,
+        l: l,
+        osIsDark: remote.nativeTheme.shouldUseDarkColors as boolean,
+        selectedSection: 'auto-backup' as
+          | 'auto-backup'
+          | 'export'
+          | 'import'
+          | 'vanilla',
+        isMac: process.platform === 'darwin',
+        platform: process.platform,
 
-    vanillaContext?: VanillaContext;
-    vanillaImportAvailable = false;
-    vanillaBaseDir: string | undefined = undefined;
-    vanillaCharacters: Array<{ name: string; selected: boolean }> = [];
-    vanillaImportGeneral = true;
-    vanillaImportGeneralAvailable = true;
-    vanillaImportCharacterSettings = true;
-    vanillaImportLogs = true;
-    vanillaImportPinnedEicons = true;
-    vanillaImportOverwrite = false;
-    vanillaImportInProgress = false;
-    vanillaImportSummary: string | undefined = undefined;
-    vanillaImportError: string | undefined = undefined;
-    showVanillaAutoPrompt = false;
+        vanillaContext: undefined as VanillaContext | undefined,
+        vanillaImportAvailable: false,
+        vanillaBaseDir: undefined as string | undefined,
+        vanillaCharacters: [] as Array<{ name: string; selected: boolean }>,
+        vanillaImportGeneral: true,
+        vanillaImportGeneralAvailable: true,
+        vanillaImportCharacterSettings: true,
+        vanillaImportLogs: true,
+        vanillaImportPinnedEicons: true,
+        vanillaImportOverwrite: false,
+        vanillaImportInProgress: false,
+        vanillaImportSummary: undefined as string | undefined,
+        vanillaImportError: undefined as string | undefined,
+        showVanillaAutoPrompt: false,
 
-    exportCharacters: Array<{ name: string; selected: boolean }> = [];
-    exportIncludeGeneralSettings = true;
-    exportIncludeCharacterSettings = true;
-    exportIncludeLogs = true;
-    exportIncludeDrafts = true;
-    exportIncludePinnedConversations = true;
-    exportIncludePinnedEicons = true;
-    exportIncludeRecents = true;
-    exportIncludeHidden = true;
-    exportInProgress = false;
-    exportProgress: number | undefined = undefined;
-    exportCount: number | undefined = undefined;
-    exportTotal: number | undefined = undefined;
-    exportSummary: string | undefined = undefined;
-    exportError: string | undefined = undefined;
-    exportAnimatedDots = '';
-    exportAnimationTimer: NodeJS.Timeout | undefined = undefined;
+        exportCharacters: [] as Array<{ name: string; selected: boolean }>,
+        exportIncludeGeneralSettings: true,
+        exportIncludeCharacterSettings: true,
+        exportIncludeLogs: true,
+        exportIncludeDrafts: true,
+        exportIncludePinnedConversations: true,
+        exportIncludePinnedEicons: true,
+        exportIncludeRecents: true,
+        exportIncludeHidden: true,
+        exportInProgress: false,
+        exportProgress: undefined as number | undefined,
+        exportCount: undefined as number | undefined,
+        exportTotal: undefined as number | undefined,
+        exportSummary: undefined as string | undefined,
+        exportError: undefined as string | undefined,
+        exportAnimatedDots: '',
+        exportAnimationTimer: undefined as NodeJS.Timeout | undefined,
 
-    importCharacters: BackupCharacterInfo[] = [];
-    importIncludeGeneralSettings = false;
-    importGeneralAvailable = false;
-    importIncludeCharacterSettings = false;
-    importCharacterSettingsAvailable = false;
-    importIncludeLogs = false;
-    importLogsAvailable = false;
-    importIncludeDrafts = false;
-    importDraftsAvailable = false;
-    importIncludePinnedConversations = false;
-    importPinnedConversationsAvailable = false;
-    importIncludePinnedEicons = false;
-    importPinnedEiconsAvailable = false;
-    importIncludeRecents = false;
-    importRecentsAvailable = false;
-    importIncludeHidden = false;
-    importHiddenAvailable = false;
-    importOverwrite = false;
-    importInProgress = false;
-    importSummary: string | undefined = undefined;
-    importError: string | undefined = undefined;
-    importZipPath: string | undefined = undefined;
-    importZipName: string | undefined = undefined;
-    importZipError: string | undefined = undefined;
-    private importZipArchive?: any;
-    importZipHasManifest = false;
-    importZipManifest: any = undefined;
-    importCustomLogDirectory: string | undefined = undefined;
-    importUseCustomLogLocation = false;
-    importCustomLogLocationError: string | undefined = undefined;
+        importCharacters: [] as BackupCharacterInfo[],
+        importIncludeGeneralSettings: false,
+        importGeneralAvailable: false,
+        importIncludeCharacterSettings: false,
+        importCharacterSettingsAvailable: false,
+        importIncludeLogs: false,
+        importLogsAvailable: false,
+        importIncludeDrafts: false,
+        importDraftsAvailable: false,
+        importIncludePinnedConversations: false,
+        importPinnedConversationsAvailable: false,
+        importIncludePinnedEicons: false,
+        importPinnedEiconsAvailable: false,
+        importIncludeRecents: false,
+        importRecentsAvailable: false,
+        importIncludeHidden: false,
+        importHiddenAvailable: false,
+        importOverwrite: false,
+        importInProgress: false,
+        importSummary: undefined as string | undefined,
+        importError: undefined as string | undefined,
+        importZipPath: undefined as string | undefined,
+        importZipName: undefined as string | undefined,
+        importZipError: undefined as string | undefined,
+        importZipArchive: undefined as any,
+        importZipHasManifest: false,
+        importZipManifest: undefined as ExportManifest | undefined,
+        importCustomLogDirectory: undefined as string | undefined,
+        importUseCustomLogLocation: false,
+        importCustomLogLocationError: undefined as string | undefined,
 
-    connectedCharacters: string[] = [];
-    autoBackups: { name: string; path: string; mtime: number; size: number }[] =
-      [];
-    selectedAutoBackup: string | undefined = undefined;
+        connectedCharacters: [] as string[],
+        autoBackups: [] as {
+          name: string;
+          path: string;
+          mtime: number;
+          size: number;
+        }[],
+        selectedAutoBackup: undefined as string | undefined,
 
-    get defaultBackupDir(): string {
-      return path.join(remote.app.getPath('userData'), 'backups');
-    }
-
-    async chooseAutoBackupDir(): Promise<void> {
-      const result = await remote.dialog.showOpenDialog(browserWindow, {
-        properties: ['openDirectory'],
-        defaultPath: this.settings.autoBackupDirectory || this.defaultBackupDir
-      });
-      if (!result.canceled && result.filePaths.length > 0) {
-        this.settings.autoBackupDirectory = result.filePaths[0];
-      }
-    }
-
-    get anyCharactersConnected(): boolean {
-      return (
-        Array.isArray(this.connectedCharacters) &&
-        this.connectedCharacters.length > 0
-      );
-    }
-
-    get styling(): string {
-      try {
-        return `<style>${fs
-          .readFileSync(
-            path.join(__dirname, `themes/${this.getSyncedTheme()}.css`),
-            'utf8'
-          )
-          .toString()}</style>`;
-      } catch (e) {
-        if (
-          (<Error & { code: string }>e).code === 'ENOENT' &&
-          this.settings.theme !== 'default'
-        ) {
-          this.settings.theme = 'default';
-          return this.styling;
+        refreshExportCharacters: () =>
+          ImportExport.refreshExportCharacters(this as any),
+        refreshVanillaContext: () =>
+          ImportExport.refreshVanillaContext(this as any),
+        normalizeVanillaBaseDir: () =>
+          ImportExport.normalizeVanillaBaseDir(this as any),
+        chooseVanillaImportDir: () =>
+          ImportExport.chooseVanillaImportDir(this as any),
+        resetVanillaImportDir: () =>
+          ImportExport.resetVanillaImportDir(this as any),
+        handleVanillaBaseDirInput: () =>
+          ImportExport.handleVanillaBaseDirInput(this as any),
+        setVanillaCharacters: (selected: boolean) =>
+          ImportExport.setVanillaCharacters(this as any, selected),
+        setExportCharacters: (selected: boolean) =>
+          ImportExport.setExportCharacters(this as any, selected),
+        setImportCharacters: (selected: boolean) =>
+          ImportExport.setImportCharacters(this as any, selected),
+        runVanillaImport: () => ImportExport.runVanillaImport(this as any),
+        runExport: () => {
+          (this as any).startExportAnimation();
+          ImportExport.runExport(this as any).finally(() =>
+            (this as any).stopExportAnimation()
+          );
+        },
+        chooseImportZip: () => ImportExport.chooseImportZip(this as any),
+        describeImportCharacter: (character: BackupCharacterInfo) =>
+          ImportExport.describeImportCharacter(character),
+        runZipImport: () => ImportExport.runZipImport(this as any)
+      };
+    },
+    computed: {
+      anyCharactersConnected(): boolean {
+        return (
+          Array.isArray(this.connectedCharacters) &&
+          this.connectedCharacters.length > 0
+        );
+      },
+      defaultBackupDir(): string {
+        return path.join(remote.app.getPath('userData'), 'backups');
+      },
+      estimatedRetentionSize(): string | undefined {
+        if (!this.autoBackups.length) return undefined;
+        const latest = this.autoBackups[0];
+        const total = latest.size * (this.settings.autoBackupRetention || 1);
+        if (total < 1024 * 1024) {
+          return `${(total / 1024).toFixed(0)} KB`;
         }
-        throw e;
+        if (total < 1024 * 1024 * 1024) {
+          return `${(total / (1024 * 1024)).toFixed(1)} MB`;
+        }
+        return `${(total / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+      },
+      styling(): string {
+        try {
+          return `<style>${fs
+            .readFileSync(
+              path.join(__dirname, `themes/${this.getSyncedTheme()}.css`),
+              'utf8'
+            )
+            .toString()}</style>`;
+        } catch (e) {
+          if (
+            (<Error & { code: string }>e).code === 'ENOENT' &&
+            this.settings.theme !== 'default'
+          ) {
+            this.settings.theme = 'default';
+            return this.styling;
+          }
+          throw e;
+        }
+      },
+      canRunVanillaImport(): boolean {
+        if (!this.vanillaImportAvailable || this.vanillaImportInProgress)
+          return false;
+        if (this.anyCharactersConnected) return false;
+        if (
+          !this.vanillaImportGeneral &&
+          !this.vanillaImportCharacterSettings &&
+          !this.vanillaImportLogs &&
+          !this.vanillaImportPinnedEicons
+        )
+          return false;
+        if (
+          (this.vanillaImportCharacterSettings ||
+            this.vanillaImportLogs ||
+            this.vanillaImportPinnedEicons) &&
+          this.vanillaCharacters.length > 0 &&
+          this.vanillaCharacters.every(character => !character.selected)
+        )
+          return false;
+        return true;
+      },
+      canRunExport(): boolean {
+        if (this.exportInProgress) return false;
+        if (
+          !this.exportIncludeGeneralSettings &&
+          !this.exportIncludeCharacterSettings &&
+          !this.exportIncludeLogs &&
+          !this.exportIncludeDrafts &&
+          !this.exportIncludePinnedConversations &&
+          !this.exportIncludePinnedEicons &&
+          !this.exportIncludeRecents &&
+          !this.exportIncludeHidden
+        )
+          return false;
+        if (
+          (this.exportIncludeCharacterSettings ||
+            this.exportIncludeLogs ||
+            this.exportIncludeDrafts ||
+            this.exportIncludePinnedConversations ||
+            this.exportIncludePinnedEicons ||
+            this.exportIncludeRecents ||
+            this.exportIncludeHidden) &&
+          this.exportCharacters.length > 0 &&
+          this.exportCharacters.every(character => !character.selected)
+        )
+          return false;
+        return true;
+      },
+      canRunZipImport(): boolean {
+        if (!this.importZipArchive || this.importInProgress) return false;
+        if (this.anyCharactersConnected) return false;
+
+        const includeGeneral =
+          this.importIncludeGeneralSettings && this.importGeneralAvailable;
+        const includeAnyCharacterData =
+          (this.importIncludeCharacterSettings &&
+            this.importCharacterSettingsAvailable) ||
+          (this.importIncludeLogs && this.importLogsAvailable) ||
+          (this.importIncludeDrafts && this.importDraftsAvailable) ||
+          (this.importIncludePinnedConversations &&
+            this.importPinnedConversationsAvailable) ||
+          (this.importIncludePinnedEicons &&
+            this.importPinnedEiconsAvailable) ||
+          (this.importIncludeRecents && this.importRecentsAvailable) ||
+          (this.importIncludeHidden && this.importHiddenAvailable);
+
+        if (!includeGeneral && !includeAnyCharacterData) return false;
+        if (!includeAnyCharacterData) return true;
+
+        const selectedCharacters = this.importCharacters.filter(
+          character => character.selected
+        );
+        if (selectedCharacters.length === 0) return false;
+
+        return selectedCharacters.some(character => {
+          if (
+            this.importIncludeCharacterSettings &&
+            this.importCharacterSettingsAvailable &&
+            character.hasSettings
+          )
+            return true;
+          if (
+            this.importIncludeLogs &&
+            this.importLogsAvailable &&
+            character.hasLogs
+          )
+            return true;
+          if (
+            this.importIncludeDrafts &&
+            this.importDraftsAvailable &&
+            character.hasDrafts
+          )
+            return true;
+          if (
+            this.importIncludePinnedConversations &&
+            this.importPinnedConversationsAvailable &&
+            character.hasPinnedConversations
+          )
+            return true;
+          if (
+            this.importIncludePinnedEicons &&
+            this.importPinnedEiconsAvailable &&
+            character.hasPinnedEicons
+          )
+            return true;
+          if (
+            this.importIncludeRecents &&
+            this.importRecentsAvailable &&
+            character.hasRecents
+          )
+            return true;
+          if (
+            this.importIncludeHidden &&
+            this.importHiddenAvailable &&
+            character.hasHidden
+          )
+            return true;
+          return false;
+        });
+      },
+      allExportCharactersSelected(): boolean {
+        return (
+          this.exportCharacters.length > 0 &&
+          this.exportCharacters.every(character => character.selected)
+        );
+      },
+      allImportCharactersSelected(): boolean {
+        return (
+          this.importCharacters.length > 0 &&
+          this.importCharacters.every(character => character.selected)
+        );
+      },
+      allVanillaCharactersSelected(): boolean {
+        return (
+          this.vanillaCharacters.length > 0 &&
+          this.vanillaCharacters.every(character => character.selected)
+        );
       }
-    }
-
-    getSyncedTheme() {
-      if (!this.settings.themeSync) return this.settings.theme;
-      return this.osIsDark
-        ? this.settings.themeSyncDark
-        : this.settings.themeSyncLight;
-    }
-
-    get canRunVanillaImport(): boolean {
-      if (!this.vanillaImportAvailable || this.vanillaImportInProgress)
-        return false;
-      if (this.anyCharactersConnected) return false;
-      if (
-        !this.vanillaImportGeneral &&
-        !this.vanillaImportCharacterSettings &&
-        !this.vanillaImportLogs &&
-        !this.vanillaImportPinnedEicons
-      )
-        return false;
-      if (
-        (this.vanillaImportCharacterSettings ||
-          this.vanillaImportLogs ||
-          this.vanillaImportPinnedEicons) &&
-        this.vanillaCharacters.length > 0 &&
-        this.vanillaCharacters.every(character => !character.selected)
-      )
-        return false;
-      return true;
-    }
-
-    get canRunExport(): boolean {
-      if (this.exportInProgress) return false;
-      if (
-        !this.exportIncludeGeneralSettings &&
-        !this.exportIncludeCharacterSettings &&
-        !this.exportIncludeLogs &&
-        !this.exportIncludeDrafts &&
-        !this.exportIncludePinnedConversations &&
-        !this.exportIncludePinnedEicons &&
-        !this.exportIncludeRecents &&
-        !this.exportIncludeHidden
-      )
-        return false;
-      if (
-        (this.exportIncludeCharacterSettings ||
-          this.exportIncludeLogs ||
-          this.exportIncludeDrafts ||
-          this.exportIncludePinnedConversations ||
-          this.exportIncludePinnedEicons ||
-          this.exportIncludeRecents ||
-          this.exportIncludeHidden) &&
-        this.exportCharacters.length > 0 &&
-        this.exportCharacters.every(character => !character.selected)
-      )
-        return false;
-      return true;
-    }
-
-    get canRunZipImport(): boolean {
-      if (!this.importZipArchive || this.importInProgress) return false;
-      if (this.anyCharactersConnected) return false;
-
-      const includeGeneral =
-        this.importIncludeGeneralSettings && this.importGeneralAvailable;
-      const includeAnyCharacterData =
-        (this.importIncludeCharacterSettings &&
-          this.importCharacterSettingsAvailable) ||
-        (this.importIncludeLogs && this.importLogsAvailable) ||
-        (this.importIncludeDrafts && this.importDraftsAvailable) ||
-        (this.importIncludePinnedConversations &&
-          this.importPinnedConversationsAvailable) ||
-        (this.importIncludePinnedEicons && this.importPinnedEiconsAvailable) ||
-        (this.importIncludeRecents && this.importRecentsAvailable) ||
-        (this.importIncludeHidden && this.importHiddenAvailable);
-
-      if (!includeGeneral && !includeAnyCharacterData) return false;
-      if (!includeAnyCharacterData) return true;
-
-      const selectedCharacters = this.importCharacters.filter(
-        character => character.selected
-      );
-      if (selectedCharacters.length === 0) return false;
-
-      return selectedCharacters.some(character => {
-        if (
-          this.importIncludeCharacterSettings &&
-          this.importCharacterSettingsAvailable &&
-          character.hasSettings
-        )
-          return true;
-        if (
-          this.importIncludeLogs &&
-          this.importLogsAvailable &&
-          character.hasLogs
-        )
-          return true;
-        if (
-          this.importIncludeDrafts &&
-          this.importDraftsAvailable &&
-          character.hasDrafts
-        )
-          return true;
-        if (
-          this.importIncludePinnedConversations &&
-          this.importPinnedConversationsAvailable &&
-          character.hasPinnedConversations
-        )
-          return true;
-        if (
-          this.importIncludePinnedEicons &&
-          this.importPinnedEiconsAvailable &&
-          character.hasPinnedEicons
-        )
-          return true;
-        if (
-          this.importIncludeRecents &&
-          this.importRecentsAvailable &&
-          character.hasRecents
-        )
-          return true;
-        if (
-          this.importIncludeHidden &&
-          this.importHiddenAvailable &&
-          character.hasHidden
-        )
-          return true;
-        return false;
-      });
-    }
-
-    get allExportCharactersSelected(): boolean {
-      return (
-        this.exportCharacters.length > 0 &&
-        this.exportCharacters.every(character => character.selected)
-      );
-    }
-
-    get allImportCharactersSelected(): boolean {
-      return (
-        this.importCharacters.length > 0 &&
-        this.importCharacters.every(character => character.selected)
-      );
-    }
-
-    get allVanillaCharactersSelected(): boolean {
-      return (
-        this.vanillaCharacters.length > 0 &&
-        this.vanillaCharacters.every(character => character.selected)
-      );
-    }
-
-    @Hook('mounted')
+    },
     async mounted(): Promise<void> {
       remote.nativeTheme.on('updated', () => {
         this.osIsDark = remote.nativeTheme.shouldUseDarkColors;
@@ -1634,185 +1664,156 @@
       ipcRenderer.on('connected-characters-updated', (_e, list: string[]) => {
         this.connectedCharacters = Array.isArray(list) ? list : [];
       });
-    }
-
-    async initializeImportExport(): Promise<void> {
-      this.refreshExportCharacters();
-      await ImportExport.initializeVanillaImport(this);
-    }
-
-    private refreshExportCharacters = () =>
-      ImportExport.refreshExportCharacters(this);
-    refreshVanillaContext = () => ImportExport.refreshVanillaContext(this);
-    normalizeVanillaBaseDir = () => ImportExport.normalizeVanillaBaseDir(this);
-    chooseVanillaImportDir = () => ImportExport.chooseVanillaImportDir(this);
-    resetVanillaImportDir = () => ImportExport.resetVanillaImportDir(this);
-    handleVanillaBaseDirInput = () =>
-      ImportExport.handleVanillaBaseDirInput(this);
-    setVanillaCharacters = (selected: boolean) =>
-      ImportExport.setVanillaCharacters(this, selected);
-    setExportCharacters = (selected: boolean) =>
-      ImportExport.setExportCharacters(this, selected);
-    setImportCharacters = (selected: boolean) =>
-      ImportExport.setImportCharacters(this, selected);
-
-    toggleVanillaCharacters(): void {
-      this.setVanillaCharacters(!this.allVanillaCharactersSelected);
-    }
-
-    toggleExportCharacters(): void {
-      this.setExportCharacters(!this.allExportCharactersSelected);
-    }
-
-    toggleImportCharacters(): void {
-      this.setImportCharacters(!this.allImportCharactersSelected);
-    }
-    runVanillaImport = () => ImportExport.runVanillaImport(this);
-    runExport = () => {
-      this.startExportAnimation();
-      ImportExport.runExport(this).finally(() => this.stopExportAnimation());
-    };
-    chooseImportZip = () => ImportExport.chooseImportZip(this);
-    describeImportCharacter = (character: BackupCharacterInfo) =>
-      ImportExport.describeImportCharacter(character);
-    runZipImport = () => ImportExport.runZipImport(this);
-
-    async refreshAutoBackups(): Promise<void> {
-      try {
-        this.autoBackups = await ipcRenderer.invoke('list-auto-backups');
-      } catch {
-        this.autoBackups = [];
-      }
-    }
-
-    formatBackupLabel(backup: {
-      name: string;
-      mtime: number;
-      size: number;
-    }): string {
-      const date = new Date(backup.mtime).toLocaleString();
-      const mb = (backup.size / (1024 * 1024)).toFixed(1);
-      return `${date} (${mb} MB)`;
-    }
-
-    startExportAnimation(): void {
-      this.exportAnimatedDots = '';
-      this.exportAnimationTimer = setInterval(() => {
-        if (this.exportAnimatedDots === '...') {
-          this.exportAnimatedDots = '';
-        } else {
-          this.exportAnimatedDots += '.';
-        }
-      }, 500);
-    }
-
-    stopExportAnimation(): void {
-      if (this.exportAnimationTimer) {
-        clearInterval(this.exportAnimationTimer);
-        this.exportAnimationTimer = undefined;
-      }
-      this.exportAnimatedDots = '';
-    }
-
-    get estimatedRetentionSize(): string | undefined {
-      if (!this.autoBackups.length) return undefined;
-      const latest = this.autoBackups[0];
-      const total = latest.size * (this.settings.autoBackupRetention || 1);
-      if (total < 1024 * 1024) {
-        return `${(total / 1024).toFixed(0)} KB`;
-      }
-      if (total < 1024 * 1024 * 1024) {
-        return `${(total / (1024 * 1024)).toFixed(1)} MB`;
-      }
-      return `${(total / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-    }
-
-    hasTrigger(t: string): boolean {
-      const triggers = this.settings.autoBackupTriggers;
-      return Array.isArray(triggers) && triggers.includes(t);
-    }
-
-    toggleTrigger(t: string): void {
-      if (!Array.isArray(this.settings.autoBackupTriggers)) {
-        this.settings.autoBackupTriggers = ['launch'];
-      }
-      const idx = this.settings.autoBackupTriggers.indexOf(t);
-      if (idx === -1) {
-        this.settings.autoBackupTriggers.push(t);
-      } else {
-        this.settings.autoBackupTriggers.splice(idx, 1);
-      }
-      this.settings.autoBackupTriggers = [...this.settings.autoBackupTriggers];
-    }
-
-    setCronTime(idx: number, value: string): void {
-      if (!Array.isArray(this.settings.autoBackupCronTimes)) return;
-      this.settings.autoBackupCronTimes.splice(idx, 1, value);
-      this.settings.autoBackupCronTimes = [
-        ...this.settings.autoBackupCronTimes
-      ];
-    }
-
-    removeCronTime(idx: number): void {
-      if (!Array.isArray(this.settings.autoBackupCronTimes)) return;
-      this.settings.autoBackupCronTimes.splice(idx, 1);
-      this.settings.autoBackupCronTimes = [
-        ...this.settings.autoBackupCronTimes
-      ];
-    }
-
-    addCronTime(): void {
-      if (!Array.isArray(this.settings.autoBackupCronTimes)) {
-        this.settings.autoBackupCronTimes = [];
-      }
-      this.settings.autoBackupCronTimes = [
-        ...this.settings.autoBackupCronTimes,
-        '02:00'
-      ];
-    }
-
-    close(): void {
-      if (this.exportInProgress || this.importInProgress) {
-        const choice = remote.dialog.showMessageBoxSync(browserWindow, {
-          type: 'warning',
-          buttons: ['Cancel', 'Close anyway'],
-          defaultId: 0,
-          cancelId: 0,
-          title: 'Operation in progress',
-          message:
-            'An export or import is still running. Closing now may result in incomplete or corrupted data.'
+    },
+    methods: {
+      getSyncedTheme() {
+        if (!this.settings.themeSync) return this.settings.theme;
+        return this.osIsDark
+          ? this.settings.themeSyncDark
+          : this.settings.themeSyncLight;
+      },
+      async initializeImportExport(): Promise<void> {
+        this.refreshExportCharacters();
+        await ImportExport.initializeVanillaImport(this as any);
+      },
+      async chooseAutoBackupDir(): Promise<void> {
+        const result = await remote.dialog.showOpenDialog(browserWindow, {
+          properties: ['openDirectory'],
+          defaultPath:
+            this.settings.autoBackupDirectory || this.defaultBackupDir
         });
-        if (choice === 0) return;
-      }
-      browserWindow.close();
-    }
-
-    getThemeClass() {
-      try {
-        if (process.platform === 'win32') {
-          if (this.settings?.risingDisableWindowsHighContrast) {
-            document
-              .querySelector('html')
-              ?.classList.add('disableWindowsHighContrast');
-          } else {
-            document
-              .querySelector('html')
-              ?.classList.remove('disableWindowsHighContrast');
-          }
+        if (!result.canceled && result.filePaths.length > 0) {
+          this.settings.autoBackupDirectory = result.filePaths[0];
         }
+      },
+      async refreshAutoBackups(): Promise<void> {
+        try {
+          this.autoBackups = await ipcRenderer.invoke('list-auto-backups');
+        } catch {
+          this.autoBackups = [];
+        }
+      },
+      formatBackupLabel(backup: {
+        name: string;
+        mtime: number;
+        size: number;
+      }): string {
+        const date = new Date(backup.mtime).toLocaleString();
+        const mb = (backup.size / (1024 * 1024)).toFixed(1);
+        return `${date} (${mb} MB)`;
+      },
+      hasTrigger(t: string): boolean {
+        const triggers = this.settings.autoBackupTriggers;
+        return Array.isArray(triggers) && triggers.includes(t);
+      },
+      toggleTrigger(t: string): void {
+        if (!Array.isArray(this.settings.autoBackupTriggers)) {
+          this.settings.autoBackupTriggers = ['launch'];
+        }
+        const idx = this.settings.autoBackupTriggers.indexOf(t);
+        if (idx === -1) {
+          this.settings.autoBackupTriggers.push(t);
+        } else {
+          this.settings.autoBackupTriggers.splice(idx, 1);
+        }
+        this.settings.autoBackupTriggers = [
+          ...this.settings.autoBackupTriggers
+        ];
+      },
+      setCronTime(idx: number, value: string): void {
+        if (!Array.isArray(this.settings.autoBackupCronTimes)) return;
+        this.settings.autoBackupCronTimes.splice(idx, 1, value);
+        this.settings.autoBackupCronTimes = [
+          ...this.settings.autoBackupCronTimes
+        ];
+      },
+      removeCronTime(idx: number): void {
+        if (!Array.isArray(this.settings.autoBackupCronTimes)) return;
+        this.settings.autoBackupCronTimes.splice(idx, 1);
+        this.settings.autoBackupCronTimes = [
+          ...this.settings.autoBackupCronTimes
+        ];
+      },
+      addCronTime(): void {
+        if (!Array.isArray(this.settings.autoBackupCronTimes)) {
+          this.settings.autoBackupCronTimes = [];
+        }
+        this.settings.autoBackupCronTimes = [
+          ...this.settings.autoBackupCronTimes,
+          '02:00'
+        ];
+      },
+      close(): void {
+        if (this.exportInProgress || this.importInProgress) {
+          const choice = remote.dialog.showMessageBoxSync(browserWindow, {
+            type: 'warning',
+            buttons: ['Cancel', 'Close anyway'],
+            defaultId: 0,
+            cancelId: 0,
+            title: 'Operation in progress',
+            message:
+              'An export or import is still running. Closing now may result in incomplete or corrupted data.'
+          });
+          if (choice === 0) return;
+        }
+        browserWindow.close();
+      },
+      toggleVanillaCharacters(): void {
+        this.setVanillaCharacters(!this.allVanillaCharactersSelected);
+      },
+      toggleExportCharacters(): void {
+        this.setExportCharacters(!this.allExportCharactersSelected);
+      },
+      toggleImportCharacters(): void {
+        this.setImportCharacters(!this.allImportCharactersSelected);
+      },
+      startExportAnimation(): void {
+        this.exportAnimatedDots = '';
+        this.exportAnimationTimer = setInterval(() => {
+          if (this.exportAnimatedDots === '...') {
+            this.exportAnimatedDots = '';
+          } else {
+            this.exportAnimatedDots += '.';
+          }
+        }, 500);
+      },
+      stopExportAnimation(): void {
+        if (this.exportAnimationTimer) {
+          clearInterval(this.exportAnimationTimer);
+          this.exportAnimationTimer = undefined;
+        }
+        this.exportAnimatedDots = '';
+      },
+      close(): void {
+        browserWindow.close();
+      },
+      getThemeClass() {
+        try {
+          if (process.platform === 'win32') {
+            if (this.settings?.risingDisableWindowsHighContrast) {
+              document
+                .querySelector('html')
+                ?.classList.add('disableWindowsHighContrast');
+            } else {
+              document
+                .querySelector('html')
+                ?.classList.remove('disableWindowsHighContrast');
+            }
+          }
 
-        return {
-          ['platform-' + this.platform]: true,
-          disableWindowsHighContrast:
-            this.settings?.risingDisableWindowsHighContrast || false
-        };
-      } catch (err) {
-        return {
-          ['platform-' + this.platform]: true
-        };
+          return {
+            ['platform-' + this.platform]: true,
+            disableWindowsHighContrast:
+              this.settings?.risingDisableWindowsHighContrast || false
+          };
+        } catch (err) {
+          return {
+            ['platform-' + this.platform]: true
+          };
+        }
       }
     }
-  }
+  });
 </script>
 
 <style lang="scss">

@@ -1,6 +1,5 @@
 import { queuedJoin } from '../fchat/channels';
 import { decodeHTML } from '../fchat/common';
-// import { CharacterCacheRecord } from '../learn/profile-cache';
 import { AdManager } from './ads/ad-manager';
 import {
   characterImage,
@@ -62,7 +61,8 @@ abstract class Conversation implements Interfaces.Conversation {
   abstract readonly name: string;
   messages: Interfaces.Message[] = [];
   errorText = '';
-  unread = Interfaces.UnreadState.None;
+  private _unread = Interfaces.UnreadState.None;
+  unreadCount = 0;
   lastRead: Interfaces.Message | undefined = undefined;
   infoText = '';
   abstract readonly maxMessageLength: number | undefined;
@@ -73,10 +73,9 @@ abstract class Conversation implements Interfaces.Conversation {
   protected allMessages: Interfaces.Message[] = [];
   readonly reportMessages: Interfaces.Message[] = [];
   private lastSent = '';
-  // private loadedMore = false;
   adManager: AdManager;
   cacheActive = false;
-  protected cacheInterval: NodeJS.Timer | undefined;
+  protected cacheInterval: ReturnType<typeof setInterval> | undefined;
 
   public static readonly conversationThroat = throat(1); // make sure user posting and ad posting won't get in each others' way
 
@@ -90,6 +89,17 @@ abstract class Conversation implements Interfaces.Conversation {
   markRead(): void {
     this.lastRead = this.messages[this.messages.length - 1];
     this.unread = Interfaces.UnreadState.None;
+  }
+
+  get unread(): Interfaces.UnreadState {
+    return this._unread;
+  }
+
+  set unread(state: Interfaces.UnreadState) {
+    this._unread = state;
+    if (state !== Interfaces.UnreadState.Mention) {
+      this.unreadCount = 0;
+    }
   }
 
   get settings(): Interfaces.Settings {
@@ -149,7 +159,6 @@ abstract class Conversation implements Interfaces.Conversation {
   loadMore(): boolean {
     if (this.messages.length >= this.allMessages.length) return false;
     this.maxMessages += 50;
-    // this.loadedMore = true;
     this.messages = this.allMessages.slice(-this.maxMessages);
 
     EventBus.$emit('conversation-load-more', { conversation: this });
@@ -166,7 +175,6 @@ abstract class Conversation implements Interfaces.Conversation {
     this.lastRead = this.messages[this.messages.length - 1];
     this.maxMessages = 50;
     this.messages = this.allMessages.slice(-this.maxMessages);
-    // this.loadedMore = false;
     this.insertCount = 0;
   }
 
@@ -248,8 +256,6 @@ abstract class Conversation implements Interfaces.Conversation {
   public static async testPostDelay(): Promise<void> {
     const lastPostDelta = Date.now() - core.cache.getLastPost().getTime();
 
-    // console.log('Last Post Delta', lastPostDelta, ((lastPostDelta < Conversation.POST_DELAY) && (lastPostDelta > 0)));
-
     if (lastPostDelta < Conversation.POST_DELAY && lastPostDelta > 0) {
       await Bluebird.delay(Conversation.POST_DELAY - lastPostDelta);
     }
@@ -275,6 +281,15 @@ abstract class Conversation implements Interfaces.Conversation {
   protected formatEiconMessage(message: string): string {
     const eIconRegex =
       /^(?!\n)(?=.*\[eicon\].*\[\/eicon\].*\n.*\[eicon\].*\[\/eicon\])(.*\n\[eicon\].*\[\/eicon\].*)\s*/;
+
+    if (/^\/me\s+/i.test(message)) {
+      const body = message.replace(/^\/me\s+/i, '');
+      if (eIconRegex.test(body)) {
+        return '/me\n' + body;
+      }
+      return message;
+    }
+
     if (eIconRegex.test(message)) {
       return '\n' + message;
     }
@@ -346,8 +361,12 @@ class PrivateConversation
         );
         unreadState = Interfaces.UnreadState.Mention;
       }
-      if (this !== state.selectedConversation || !state.windowFocused)
+      if (this !== state.selectedConversation || !state.windowFocused) {
         this.unread = unreadState;
+        if (this.unread === Interfaces.UnreadState.Mention) {
+          this.unreadCount++;
+        }
+      }
       this.typingStatus = 'clear';
     }
   }
@@ -446,6 +465,7 @@ class PrivateConversation
       this.safeAddMessage(message);
 
       await this.logMessage(message, false);
+      core.cache.deregisterConversationDraft(this.name);
       this.markRead();
     });
   }
@@ -767,14 +787,13 @@ class State implements Interfaces.State {
   navigationHistoryIndex: number = -1;
   private isNavigatingHistory: boolean = false;
 
-  get hasNew(): boolean {
+  get hasNew(): number {
     return (
-      this.privateConversations.some(
-        x => x.unread === Interfaces.UnreadState.Mention
-      ) ||
-      this.channelConversations.some(
-        x => x.unread === Interfaces.UnreadState.Mention
-      )
+      this.privateConversations.reduce(
+        (sum, item) => sum + item.unreadCount,
+        0
+      ) +
+      this.channelConversations.reduce((sum, item) => sum + item.unreadCount, 0)
     );
   }
 
@@ -834,6 +853,7 @@ class State implements Interfaces.State {
   show(conversation: Conversation): void {
     if (conversation === this.selectedConversation) return;
     this.lastConversation = this.selectedConversation;
+    this.lastConversation.unreadCount = 0;
     this.selectedConversation.onHide();
     conversation.unread = Interfaces.UnreadState.None;
     this.selectedConversation = conversation;
@@ -1277,8 +1297,10 @@ export default function (this: any): Interfaces.State {
         characterImage(data.character),
         'attention'
       );
-      if (conversation !== state.selectedConversation || !state.windowFocused)
+      if (conversation !== state.selectedConversation || !state.windowFocused) {
         conversation.unread = Interfaces.UnreadState.Mention;
+        conversation.unreadCount++;
+      }
       message.isHighlight = true;
       await state.consoleTab.addMessage(
         new EventMessage(
@@ -1296,7 +1318,11 @@ export default function (this: any): Interfaces.State {
       await core.notifications.notify(
         conversation,
         data.character,
-        data.message,
+        l(
+          'events.watchedUserPosted.notification',
+          conversation.name,
+          data.message
+        ),
         characterImage(data.character),
         'attention'
       );
@@ -1311,8 +1337,10 @@ export default function (this: any): Interfaces.State {
           time
         )
       );
-      if (conversation !== state.selectedConversation || !state.windowFocused)
+      if (conversation !== state.selectedConversation || !state.windowFocused) {
         conversation.unread = Interfaces.UnreadState.Mention;
+        conversation.unreadCount++;
+      }
     } else if (conversation.settings.notify === Interfaces.Setting.True) {
       await core.notifications.notify(
         conversation,
@@ -1321,16 +1349,17 @@ export default function (this: any): Interfaces.State {
         characterImage(data.character),
         'attention'
       );
-      if (conversation !== state.selectedConversation || !state.windowFocused)
+      if (conversation !== state.selectedConversation || !state.windowFocused) {
         conversation.unread = Interfaces.UnreadState.Mention;
+        conversation.unreadCount++;
+      }
     }
   });
   connection.onMessage('LRP', async (data, time) => {
     const char = core.characters.get(data.character);
     const conv = state.channelMap[data.channel.toLowerCase()];
     if (conv === undefined) return core.channels.leave(data.channel);
-    if (char.isIgnored || core.state.hiddenUsers.indexOf(char.name) !== -1)
-      return;
+    if (char.isIgnored || core.isHidden(char.name)) return;
 
     const msg = new Message(
       MessageType.Ad,
@@ -1377,8 +1406,13 @@ export default function (this: any): Interfaces.State {
           characterImage(data.character),
           'attention'
         );
-        if (conversation !== state.selectedConversation || !state.windowFocused)
+        if (
+          conversation !== state.selectedConversation ||
+          !state.windowFocused
+        ) {
           conversation.unread = Interfaces.UnreadState.Mention;
+          conversation.unreadCount++;
+        }
         message.isHighlight = true;
       }
       await conversation.addMessage(message);
@@ -1448,29 +1482,45 @@ export default function (this: any): Interfaces.State {
   connection.onMessage('CBU', async (data, time) => {
     const conv = state.channelMap[data.channel.toLowerCase()];
     if (conv === undefined) return core.channels.leave(data.channel);
-    const text = l('events.ban', conv.name, data.character, data.operator);
-    conv.infoText = text;
-    return addEventMessage(new EventMessage(text, time));
+    const logtext = l(
+      'events.ban',
+      conv.name,
+      data.character,
+      `[user]${data.operator}[/user]`
+    );
+    conv.infoText = l('events.ban', conv.name, data.character, data.operator);
+    return addEventMessage(new EventMessage(logtext, time));
   });
   connection.onMessage('CKU', async (data, time) => {
     const conv = state.channelMap[data.channel.toLowerCase()];
     if (conv === undefined) return core.channels.leave(data.channel);
-    const text = l('events.kick', conv.name, data.character, data.operator);
-    conv.infoText = text;
-    return addEventMessage(new EventMessage(text, time));
+    const logtext = l(
+      'events.kick',
+      conv.name,
+      data.character,
+      `[user]${data.operator}[/user]`
+    );
+    conv.infoText = l('events.kick', conv.name, data.character, data.operator);
+    return addEventMessage(new EventMessage(logtext, time));
   });
   connection.onMessage('CTU', async (data, time) => {
     const conv = state.channelMap[data.channel.toLowerCase()];
     if (conv === undefined) return core.channels.leave(data.channel);
-    const text = l(
+    const logtext = l(
+      'events.timeout',
+      conv.name,
+      data.character,
+      `[user]${data.operator}[/user]`,
+      data.length.toString()
+    );
+    conv.infoText = l(
       'events.timeout',
       conv.name,
       data.character,
       data.operator,
       data.length.toString()
     );
-    conv.infoText = text;
-    return addEventMessage(new EventMessage(text, time));
+    return addEventMessage(new EventMessage(logtext, time));
   });
   connection.onMessage('BRO', async (data, time) => {
     if (data.character !== undefined) {
@@ -1485,6 +1535,7 @@ export default function (this: any): Interfaces.State {
       );
       await state.consoleTab.addMessage(message);
       state.consoleTab.unread = Interfaces.UnreadState.Mention;
+      state.consoleTab.unreadCount++;
       await core.notifications.notify(
         state.consoleTab,
         l('events.broadcast.notification', data.character),
@@ -1515,9 +1566,12 @@ export default function (this: any): Interfaces.State {
 
   connection.onMessage('IGN', async (data, time) => {
     if (data.action !== 'add' && data.action !== 'delete') return;
-    const text = l(`events.ignore_${data.action}`, data.character);
-    state.selectedConversation.infoText = text;
-    return addEventMessage(new EventMessage(text, time));
+    const key = `events.ignore_${data.action}`;
+    const name = data.character;
+    state.selectedConversation.infoText = l(key, name);
+    return addEventMessage(
+      new EventMessage(l(key, `[user]${name}[/user]`), time)
+    );
   });
   connection.onMessage('RTB', async (data, time) => {
     let url = 'https://www.f-list.net/';

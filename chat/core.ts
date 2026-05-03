@@ -1,3 +1,14 @@
+/**
+ * @license MPL-2.0
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * @copyright 2024-2026 Sylvia Roselie & Respective Horizon Contributors
+ * @version 1.0
+ * @see {@link https://github.com/Fchat-Horizon/Horizon|GitHub repo}
+ */
+
 import Vue, { WatchHandler } from 'vue';
 import { CacheManager } from '../learn/cache-manager';
 import { Channels, Characters } from '../fchat';
@@ -28,9 +39,11 @@ function createBBCodeParser(): BBCodeParser {
 }
 
 class State implements StateInterface {
+  generalSettings?: GeneralSettings | undefined;
   _settings: Settings | undefined = undefined;
   hiddenUsers: string[] = [];
   favoriteEIcons: Record<string, boolean> = {};
+  recentEIcons: string[] = [];
 
   get settings(): Settings {
     if (this._settings === undefined) throw new Error('Settings load failed.');
@@ -64,6 +77,16 @@ const vue = <Vue & VueState>new Vue({
   }
 });
 
+// ! Kept separate from Vue so it stays cheap when the list is huge. (=
+// ^ ps from rose: We should probably add some better filtering so people don't
+// ^ have to hide thousands of users.
+const hiddenUsersSet: Set<string> = new Set();
+
+function rebuildHiddenUsersSet(): void {
+  hiddenUsersSet.clear();
+  for (const name of state.hiddenUsers) hiddenUsersSet.add(name);
+}
+
 const data = {
   connection: <Connection | undefined>undefined,
   logs: <Logs | undefined>undefined,
@@ -78,6 +101,20 @@ const data = {
   adCoordinator: <AdCoordinatorGuest | undefined>undefined,
   adCenter: <AdCenter | undefined>undefined,
   siteSession: <SiteSession | undefined>undefined,
+
+  isHidden(name: string): boolean {
+    return hiddenUsersSet.has(name);
+  },
+  toggleHidden(name: string): void {
+    if (hiddenUsersSet.has(name)) {
+      hiddenUsersSet.delete(name);
+      const i = state.hiddenUsers.indexOf(name);
+      if (i !== -1) state.hiddenUsers.splice(i, 1);
+    } else {
+      hiddenUsersSet.add(name);
+      state.hiddenUsers.push(name);
+    }
+  },
 
   register<K extends 'characters' | 'conversations' | 'channels'>(
     module: K,
@@ -103,9 +140,13 @@ const data = {
 
     const hiddenUsers = await core.settingsStore.get('hiddenUsers');
     state.hiddenUsers = hiddenUsers !== undefined ? hiddenUsers : [];
+    rebuildHiddenUsersSet();
 
     const favoriteEIcons = await core.settingsStore.get('favoriteEIcons');
     state.favoriteEIcons = favoriteEIcons !== undefined ? favoriteEIcons : {};
+
+    const recentEIcons = await core.settingsStore.get('recentEIcons');
+    state.recentEIcons = recentEIcons !== undefined ? recentEIcons : [];
   }
 };
 
@@ -132,12 +173,18 @@ export function init(
   data.register('channels', Channels(connection, core.characters));
   data.register('conversations', Conversations());
 
+  // ^ Debounced: rapid toggles (or bulk imports of large lists) used to kick off
+  // a full JSON.stringify + fs.writeFileSync per mutation, which freezes the UI
+  // when the list is tens of thousands of entries long.
+  const saveHiddenUsers = _.debounce((newValue: string[]) => {
+    if (data.settingsStore !== undefined) {
+      // tslint:disable-next-line no-floating-promises
+      data.settingsStore.set('hiddenUsers', newValue);
+    }
+  }, 500);
   data.watch(
     () => state.hiddenUsers,
-    async newValue => {
-      if (data.settingsStore !== undefined)
-        await data.settingsStore.set('hiddenUsers', newValue);
-    }
+    newValue => saveHiddenUsers(newValue.slice())
   );
 
   connection.onEvent('connecting', async () => {
@@ -161,6 +208,9 @@ export interface Core {
   readonly adCoordinator: AdCoordinatorGuest;
   readonly adCenter: AdCenter;
   readonly siteSession: SiteSession;
+
+  isHidden(name: string): boolean;
+  toggleHidden(name: string): void;
 
   watch<T>(getter: (this: VueState) => T, callback: WatchHandler<T>): void;
 }

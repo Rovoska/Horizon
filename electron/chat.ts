@@ -2,7 +2,7 @@
  * @license
  * Originally licensed under MIT License
  *
- * Copyright (c) 2018 F-List
+ * Copyright (c) 2018-2026 Dragonfruit Ventures, LLC
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,15 @@
  *
  * ---
  *
- * This file is now also licensed under GPLv3 (see LICENSE file).
- * Modifications made after the original MIT release are licensed under GPLv3.
+ * This file is now also licensed under MPL-2.0 (see LICENSE.md).
+ * Modifications made after the original MIT release are licensed under MPL-2.0.
  *
  * This license header applies to this file and all of the non-third-party assets it includes.
  * @file The entry point for the Electron renderer of F-Chat 3.0.
- * @copyright 2018 F-List
+ * @copyright 2018-2026 Dragonfruit Ventures, LLC
+ * @copyright 2024-2026 Sylvia Roselie & Respective Horizon Contributors
+ * @version 1.0
+ * @see {@link https://github.com/Fchat-Horizon/Horizon|GitHub repo}
  * @author Maya Wolf <maya@f-list.net>
  * @version 3.0
  * @see {@link https://github.com/f-list/exported|GitHub repo}
@@ -379,7 +382,7 @@ webContents.on('context-menu', (_, props) => {
     );
   else if (
     props.linkURL.length > 0 &&
-    props.linkURL.substr(0, props.pageURL.length) !== props.pageURL
+    props.linkURL.slice(0, props.pageURL.length) !== props.pageURL
   ) {
     if (props.mediaType === 'none') {
       menuTemplate.push({
@@ -392,6 +395,13 @@ webContents.on('context-menu', (_, props) => {
         }
       });
     }
+    menuTemplate.push({
+      id: 'openLink',
+      label: l('action.openBrowser'),
+      click(): void {
+        electron.ipcRenderer.send('open-url-externally', props.linkURL);
+      }
+    });
     menuTemplate.push({
       id: 'copyLink',
       label: l('action.copyLink'),
@@ -562,7 +572,7 @@ electron.ipcRenderer.on(
 );
 
 const params = <{ [key: string]: string | undefined }>(
-  qs.parse(window.location.search.substr(1))
+  qs.parse(window.location.search.slice(1))
 );
 let settings = <GeneralSettings>JSON.parse(params['settings']!);
 

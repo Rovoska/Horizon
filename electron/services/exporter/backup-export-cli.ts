@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import archiver from 'archiver';
 import { createManifest } from './manifest';
-import type { ExportManifest } from './manifest';
 
 /**
  * Configuration options for CLI-based export operations.
