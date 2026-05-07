@@ -36,7 +36,8 @@
                   href="#"
                   @click.prevent="selectedSection = 'auto-backup'"
                 >
-                  <i class="fas fa-fw fa-clock-rotate-left me-2"></i>Auto Backup
+                  <i class="fas fa-fw fa-clock-rotate-left me-2"></i
+                  >{{ l('settings.dataManager.section.autoBackup') }}
                 </a>
                 <a
                   class="nav-link"
@@ -44,7 +45,8 @@
                   href="#"
                   @click.prevent="selectedSection = 'export'"
                 >
-                  <i class="fas fa-fw fa-file-export me-2"></i>Export
+                  <i class="fas fa-fw fa-file-export me-2"></i
+                  >{{ l('settings.dataManager.section.export') }}
                 </a>
                 <a
                   class="nav-link"
@@ -52,7 +54,8 @@
                   href="#"
                   @click.prevent="selectedSection = 'import'"
                 >
-                  <i class="fas fa-fw fa-file-import me-2"></i>Import
+                  <i class="fas fa-fw fa-file-import me-2"></i
+                  >{{ l('settings.dataManager.section.import') }}
                 </a>
                 <a
                   class="nav-link"
@@ -60,8 +63,8 @@
                   href="#"
                   @click.prevent="selectedSection = 'vanilla'"
                 >
-                  <i class="fas fa-fw fa-file-arrow-down me-2"></i>Import from
-                  Vanilla
+                  <i class="fas fa-fw fa-file-arrow-down me-2"></i
+                  >{{ l('settings.dataManager.section.vanilla') }}
                 </a>
               </div>
               <div class="data-manager-content hidden-scrollbar">
@@ -69,10 +72,9 @@
                   v-show="selectedSection === 'auto-backup'"
                   class="settings-content"
                 >
-                  <h5>Auto Backup</h5>
+                  <h5>{{ l('settings.autoBackup.title') }}</h5>
                   <p class="text-muted">
-                    Automatically create backups based on triggers you choose.
-                    Old backups are removed based on the retention count.
+                    {{ l('settings.autoBackup.description') }}
                   </p>
                   <div class="form-check mb-2">
                     <input
@@ -82,11 +84,13 @@
                       v-model="settings.autoBackupEnabled"
                     />
                     <label class="form-check-label" for="autoBackupEnabled">
-                      Enable auto backup
+                      {{ l('settings.autoBackup.enable') }}
                     </label>
                   </div>
                   <div v-if="settings.autoBackupEnabled" class="mb-3 ms-3">
-                    <label class="form-label fw-semibold">Triggers</label>
+                    <label class="form-label fw-semibold">
+                      {{ l('settings.autoBackup.triggers') }}
+                    </label>
                     <div class="form-check mb-1">
                       <input
                         class="form-check-input"
@@ -96,10 +100,10 @@
                         @change="toggleTrigger('launch')"
                       />
                       <label class="form-check-label" for="triggerLaunch">
-                        On Launch
-                        <small class="text-muted"
-                          >&mdash; back up when the app starts</small
-                        >
+                        {{ l('settings.autoBackup.triggerLaunch') }}
+                        <small class="text-muted">
+                          - {{ l('settings.autoBackup.triggerLaunchHelp') }}
+                        </small>
                       </label>
                     </div>
                     <div class="form-check mb-1">
@@ -111,10 +115,10 @@
                         @change="toggleTrigger('close')"
                       />
                       <label class="form-check-label" for="triggerClose">
-                        On Close
-                        <small class="text-muted"
-                          >&mdash; back up when the app closes</small
-                        >
+                        {{ l('settings.autoBackup.triggerClose') }}
+                        <small class="text-muted">
+                          - {{ l('settings.autoBackup.triggerCloseHelp') }}
+                        </small>
                       </label>
                     </div>
                     <div class="form-check mb-1">
@@ -126,10 +130,10 @@
                         @change="toggleTrigger('interval')"
                       />
                       <label class="form-check-label" for="triggerInterval">
-                        Interval
-                        <small class="text-muted"
-                          >&mdash; back up every N hours</small
-                        >
+                        {{ l('settings.autoBackup.triggerInterval') }}
+                        <small class="text-muted">
+                          - {{ l('settings.autoBackup.triggerIntervalHelp') }}
+                        </small>
                       </label>
                     </div>
                     <div
@@ -140,8 +144,9 @@
                       <label
                         class="form-label small"
                         for="autoBackupIntervalHours"
-                        >Hours between backups</label
                       >
+                        {{ l('settings.autoBackup.intervalHours') }}
+                      </label>
                       <input
                         class="form-control form-control-sm"
                         type="number"
@@ -161,10 +166,10 @@
                         @change="toggleTrigger('cron')"
                       />
                       <label class="form-check-label" for="triggerCron">
-                        Scheduled
-                        <small class="text-muted"
-                          >&mdash; back up at specific times of day</small
-                        >
+                        {{ l('settings.autoBackup.triggerCron') }}
+                        <small class="text-muted">
+                          - {{ l('settings.autoBackup.triggerCronHelp') }}
+                        </small>
                       </label>
                     </div>
                     <div v-if="hasTrigger('cron')" class="ms-4 mb-2">
@@ -193,7 +198,8 @@
                         type="button"
                         @click="addCronTime"
                       >
-                        <i class="fas fa-plus me-1"></i>Add time
+                        <i class="fas fa-plus me-1"></i
+                        >{{ l('settings.autoBackup.addTime') }}
                       </button>
                     </div>
                     <div class="form-check mb-1">
@@ -205,10 +211,10 @@
                         @change="toggleTrigger('connect')"
                       />
                       <label class="form-check-label" for="triggerConnect">
-                        On Connect
-                        <small class="text-muted"
-                          >&mdash; back up when connecting to chat</small
-                        >
+                        {{ l('settings.autoBackup.triggerConnect') }}
+                        <small class="text-muted">
+                          - {{ l('settings.autoBackup.triggerConnectHelp') }}
+                        </small>
                       </label>
                     </div>
                   </div>
@@ -327,7 +333,7 @@
                     </div>
                     <div class="mb-2">
                       <label class="form-label" for="autoBackupRetention">
-                        Backups to keep
+                        {{ l('settings.autoBackup.retention') }}
                       </label>
                       <input
                         class="form-control"
@@ -342,12 +348,17 @@
                         v-if="estimatedRetentionSize"
                         class="form-text text-muted"
                       >
-                        Estimated usage: ~{{ estimatedRetentionSize }}
+                        {{
+                          l(
+                            'settings.autoBackup.estimatedUsage',
+                            estimatedRetentionSize
+                          )
+                        }}
                       </small>
                     </div>
                     <div class="mb-2">
                       <label class="form-label" for="autoBackupDirectory">
-                        Custom backup directory (optional)
+                        {{ l('settings.autoBackup.directoryLabel') }}
                       </label>
                       <div class="input-group">
                         <input
@@ -362,7 +373,7 @@
                           type="button"
                           @click="chooseAutoBackupDir"
                         >
-                          Browse
+                          {{ l('settings.autoBackup.directoryBrowse') }}
                         </button>
                         <button
                           v-if="settings.autoBackupDirectory"
@@ -370,20 +381,24 @@
                           type="button"
                           @click="settings.autoBackupDirectory = ''"
                         >
-                          Reset
+                          {{ l('settings.autoBackup.directoryReset') }}
                         </button>
                       </div>
                       <small class="form-text text-muted">
-                        Default: {{ defaultBackupDir }}
+                        {{
+                          l(
+                            'settings.autoBackup.directoryDefault',
+                            defaultBackupDir
+                          )
+                        }}
                       </small>
                     </div>
                   </div>
 
                   <div v-if="settings.autoBackupEnabled" class="mt-3 mb-2">
-                    <h6>Restore from Auto Backup</h6>
+                    <h6>{{ l('settings.autoBackup.restoreTitle') }}</h6>
                     <p class="text-muted small">
-                      Select an auto backup to restore. This loads it into the
-                      import section below.
+                      {{ l('settings.autoBackup.restoreDescription') }}
                     </p>
                     <div class="d-flex align-items-center gap-2 mb-2">
                       <select
@@ -395,8 +410,8 @@
                         <option :value="undefined" disabled>
                           {{
                             autoBackups.length === 0
-                              ? 'No auto backups found'
-                              : 'Choose a backup...'
+                              ? l('settings.autoBackup.noBackups')
+                              : l('settings.autoBackup.chooseBackup')
                           }}
                         </option>
                         <option
@@ -646,17 +661,18 @@
                     "
                     class="alert alert-info small mb-3"
                   >
-                    Horizon export v{{ importZipManifest.version }} &middot;
-                    {{ importZipManifest.characters.length }} character(s)
-                    &middot; {{ importZipManifest.expectedFiles }} file(s)
-                    &middot; created
-                    {{ new Date(importZipManifest.createdAt).toLocaleString() }}
-                    &middot; Logs:
                     {{
-                      importZipManifest.includes &&
-                      importZipManifest.includes.jsonLogs
-                        ? 'JSON'
-                        : 'Binary'
+                      l(
+                        'settings.import.zip.manifestBanner',
+                        importZipManifest.version,
+                        importZipManifest.characters.length,
+                        importZipManifest.expectedFiles,
+                        new Date(importZipManifest.createdAt).toLocaleString(),
+                        importZipManifest.includes &&
+                          importZipManifest.includes.jsonLogs
+                          ? l('settings.import.zip.manifestBannerJson')
+                          : l('settings.import.zip.manifestBannerBinary')
+                      )
                     }}
                   </div>
                   <div
@@ -665,9 +681,7 @@
                     "
                     class="alert alert-secondary small mb-3"
                   >
-                    This export was created without a manifest. It may be from
-                    an older version of Horizon. Import should still work
-                    normally.
+                    {{ l('settings.import.zip.noManifest') }}
                   </div>
                   <div v-if="importZipName && !importZipError">
                     <div class="form-check mb-2">
@@ -703,18 +717,20 @@
                           class="form-check-label"
                           for="importUseCustomLogLocation"
                         >
-                          Import to custom log location
+                          {{ l('settings.import.zip.useCustomLogLocation') }}
                         </label>
                       </div>
                       <small class="form-text text-muted d-block">
-                        This backup used a custom log directory:
+                        {{
+                          l('settings.import.zip.customLogDirectoryDescription')
+                        }}
                         <code>{{ importCustomLogDirectory }}</code>
                       </small>
                       <small
                         v-if="!importUseCustomLogLocation"
                         class="form-text text-muted d-block"
                       >
-                        Logs will be imported to the default location instead.
+                        {{ l('settings.import.zip.useDefaultLogLocation') }}
                       </small>
                       <div
                         v-if="importCustomLogLocationError"
@@ -1747,12 +1763,14 @@
         if (this.exportInProgress || this.importInProgress) {
           const choice = remote.dialog.showMessageBoxSync(browserWindow, {
             type: 'warning',
-            buttons: ['Cancel', 'Close anyway'],
+            buttons: [
+              l('settings.dataManager.closeWhileBusyCancel'),
+              l('settings.dataManager.closeWhileBusyConfirm')
+            ],
             defaultId: 0,
             cancelId: 0,
-            title: 'Operation in progress',
-            message:
-              'An export or import is still running. Closing now may result in incomplete or corrupted data.'
+            title: l('settings.dataManager.closeWhileBusyTitle'),
+            message: l('settings.dataManager.closeWhileBusyMessage')
           });
           if (choice === 0) return;
         }

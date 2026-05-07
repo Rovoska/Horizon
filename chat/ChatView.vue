@@ -505,7 +505,7 @@
           if (status === 'started') {
             showToast({
               id,
-              message: 'Auto backup in progress...',
+              message: l('settings.autoBackup.toastInProgress'),
               icon: 'fa-sync',
               iconSpin: true,
               progress: 0
@@ -514,7 +514,7 @@
             updateToast(id, { progress });
           } else if (status === 'success') {
             updateToast(id, {
-              message: 'Auto backup complete',
+              message: l('settings.autoBackup.toastComplete'),
               icon: 'fa-check',
               iconSpin: false,
               variant: 'success',
@@ -523,7 +523,7 @@
             });
           } else if (status === 'error') {
             updateToast(id, {
-              message: 'Auto backup failed',
+              message: l('settings.autoBackup.toastFailed'),
               icon: 'fa-exclamation-triangle',
               iconSpin: false,
               variant: 'error',
