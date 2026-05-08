@@ -116,7 +116,7 @@ export let defaultButtons: ReadonlyArray<EditorButton> = [
     title:
       'EIcon (' +
       shortcutModifierKey +
-      '+E)\n\nShows a previously uploaded eicon. If the icon is a gif, it will be shown as animated unless a user has turned this off.',
+      '+E)\n\nClick to open the eicon picker. The shortcut inserts the tags directly, for when you already know the name.\n\nIf the icon is a gif, it will be shown as animated unless a user has turned this off.',
     tag: 'eicon',
     class: 'far fa-fw ',
     icon: 'fa-smile',
