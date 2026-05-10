@@ -17,17 +17,19 @@ import archiver from 'archiver';
 import AdmZip from 'adm-zip';
 import { createManifest, isValidManifest } from './manifest';
 import type { ExportManifest } from './manifest';
+import type { ExporterVm } from '../exporter-vm';
 import { binaryLogToJson } from './backup-export-cli';
 
-async function yieldToUi(vm?: any): Promise<void> {
+async function yieldToUi(vm?: ExporterVm): Promise<void> {
   try {
     if (vm && typeof vm.$nextTick === 'function') {
       await vm.$nextTick();
     }
-    if (typeof (globalThis as any).requestAnimationFrame === 'function') {
-      await new Promise<void>(resolve =>
-        (globalThis as any).requestAnimationFrame(() => resolve())
-      );
+    const raf = (
+      globalThis as { requestAnimationFrame?: (cb: () => void) => void }
+    ).requestAnimationFrame;
+    if (typeof raf === 'function') {
+      await new Promise<void>(resolve => raf(() => resolve()));
     } else {
       await new Promise<void>(resolve => setTimeout(resolve, 16));
     }
@@ -42,7 +44,7 @@ async function yieldToUi(vm?: any): Promise<void> {
  *
  * @param vm - Vue component instance containing settings and exportCharacters array
  */
-export function refreshExportCharacters(vm: any): void {
+export function refreshExportCharacters(vm: ExporterVm): void {
   const characters: Array<{ name: string; selected: boolean }> = [];
   try {
     const dataDir = vm.settings.logDirectory;
@@ -70,8 +72,8 @@ export function refreshExportCharacters(vm: any): void {
  * @param vm - Vue component instance containing exportCharacters array
  * @param selected - Whether to select (true) or deselect (false) all characters
  */
-export function setExportCharacters(vm: any, selected: boolean): void {
-  vm.exportCharacters.forEach((character: any) => {
+export function setExportCharacters(vm: ExporterVm, selected: boolean): void {
+  vm.exportCharacters.forEach(character => {
     character.selected = selected;
   });
 }
@@ -82,10 +84,8 @@ export function setExportCharacters(vm: any, selected: boolean): void {
  * @param vm - Vue component instance containing exportCharacters array
  * @returns Array of character names where selected is true
  */
-export function getSelectedExportCharacters(vm: any): string[] {
-  return vm.exportCharacters
-    .filter((c: any) => c.selected)
-    .map((c: any) => c.name);
+export function getSelectedExportCharacters(vm: ExporterVm): string[] {
+  return vm.exportCharacters.filter(c => c.selected).map(c => c.name);
 }
 
 /**
@@ -129,7 +129,7 @@ type ExportEntry = { abs: string; zip: string; isLog?: boolean };
 function buildExportEntries(
   dataDir: string,
   selectedCharacters: string[],
-  vm: any
+  vm: ExporterVm
 ): ExportEntry[] {
   const entries: ExportEntry[] = [];
 
@@ -200,7 +200,7 @@ function buildExportEntries(
   return entries;
 }
 
-function getSettingsFilesToInclude(vm: any): Set<string> {
+function getSettingsFilesToInclude(vm: ExporterVm): Set<string> {
   const includeFiles = new Set<string>();
   if (vm.exportIncludePinnedConversations) includeFiles.add('pinned');
   if (vm.exportIncludePinnedEicons) includeFiles.add('favoriteEIcons');
@@ -218,7 +218,7 @@ function getSettingsFilesToInclude(vm: any): Set<string> {
  * @param vm - Vue component instance with export state and settings
  * @returns A promise that resolves when export completes or is cancelled
  */
-function buildManifestIncludes(vm: any): ExportManifest['includes'] {
+function buildManifestIncludes(vm: ExporterVm): ExportManifest['includes'] {
   return {
     generalSettings: !!vm.exportIncludeGeneralSettings,
     logs: !!vm.exportIncludeLogs,
@@ -272,7 +272,7 @@ function verifyExportZip(
   }
 }
 
-export async function runExport(vm: any): Promise<void> {
+export async function runExport(vm: ExporterVm): Promise<void> {
   if (!vm.canRunExport) return;
   vm.exportInProgress = true;
   vm.exportSummary = undefined;

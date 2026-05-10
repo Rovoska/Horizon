@@ -1285,7 +1285,7 @@
         importHint: undefined as
           | 'auto'
           | 'vanilla'
-          | 'vanilla-advanced'
+          | 'advanced'
           | 'slimcat'
           | undefined,
         l: l,
@@ -1369,37 +1369,7 @@
           mtime: number;
           size: number;
         }[],
-        selectedAutoBackup: undefined as string | undefined,
-
-        refreshExportCharacters: () =>
-          ImportExport.refreshExportCharacters(this as any),
-        refreshVanillaContext: () =>
-          ImportExport.refreshVanillaContext(this as any),
-        normalizeVanillaBaseDir: () =>
-          ImportExport.normalizeVanillaBaseDir(this as any),
-        chooseVanillaImportDir: () =>
-          ImportExport.chooseVanillaImportDir(this as any),
-        resetVanillaImportDir: () =>
-          ImportExport.resetVanillaImportDir(this as any),
-        handleVanillaBaseDirInput: () =>
-          ImportExport.handleVanillaBaseDirInput(this as any),
-        setVanillaCharacters: (selected: boolean) =>
-          ImportExport.setVanillaCharacters(this as any, selected),
-        setExportCharacters: (selected: boolean) =>
-          ImportExport.setExportCharacters(this as any, selected),
-        setImportCharacters: (selected: boolean) =>
-          ImportExport.setImportCharacters(this as any, selected),
-        runVanillaImport: () => ImportExport.runVanillaImport(this as any),
-        runExport: () => {
-          (this as any).startExportAnimation();
-          ImportExport.runExport(this as any).finally(() =>
-            (this as any).stopExportAnimation()
-          );
-        },
-        chooseImportZip: () => ImportExport.chooseImportZip(this as any),
-        describeImportCharacter: (character: BackupCharacterInfo) =>
-          ImportExport.describeImportCharacter(character),
-        runZipImport: () => ImportExport.runZipImport(this as any)
+        selectedAutoBackup: undefined as string | undefined
       };
     },
     computed: {
@@ -1690,7 +1660,52 @@
       },
       async initializeImportExport(): Promise<void> {
         this.refreshExportCharacters();
-        await ImportExport.initializeVanillaImport(this as any);
+        await ImportExport.initializeVanillaImport(this);
+      },
+      refreshExportCharacters(): void {
+        ImportExport.refreshExportCharacters(this);
+      },
+      refreshVanillaContext(): void {
+        ImportExport.refreshVanillaContext(this);
+      },
+      normalizeVanillaBaseDir(): void {
+        ImportExport.normalizeVanillaBaseDir(this);
+      },
+      chooseVanillaImportDir(): Promise<void> {
+        return ImportExport.chooseVanillaImportDir(this);
+      },
+      resetVanillaImportDir(): void {
+        ImportExport.resetVanillaImportDir(this);
+      },
+      handleVanillaBaseDirInput(): void {
+        ImportExport.handleVanillaBaseDirInput(this);
+      },
+      setVanillaCharacters(selected: boolean): void {
+        ImportExport.setVanillaCharacters(this, selected);
+      },
+      setExportCharacters(selected: boolean): void {
+        ImportExport.setExportCharacters(this, selected);
+      },
+      setImportCharacters(selected: boolean): void {
+        ImportExport.setImportCharacters(this, selected);
+      },
+      runVanillaImport(): Promise<void> {
+        return ImportExport.runVanillaImport(this);
+      },
+      runExport(): void {
+        this.startExportAnimation();
+        void ImportExport.runExport(this).finally(() =>
+          this.stopExportAnimation()
+        );
+      },
+      chooseImportZip(): Promise<void> {
+        return ImportExport.chooseImportZip(this);
+      },
+      describeImportCharacter(character: BackupCharacterInfo): string {
+        return ImportExport.describeImportCharacter(character);
+      },
+      runZipImport(): Promise<void> {
+        return ImportExport.runZipImport(this);
       },
       async chooseAutoBackupDir(): Promise<void> {
         const result = await remote.dialog.showOpenDialog(browserWindow, {

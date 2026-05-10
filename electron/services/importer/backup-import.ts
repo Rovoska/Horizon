@@ -15,8 +15,10 @@ import path from 'path';
 import { ipcRenderer } from 'electron';
 import log from 'electron-log';
 import AdmZip from 'adm-zip';
+import type { IZipEntry } from 'adm-zip';
 import { isValidManifest } from '../exporter/manifest';
 import type { ExportManifest } from '../exporter/manifest';
+import type { ExporterVm } from '../exporter-vm';
 /** Default log directory in the renderer process (avoids instantiating GeneralSettings). */
 const defaultLogDirectory = path.join(remote.app.getPath('userData'), 'data');
 
@@ -51,7 +53,7 @@ export interface BackupCharacterInfo {
  * @param vm - Vue component instance managing import state
  * @returns A promise that resolves when the file dialog closes
  */
-export async function chooseImportZip(vm: any): Promise<void> {
+export async function chooseImportZip(vm: ExporterVm): Promise<void> {
   if (vm.importInProgress) return;
   const result = await remote.dialog.showOpenDialog({
     title: 'Choose Horizon export', // TODO: localize
@@ -68,7 +70,7 @@ export async function chooseImportZip(vm: any): Promise<void> {
  *
  * @param vm - Vue component instance managing import state
  */
-export function resetImportZipState(vm: any): void {
+export function resetImportZipState(vm: ExporterVm): void {
   vm.importZipArchive = undefined;
   vm.importZipPath = undefined;
   vm.importZipName = undefined;
@@ -104,7 +106,10 @@ export function resetImportZipState(vm: any): void {
  * @param filePath - Absolute path to the ZIP file to load
  * @returns A promise that resolves when the ZIP is loaded and parsed
  */
-export async function loadImportZip(vm: any, filePath: string): Promise<void> {
+export async function loadImportZip(
+  vm: ExporterVm,
+  filePath: string
+): Promise<void> {
   vm.importSummary = undefined;
   vm.importError = undefined;
   vm.importZipError = undefined;
@@ -211,8 +216,8 @@ function updateCharacterInfo(
  *
  * @param vm - Vue component instance with loaded ZIP archive
  */
-export function parseImportZip(vm: any): void {
-  const zip: AdmZip = vm.importZipArchive;
+export function parseImportZip(vm: ExporterVm): void {
+  const zip = vm.importZipArchive as AdmZip;
   if (!zip) return;
 
   const characterMap = new Map<string, BackupCharacterInfo>();
@@ -333,8 +338,8 @@ export function parseImportZip(vm: any): void {
  * @param vm - Vue component instance with importCharacters array
  * @param selected - Whether to select (true) or deselect (false) all characters
  */
-export function setImportCharacters(vm: any, selected: boolean): void {
-  vm.importCharacters.forEach((character: any) => {
+export function setImportCharacters(vm: ExporterVm, selected: boolean): void {
+  vm.importCharacters.forEach(character => {
     character.selected = selected;
   });
 }
@@ -345,10 +350,10 @@ export function setImportCharacters(vm: any, selected: boolean): void {
  * @param vm - Vue component instance with importCharacters array
  * @returns Array of character names where selected is true
  */
-export function getSelectedImportCharacters(vm: any): string[] {
+export function getSelectedImportCharacters(vm: ExporterVm): string[] {
   return vm.importCharacters
-    .filter((character: any) => character.selected)
-    .map((character: any) => character.name);
+    .filter(character => character.selected)
+    .map(character => character.name);
 }
 
 /**
@@ -451,7 +456,7 @@ interface ImportStats {
 }
 
 function shouldImportEntry(
-  vm: any,
+  vm: ExporterVm,
   category: string,
   segments: string[],
   info: BackupCharacterInfo
@@ -480,7 +485,7 @@ function shouldImportEntry(
 }
 
 function shouldImportSettingsFile(
-  vm: any,
+  vm: ExporterVm,
   segments: string[],
   info: BackupCharacterInfo
 ): boolean {
@@ -531,7 +536,7 @@ async function checkConnectedCharacters(): Promise<boolean> {
 }
 
 function importGeneralSettings(
-  vm: any,
+  vm: ExporterVm,
   zip: AdmZip,
   dataDir: string,
   stats: ImportStats
@@ -580,8 +585,8 @@ function shouldSkipExistingFile(
 }
 
 function importCharacterFile(
-  vm: any,
-  entry: any,
+  vm: ExporterVm,
+  entry: IZipEntry,
   dataDir: string,
   selectedCharacters: Set<string>,
   characterInfo: Map<string, BackupCharacterInfo>,
@@ -653,7 +658,7 @@ function importCharacterFile(
 }
 
 function importCharacterData(
-  vm: any,
+  vm: ExporterVm,
   zip: AdmZip,
   dataDir: string,
   selectedCharacters: Set<string>,
@@ -674,7 +679,7 @@ function importCharacterData(
   }
 }
 
-function finalizeImport(vm: any, stats: ImportStats): void {
+function finalizeImport(vm: ExporterVm, stats: ImportStats): void {
   if (stats.generalImported || stats.charactersTouched.size > 0) {
     ipcRenderer.send('general-settings-update', vm.settings);
   }
@@ -702,13 +707,13 @@ function finalizeImport(vm: any, stats: ImportStats): void {
  * @param vm - Vue component instance managing import state and user selections
  * @returns A promise that resolves when import completes
  */
-export async function runZipImport(vm: any): Promise<void> {
+export async function runZipImport(vm: ExporterVm): Promise<void> {
   if (!vm.canRunZipImport) return;
 
   const hasConnected = await checkConnectedCharacters();
   if (hasConnected) return;
 
-  const zip: AdmZip = vm.importZipArchive;
+  const zip = vm.importZipArchive as AdmZip;
   if (!zip) return;
 
   vm.importInProgress = true;
