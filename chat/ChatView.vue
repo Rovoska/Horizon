@@ -472,6 +472,11 @@
           e: KeyboardEvent
         ) => boolean,
         mouseButtonListener: undefined as any as (e: MouseEvent) => void,
+        autoBackupStatusListener: undefined as any as (
+          e: Electron.IpcRendererEvent,
+          status: string,
+          progress?: number
+        ) => void,
         toasts: toasts,
         dismissToast: dismissToast
       };
@@ -498,41 +503,39 @@
       this.mouseButtonListener = (e: MouseEvent) => this.onMouseButton(e);
       window.addEventListener('mouseup', this.mouseButtonListener);
 
-      ipcRenderer.on(
-        'auto-backup-status',
-        (_e, status: string, progress?: number) => {
-          const id = 'auto-backup';
-          if (status === 'started') {
-            showToast({
-              id,
-              message: l('settings.autoBackup.toastInProgress'),
-              icon: 'fa-sync',
-              iconSpin: true,
-              progress: 0
-            });
-          } else if (status === 'progress' && typeof progress === 'number') {
-            updateToast(id, { progress });
-          } else if (status === 'success') {
-            updateToast(id, {
-              message: l('settings.autoBackup.toastComplete'),
-              icon: 'fa-check',
-              iconSpin: false,
-              variant: 'success',
-              progress: 1,
-              autoDismiss: 5000
-            });
-          } else if (status === 'error') {
-            updateToast(id, {
-              message: l('settings.autoBackup.toastFailed'),
-              icon: 'fa-exclamation-triangle',
-              iconSpin: false,
-              variant: 'error',
-              progress: undefined,
-              autoDismiss: 5000
-            });
-          }
+      this.autoBackupStatusListener = (_e, status, progress) => {
+        const id = 'auto-backup';
+        if (status === 'started') {
+          showToast({
+            id,
+            message: l('settings.autoBackup.toastInProgress'),
+            icon: 'fa-sync',
+            iconSpin: true,
+            progress: 0
+          });
+        } else if (status === 'progress' && typeof progress === 'number') {
+          updateToast(id, { progress });
+        } else if (status === 'success') {
+          updateToast(id, {
+            message: l('settings.autoBackup.toastComplete'),
+            icon: 'fa-check',
+            iconSpin: false,
+            variant: 'success',
+            progress: 1,
+            autoDismiss: 5000
+          });
+        } else if (status === 'error') {
+          updateToast(id, {
+            message: l('settings.autoBackup.toastFailed'),
+            icon: 'fa-exclamation-triangle',
+            iconSpin: false,
+            variant: 'error',
+            progress: undefined,
+            autoDismiss: 5000
+          });
         }
-      );
+      };
+      ipcRenderer.on('auto-backup-status', this.autoBackupStatusListener);
 
       //We do this because it's a massive pain in the 🫏 to read some monstrosity of
       //an if-else statement to compare our platforms and then pick a keyboard shortcut in our keyboard handle event
@@ -656,6 +659,10 @@
       window.removeEventListener('focus', this.focusListener);
       window.removeEventListener('blur', this.blurListener);
       window.removeEventListener('mouseup', this.mouseButtonListener);
+      ipcRenderer.removeListener(
+        'auto-backup-status',
+        this.autoBackupStatusListener
+      );
     },
     methods: {
       onMouseButton(e: MouseEvent): void {

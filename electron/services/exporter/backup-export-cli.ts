@@ -291,7 +291,7 @@ async function createArchive(
       eicons: opts.includePinnedEicons,
       recents: opts.includeRecents,
       hidden: opts.includeHidden,
-      jsonLogs: undefined
+      jsonLogs: opts.includeLogs ? false : undefined
     },
     expectedFiles,
     dataDir
