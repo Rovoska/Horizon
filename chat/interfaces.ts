@@ -109,6 +109,14 @@ export namespace Conversation {
     return (<Partial<ChannelConversation>>conversation).channel !== undefined;
   }
 
+  export interface ChannelGroup {
+    id: string;
+    name: string;
+    collapsed: boolean;
+    order: number;
+    channels: string[];
+  }
+
   export interface State {
     readonly privateConversations: ReadonlyArray<PrivateConversation>;
     readonly channelConversations: ReadonlyArray<ChannelConversation>;
@@ -129,12 +137,7 @@ export namespace Conversation {
       noCreate: boolean
     ): PrivateConversation | undefined;
 
-    channelGroups: Array<{
-      id: string;
-      name: string;
-      collapsed: boolean;
-      order: number;
-    }>;
+    channelGroups: ChannelGroup[];
     channelGroupAssignments: { [channelId: string]: string };
     createChannelGroup(name: string): string;
     deleteChannelGroup(id: string): void;
@@ -268,13 +271,8 @@ export namespace Settings {
     hideProfileAnalysis: boolean;
     ads: Ad[];
     channelGroups: {
-      groups: Array<{
-        id: string;
-        name: string;
-        collapsed: boolean;
-        order: number;
-      }>;
-      assignments: { [channelId: string]: string };
+      groups: Conversation.ChannelGroup[];
+      assignments?: { [channelId: string]: string };
     };
   };
 

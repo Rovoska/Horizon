@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import { queuedJoin } from '../fchat/channels';
 import { decodeHTML } from '../fchat/common';
 import { AdManager } from './ads/ad-manager';
@@ -779,13 +778,14 @@ class State implements Interfaces.State {
   pinned!: { channels: string[]; private: string[] };
   settings!: { [key: string]: Interfaces.Settings };
   modes!: { [key: string]: Channel.Mode | undefined };
-  channelGroups: Array<{
-    id: string;
-    name: string;
-    collapsed: boolean;
-    order: number;
-  }> = [];
-  channelGroupAssignments: { [channelId: string]: string } = {};
+  channelGroups: Interfaces.ChannelGroup[] = [];
+
+  get channelGroupAssignments(): { [channelId: string]: string } {
+    const map: { [id: string]: string } = {};
+    for (const g of this.channelGroups)
+      for (const id of g.channels) map[id] = g.id;
+    return map;
+  }
   windowFocused = document.hasFocus();
 
   navigationHistory: Conversation[] = [];
@@ -837,7 +837,7 @@ class State implements Interfaces.State {
   }
 
   async savePinned(): Promise<void> {
-    this.pinned.channels = Object.keys(this.channelGroupAssignments);
+    this.pinned.channels = this.channelGroups.flatMap(g => g.channels);
     this.pinned.private = this.privateConversations
       .filter(x => x.isPinned)
       .map(x => x.name);
@@ -846,8 +846,7 @@ class State implements Interfaces.State {
 
   async saveChannelGroups(): Promise<void> {
     await core.settingsStore.set('channelGroups', {
-      groups: this.channelGroups,
-      assignments: this.channelGroupAssignments
+      groups: this.channelGroups
     });
   }
 
@@ -857,7 +856,8 @@ class State implements Interfaces.State {
       id,
       name,
       collapsed: false,
-      order: this.channelGroups.length
+      order: this.channelGroups.length,
+      channels: []
     });
     void this.saveChannelGroups();
     return id;
@@ -866,10 +866,6 @@ class State implements Interfaces.State {
   deleteChannelGroup(id: string): void {
     const idx = this.channelGroups.findIndex(g => g.id === id);
     if (idx !== -1) this.channelGroups.splice(idx, 1);
-    for (const channelId in this.channelGroupAssignments) {
-      if (this.channelGroupAssignments[channelId] === id)
-        Vue.delete(this.channelGroupAssignments, channelId);
-    }
     this.channelGroups.forEach((g, i) => (g.order = i));
     void this.saveChannelGroups();
   }
@@ -883,8 +879,17 @@ class State implements Interfaces.State {
   }
 
   setChannelGroup(channelId: string, groupId: string | null): void {
-    if (groupId === null) Vue.delete(this.channelGroupAssignments, channelId);
-    else Vue.set(this.channelGroupAssignments, channelId, groupId);
+    for (const g of this.channelGroups) {
+      const i = g.channels.indexOf(channelId);
+      if (i !== -1) {
+        g.channels.splice(i, 1);
+        break;
+      }
+    }
+    if (groupId !== null) {
+      const group = this.channelGroups.find(g => g.id === groupId);
+      if (group) group.channels.push(channelId);
+    }
     void this.saveChannelGroups();
     void this.savePinned();
   }
@@ -980,11 +985,21 @@ class State implements Interfaces.State {
     this.settings = settings;
     const channelGroupData = (await core.settingsStore.get(
       'channelGroups'
-    )) || { groups: [], assignments: {} };
+    )) || { groups: [] };
     this.channelGroups = channelGroupData.groups;
-    this.channelGroupAssignments = channelGroupData.assignments;
+    // Migrate from old format where channel assignments were stored separately
+    if (channelGroupData.assignments !== undefined) {
+      const oldAssignments = channelGroupData.assignments;
+      for (const g of this.channelGroups) {
+        g.channels = Object.entries(oldAssignments)
+          .filter(([, gid]) => gid === g.id)
+          .map(([cid]) => cid);
+      }
+      await this.saveChannelGroups();
+    }
+    for (const g of this.channelGroups) if (!g.channels) g.channels = [];
     const ungroupedPinned = this.pinned.channels.filter(
-      (id: string) => !(id in this.channelGroupAssignments)
+      (id: string) => !this.channelGroups.some(g => g.channels.includes(id))
     );
     if (ungroupedPinned.length > 0) {
       const groupId = `group_${Date.now()}`;
@@ -992,13 +1007,12 @@ class State implements Interfaces.State {
         id: groupId,
         name: 'Pinned',
         collapsed: false,
-        order: this.channelGroups.length
+        order: this.channelGroups.length,
+        channels: ungroupedPinned
       });
-      for (const id of ungroupedPinned)
-        this.channelGroupAssignments[id] = groupId;
       await this.saveChannelGroups();
     }
-    this.pinned.channels = Object.keys(this.channelGroupAssignments);
+    this.pinned.channels = this.channelGroups.flatMap(g => g.channels);
     //tslint:enable
   }
 }
