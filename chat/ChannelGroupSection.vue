@@ -24,7 +24,7 @@
       <span
         class="fas fa-fw fa-trash channel-group-delete"
         @click.stop="deleteGroup"
-        :aria-label="'Delete group'"
+        :aria-label="l('channel.group.delete')"
       ></span>
     </div>
     <div

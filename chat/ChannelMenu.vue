@@ -21,7 +21,7 @@
         @click.prevent="markAsRead"
       >
         <span class="fas fa-fw fa-check-double"></span>
-        <span class="action-label">Mark as read</span>
+        <span class="action-label">{{ l('channel.menu.markRead') }}</span>
       </a>
       <a
         href="#"
@@ -29,7 +29,7 @@
         @click.prevent="copyCode"
       >
         <span class="fas fa-fw fa-copy"></span>
-        <span class="action-label">Copy channel code</span>
+        <span class="action-label">{{ l('channel.menu.copyCode') }}</span>
       </a>
       <template v-if="groups.length || currentGroupId">
         <div class="list-group-item channel-menu-divider"></div>
@@ -41,9 +41,9 @@
           @click.prevent="assignToGroup(group.id)"
         >
           <span class="fas fa-fw fa-folder"></span>
-          <span class="action-label"
-            >Move to &ldquo;{{ group.name }}&rdquo;</span
-          >
+          <span class="action-label">{{
+            l('channel.menu.moveTo', group.name)
+          }}</span>
         </a>
         <a
           v-if="!currentGroupId"
@@ -52,7 +52,9 @@
           @click.prevent="createGroup"
         >
           <span class="fas fa-fw fa-folder-plus"></span>
-          <span class="action-label">Add to new group</span>
+          <span class="action-label">{{
+            l('channel.menu.addToNewGroup')
+          }}</span>
         </a>
         <a
           v-if="currentGroupId"
@@ -61,7 +63,9 @@
           @click.prevent="assignToGroup(null)"
         >
           <span class="fas fa-fw fa-folder-minus"></span>
-          <span class="action-label">Remove from group</span>
+          <span class="action-label">{{
+            l('channel.menu.removeFromGroup')
+          }}</span>
         </a>
       </template>
       <template v-else>
@@ -72,7 +76,9 @@
           @click.prevent="createGroup"
         >
           <span class="fas fa-fw fa-folder-plus"></span>
-          <span class="action-label">Add to new group</span>
+          <span class="action-label">{{
+            l('channel.menu.addToNewGroup')
+          }}</span>
         </a>
       </template>
     </div>
@@ -82,11 +88,13 @@
 <script lang="ts">
   import Vue from 'vue';
   import { Conversation } from './interfaces';
+  import l from './localize';
 
   export default Vue.extend({
     name: 'ChannelMenu',
     data() {
       return {
+        l,
         showMenu: false,
         position: {} as { left: string; top: string },
         conversation: null as Conversation.ChannelConversation | null,
