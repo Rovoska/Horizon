@@ -61,7 +61,16 @@
                 bookmarked ? 'btn-outline-success' : 'btn-outline-secondary'
               "
             >
+              <div
+                v-if="bookmarkPending"
+                class="bookmark-pending-spinner spinner-border spinner-border-sm"
+                role="status"
+                :title="
+                  l(`user.${bookmarked ? 'unbookmark' : 'bookmark'}.pending`)
+                "
+              ></div>
               <i
+                v-else
                 class="fa fa-fw"
                 :class="bookmarked ? 'fa-bookmark' : 'far fa-bookmark'"
               ></i>
@@ -296,8 +305,14 @@
         l: l,
         shared: Store as SharedStore,
         quickInfoIds: [1, 3, 2, 49, 9, 29, 15, 41, 25] as ReadonlyArray<number>,
-        avatarUrl: Utils.avatarURL
+        avatarUrl: Utils.avatarURL,
+        bookmarkPending: false
       };
+    },
+    mounted() {
+      this.character.bookmarked =
+        core.characters.get(this.character.character.name)?.isBookmarked ||
+        false;
     },
     computed: {
       displayBadges(): string[] {
@@ -336,10 +351,7 @@
         return Store.authenticated;
       },
       bookmarked(): boolean {
-        return (
-          core.characters.get(this.character.character.name)?.isBookmarked ||
-          false
-        );
+        return this.character.bookmarked || false;
       }
     },
     methods: {
@@ -441,12 +453,18 @@
         //TODO implement this
       },
       async toggleBookmark(): Promise<void> {
+        this.bookmarkPending = true;
         const char = this.character;
         try {
           await methods.bookmarkUpdate(char.character.id, !char.bookmarked);
           char.bookmarked = !char.bookmarked;
         } catch (e) {
           Utils.ajaxError(e, 'Unable to change bookmark state.');
+          //just in case we run into some awful desync with f-list's API and the fserv tracking messages
+          this.character.bookmarked =
+            core.characters.get(char.character.name)?.isBookmarked || false;
+        } finally {
+          this.bookmarkPending = false;
         }
       },
       getInfotag(id: number): Infotag {
