@@ -81,6 +81,7 @@
 
 <script lang="ts">
   import Vue from 'vue';
+  import { Conversation } from './interfaces';
 
   export default Vue.extend({
     name: 'ChannelMenu',
@@ -88,31 +89,29 @@
       return {
         showMenu: false,
         position: {} as { left: string; top: string },
-        conversation: null as any,
-        groups: [] as any[],
+        conversation: null as Conversation.ChannelConversation | null,
+        groups: [] as Conversation.ChannelGroup[],
         currentGroupId: null as string | null
       };
     },
     computed: {
-      otherGroups(): any[] {
-        return (this.groups as any[]).filter(
-          (g: any) => g.id !== this.currentGroupId
-        );
+      otherGroups(): Conversation.ChannelGroup[] {
+        return this.groups.filter(g => g.id !== this.currentGroupId);
       }
     },
     methods: {
       handleEvent(
         e: MouseEvent,
-        conv: any,
-        groups: any[],
+        conv: Conversation.ChannelConversation,
+        groups: Conversation.ChannelGroup[],
         currentGroupId: string | null
       ): void {
         this.conversation = conv;
         this.groups = groups;
         this.currentGroupId = currentGroupId;
         this.position = {
-          left: `${(e as MouseEvent).clientX}px`,
-          top: `${(e as MouseEvent).clientY}px`
+          left: `${e.clientX}px`,
+          top: `${e.clientY}px`
         };
         this.showMenu = true;
         this.$nextTick(() => {
@@ -148,10 +147,12 @@
         this.close();
       },
       assignToGroup(groupId: string | null): void {
+        if (!this.conversation) return;
         this.$emit('assign', this.conversation.channel.id, groupId);
         this.close();
       },
       createGroup(): void {
+        if (!this.conversation) return;
         this.$emit('create-group', this.conversation.channel.id);
         this.close();
       }
