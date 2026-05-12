@@ -117,7 +117,9 @@
         animation: 50,
         fallbackTolerance: 5,
         onStart: () => {
-          document.body.classList.add('channel-dragging');
+          document
+            .getElementById('conversations')
+            ?.classList.add('channel-dragging');
         },
         onAdd: (e: Sortable.SortableEvent) => {
           const channelId = (e.item as HTMLElement).dataset?.channelId;
@@ -132,7 +134,9 @@
           }
         },
         onEnd: async (e: Sortable.SortableEvent) => {
-          document.body.classList.remove('channel-dragging');
+          document
+            .getElementById('conversations')
+            ?.classList.remove('channel-dragging');
           if (e.to !== e.from || e.oldIndex === e.newIndex) return;
           const conv = this.conversations[e.oldIndex!];
           if (!conv) return;

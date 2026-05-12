@@ -559,9 +559,14 @@
         sort: true,
         animation: 150,
         fallbackTolerance: 5,
-        onStart: () => document.body.classList.add('channel-dragging'),
+        onStart: () =>
+          document
+            .getElementById('conversations')
+            ?.classList.add('channel-dragging'),
         onEnd: async (e: any) => {
-          document.body.classList.remove('channel-dragging');
+          document
+            .getElementById('conversations')
+            ?.classList.remove('channel-dragging');
           if (e.to !== e.from || e.oldIndex === e.newIndex) return;
           const allConvs = core.conversations.channelConversations;
           const ungrouped = allConvs.filter(
@@ -1319,11 +1324,11 @@
 
   // Drag-to-group styles
   // Show collapsed group lists as drop zones while dragging
-  body.channel-dragging .channel-group-list {
+  #conversations.channel-dragging .channel-group-list {
     display: block !important;
     min-height: 28px;
   }
-  body.channel-dragging .channel-group-list:empty::before {
+  #conversations.channel-dragging .channel-group-list:empty::before {
     content: 'Drop here';
     display: block;
     text-align: center;
