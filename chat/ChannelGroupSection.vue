@@ -70,7 +70,7 @@
 
 <script lang="ts">
   import Sortable from 'sortablejs'; // tslint:disable-line:no-require-imports
-  import Vue from 'vue';
+  import Vue, { PropType } from 'vue';
   import core from './core';
   import { Conversation } from './interfaces';
   import l from './localize';
@@ -84,10 +84,19 @@
   export default Vue.extend({
     name: 'ChannelGroupSection',
     props: {
-      group: { required: true as const },
-      conversations: { required: true as const },
-      allGroups: { required: true as const },
-      startEditing: { default: false }
+      group: {
+        type: Object as PropType<Conversation.ChannelGroup>,
+        required: true as const
+      },
+      conversations: {
+        type: Array as PropType<Conversation.ChannelConversation[]>,
+        required: true as const
+      },
+      allGroups: {
+        type: Array as PropType<Conversation.ChannelGroup[]>,
+        required: true as const
+      },
+      startEditing: { type: Boolean, default: false }
     },
     data() {
       return {
@@ -110,31 +119,24 @@
         onStart: () => {
           document.body.classList.add('channel-dragging');
         },
-        onAdd: (e: any) => {
-          // Channel dropped into this group from ungrouped or another group
+        onAdd: (e: Sortable.SortableEvent) => {
           const channelId = (e.item as HTMLElement).dataset?.channelId;
           if (channelId)
-            core.conversations.setChannelGroup(
-              channelId,
-              (this.group as any).id
-            );
+            core.conversations.setChannelGroup(channelId, this.group.id);
         },
-        onRemove: (e: any) => {
-          // Channel dragged out — only clear assignment if destination is ungrouped (no groupId)
+        onRemove: (e: Sortable.SortableEvent) => {
           const destGroupId = (e.to as HTMLElement).dataset?.groupId;
           if (!destGroupId) {
             const channelId = (e.item as HTMLElement).dataset?.channelId;
             if (channelId) core.conversations.setChannelGroup(channelId, null);
           }
         },
-        onEnd: async (e: any) => {
+        onEnd: async (e: Sortable.SortableEvent) => {
           document.body.classList.remove('channel-dragging');
           if (e.to !== e.from || e.oldIndex === e.newIndex) return;
-          // Reorder within this group
-          const groupConvs = this.conversations as any[];
-          const conv = groupConvs[e.oldIndex];
+          const conv = this.conversations[e.oldIndex!];
           if (!conv) return;
-          const targetConv = groupConvs[e.newIndex];
+          const targetConv = this.conversations[e.newIndex!];
           const newAbsIndex = targetConv
             ? core.conversations.channelConversations.indexOf(targetConv)
             : core.conversations.channelConversations.length - 1;
@@ -144,11 +146,11 @@
     },
     methods: {
       toggleCollapse() {
-        (this.group as any).collapsed = !(this.group as any).collapsed;
+        this.group.collapsed = !this.group.collapsed;
         void core.conversations.saveChannelGroups();
       },
       startRename() {
-        this.renameValue = (this.group as any).name;
+        this.renameValue = this.group.name;
         this.renaming = true;
         this.$nextTick(() => {
           (<HTMLInputElement>this.$refs['renameInput'])?.focus();
@@ -158,14 +160,13 @@
         if (!this.renaming) return;
         this.renaming = false;
         const name = this.renameValue.trim();
-        if (name)
-          core.conversations.renameChannelGroup((this.group as any).id, name);
+        if (name) core.conversations.renameChannelGroup(this.group.id, name);
       },
       cancelRename() {
         this.renaming = false;
       },
       deleteGroup() {
-        core.conversations.deleteChannelGroup((this.group as any).id);
+        core.conversations.deleteChannelGroup(this.group.id);
       },
       getClasses(conversation: Conversation.Conversation): string {
         return conversation === core.conversations.selectedConversation
