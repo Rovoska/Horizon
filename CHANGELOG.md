@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0-beta.0] - 2026-05-16
+
 ### Added
 
 - Pinned channels now work with groups. Simply click and drag them around, or create additional groups by right-clicking a channel.
@@ -1385,7 +1387,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IOS build removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/41261d1ba7043eb7dfd5a1a6331dc604ff338814)]
 - Webchat removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/b894a180b9be31f68d1458aaa3c59f9c4470da89)]
 
-[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.4...development
+[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.2.0-beta.0...development
+[2.2.0-beta.0]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.4...v2.2.0-beta.0
 [2.1.4]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.1...v2.1.2
