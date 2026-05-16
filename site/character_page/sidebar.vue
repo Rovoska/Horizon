@@ -1,10 +1,19 @@
 <template>
   <div id="character-page-sidebar" class="card bg-light">
     <div class="card-body">
-      <img
-        :src="getAvatarUrl()"
-        class="character-page-avatar character-avatar"
-      />
+      <div
+        class="character-page-avatar-bg d-inline-block"
+        :style="
+          getAvatarUrl().startsWith('https://static.f-list.net/images/avatar')
+            ? `--character-avatar-bg: url('${getAvatarUrl()}')`
+            : ''
+        "
+      >
+        <img
+          :src="getAvatarUrl()"
+          class="character-page-avatar character-avatar"
+        />
+      </div>
 
       <div v-if="character.character.title" class="character-title">
         {{ character.character.title }}
