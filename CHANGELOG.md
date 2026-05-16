@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Various visual improvements to the profile viewer, to get it to match the website better mostly: [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/a7eb9390ca8e89879f710da0a5f257da1aa6bc1f)
+  - Vanilla (100 pixels) profile pics in the sidebar are shrunk down to normal size and have a glow instead of being blown up into a crusty, blurry mess.
+  - Inlines are no longer visually centered across their element.
+    - This should fix issues where 'dropdown shadow' inlines underneath things like `[collapse]` tags would often have a small gap.
+  - Your own icon in the kink compare tool below now fits properly.
+  - Icons for the compare tool's button.
+  - Customs that arent expanded no longer have an annoying border around them.
+  - Empty columns in the info tab don't show up anymore.
+  - Custom kinks with an empty description now show the "No description set yet" text.
+
+### Fixed
+
+- The bookmark button on the profile viewer's side bar is a million times less jank, and actually gives you visual feedback now. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/069769fdc9f6f58cbb6fcb299912f2840938da9b)
+- The BBCode editor buttons' tooltips are now localized. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/8306f5987e605af44001a40cec00134eb42196be)
+
+### Development
+
+- Upgraded to Electron 40 (`v40.10.0`) from `39.8.3`. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d63788bce78e2934853c483cf1732cadee2ef16b)
+
+### Documentation
+
+- Fixed incorrect e-mail in the security document. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/724f947a95eb1cd02d91510d1dec533884ede92b)
+
+### Merged Pull Requests
+
+- https://github.com/Fchat-Horizon/Horizon/pull/751 by @Kannamoris
+- https://github.com/Fchat-Horizon/Horizon/pull/755 by @devinliszt
+- https://github.com/Fchat-Horizon/Horizon/pull/754 by @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/757 by @FatCatClient
+
 ## [2.1.4] - 2026-05-06
 
 ### Added
