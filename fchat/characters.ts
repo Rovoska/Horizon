@@ -304,7 +304,6 @@ export default function (this: void, connection: Connection): Interfaces.State {
     char.isChatOp = false;
   });
   connection.onMessage('RTB', async data => {
-    console.log('got rtb:', data);
     if (
       data.type !== 'trackadd' &&
       data.type !== 'trackrem' &&
