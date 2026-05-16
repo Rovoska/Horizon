@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Pinned channels now work with groups. Simply click and drag them around, or create additional groups by right-clicking a channel.
+  - Thank you, @Kannamoris!!
+- Reworked the logs/ data exporter siginificantly! [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/2fb21e99a3798119441281bef09ead36e52f6667)
+  - Now features automated backups that you can fully configure based on intervals, triggers, and more.
+  - Improved menu with more clarity for functions.
+  - The export format has been generified, making it easier to parse for other clients (if they should want to).
+  - Data integrity verification _after_ exporting
+
 ### Changed
 
 - Various visual improvements to the profile viewer, to get it to match the website better mostly: [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/a7eb9390ca8e89879f710da0a5f257da1aa6bc1f)
@@ -31,11 +41,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 
 - Fixed incorrect e-mail in the security document. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/724f947a95eb1cd02d91510d1dec533884ede92b)
+- Added documentation for the new exporter format.
 
 ### Merged Pull Requests
 
+- https://github.com/Fchat-Horizon/Horizon/pull/643 by @CodingWithAnxiety
+- https://github.com/Fchat-Horizon/Horizon/pull/749 by @Kannamoris
 - https://github.com/Fchat-Horizon/Horizon/pull/751 by @Kannamoris
 - https://github.com/Fchat-Horizon/Horizon/pull/755 by @devinliszt
+  - This is their first contribution! 🎉
 - https://github.com/Fchat-Horizon/Horizon/pull/754 by @FatCatClient
 - https://github.com/Fchat-Horizon/Horizon/pull/757 by @FatCatClient
 
