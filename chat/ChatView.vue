@@ -498,7 +498,6 @@
         toasts: toasts,
         dismissToast: dismissToast,
         pendingRenameGroupId: null as string | null
-
       };
     },
     computed: {
