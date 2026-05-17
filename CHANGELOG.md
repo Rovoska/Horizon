@@ -11,7 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Pinned channels now work with groups. Simply click and drag them around, or create additional groups by right-clicking a channel.
+- Channel groups replace the old pin system -- any channel inside a group will automatically rejoin when you log back in. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/55ce65d34df296d0a3ff8664e8c4ef4403c556d5)
+  - Right-click any open channel to create a new group or move it into an existing one.
+  - Drag channels between groups directly in the sidebar.
+  - Click a group header to collapse it, double-click to rename it, or hover for the delete button.
   - Thank you, @Kannamoris!!
 - Reworked the logs/ data exporter siginificantly! [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/2fb21e99a3798119441281bef09ead36e52f6667)
   - Now features automated backups that you can fully configure based on intervals, triggers, and more.
