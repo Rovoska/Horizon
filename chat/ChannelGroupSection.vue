@@ -34,6 +34,28 @@
       ></span>
     </div>
     <div
+      v-if="group.collapsed && activeConversation"
+      class="list-group conversation-nav channel-group-list"
+    >
+      <a
+        href="#"
+        @click.prevent="activeConversation.show()"
+        :class="getClasses(activeConversation)"
+        class="list-group-item list-group-item-action item-channel"
+        :data-channel-id="activeConversation.channel.id"
+        @click.middle.prevent.stop="activeConversation.close()"
+      >
+        <span class="name">{{ activeConversation.name }}</span>
+        <span class="conversation-actions">
+          <span
+            class="fas fa-times leave"
+            @click.stop="activeConversation.close()"
+            :aria-label="l('chat.closeTab')"
+          ></span>
+        </span>
+      </a>
+    </div>
+    <div
       v-show="!group.collapsed"
       ref="channelList"
       class="list-group conversation-nav channel-group-list"
@@ -112,6 +134,13 @@
       };
     },
     computed: {
+      activeConversation(): Conversation.ChannelConversation | null {
+        return (
+          this.conversations.find(
+            c => c === core.conversations.selectedConversation
+          ) ?? null
+        );
+      },
       collapsedUnreadCount(): number {
         return this.conversations.reduce((sum, c) => sum + c.unreadCount, 0);
       },
