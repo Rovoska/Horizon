@@ -1,97 +1,43 @@
 <template>
   <div
-    class="shadow-sm"
     v-if="conversation && showMenu"
     :style="position"
     style="position: fixed; z-index: 1100"
     ref="menu"
   >
-    <div
+    <custom-context-menu
       id="channelMenu"
-      class="list-group bg-solid-text"
+      :menu-items="channelMenuItems"
       style="display: block; min-width: 220px; z-index: 1100"
     >
       <div class="list-group-item" id="channelMenu-header">
-        <span class="fas fa-fw fa-hashtag"></span>
+        <span
+          class="fas fa-fw"
+          :class="
+            conversation.channel.id.startsWith('adh-')
+              ? 'fa-hashtag'
+              : 'fa-star'
+          "
+        ></span>
         <span class="userInfo-name">{{ conversation.name }}</span>
       </div>
-      <a
-        href="#"
-        class="list-group-item list-group-item-action"
-        @click.prevent="markAsRead"
-      >
-        <span class="fas fa-fw fa-check-double"></span>
-        <span class="action-label">{{ l('channel.menu.markRead') }}</span>
-      </a>
-      <a
-        href="#"
-        class="list-group-item list-group-item-action"
-        @click.prevent="copyCode"
-      >
-        <span class="fas fa-fw fa-copy"></span>
-        <span class="action-label">{{ l('channel.menu.copyCode') }}</span>
-      </a>
-      <template v-if="groups.length || currentGroupId">
-        <div class="list-group-item channel-menu-divider"></div>
-        <a
-          v-for="group in otherGroups"
-          :key="group.id"
-          href="#"
-          class="list-group-item list-group-item-action"
-          @click.prevent="assignToGroup(group.id)"
-        >
-          <span class="fas fa-fw fa-folder"></span>
-          <span class="action-label">{{
-            l('channel.menu.moveTo', group.name)
-          }}</span>
-        </a>
-        <a
-          v-if="!currentGroupId"
-          href="#"
-          class="list-group-item list-group-item-action"
-          @click.prevent="createGroup"
-        >
-          <span class="fas fa-fw fa-folder-plus"></span>
-          <span class="action-label">{{
-            l('channel.menu.addToNewGroup')
-          }}</span>
-        </a>
-        <a
-          v-if="currentGroupId"
-          href="#"
-          class="list-group-item list-group-item-action channel-menu-danger"
-          @click.prevent="assignToGroup(null)"
-        >
-          <span class="fas fa-fw fa-folder-minus"></span>
-          <span class="action-label">{{
-            l('channel.menu.removeFromGroup')
-          }}</span>
-        </a>
-      </template>
-      <template v-else>
-        <div class="list-group-item channel-menu-divider"></div>
-        <a
-          href="#"
-          class="list-group-item list-group-item-action"
-          @click.prevent="createGroup"
-        >
-          <span class="fas fa-fw fa-folder-plus"></span>
-          <span class="action-label">{{
-            l('channel.menu.addToNewGroup')
-          }}</span>
-        </a>
-      </template>
-    </div>
+    </custom-context-menu>
   </div>
 </template>
 
 <script lang="ts">
   import Vue from 'vue';
   import { Conversation } from './interfaces';
+  import CustomContextMenu, {
+    ContextMenuItemProps
+  } from '../components/CustomContextMenu.vue';
   import l from './localize';
 
   export default Vue.extend({
     name: 'ChannelMenu',
+    components: {
+      CustomContextMenu
+    },
     data() {
       return {
         l,
@@ -103,8 +49,62 @@
       };
     },
     computed: {
-      otherGroups(): Conversation.ChannelGroup[] {
-        return this.groups.filter(g => g.id !== this.currentGroupId);
+      channelMenuItems(): ContextMenuItemProps[] {
+        const items: ContextMenuItemProps[] = [
+          {
+            label: this.l('channel.menu.markRead'),
+            iconClass: 'fas fa-fw fa-check-double',
+            onClick: () => this.markAsRead()
+          },
+          {
+            label: this.l('channel.menu.copyCode'),
+            iconClass: 'fas fa-fw fa-copy',
+            onClick: () => this.copyCode()
+          }
+        ];
+
+        const otherGroups = this.groups.filter(
+          g => g.id !== this.currentGroupId
+        );
+        if (this.groups.length || this.currentGroupId) {
+          items.push({
+            label: this.l('channel.menu.moveTo'),
+            iconClass: 'fas fa-fw fa-folder-tree',
+            disabled: otherGroups.length === 0,
+            children: otherGroups.length
+              ? otherGroups.map(group => ({
+                  label: group.name,
+                  iconClass: 'fas fa-fw fa-folder',
+                  onClick: () => this.assignToGroup(group.id)
+                }))
+              : []
+          });
+
+          if (!this.currentGroupId) {
+            items.push({
+              label: this.l('channel.menu.addToNewGroup'),
+              iconClass: 'fas fa-fw fa-folder-plus',
+              topBorder: otherGroups.length === 0,
+              onClick: () => this.createGroup()
+            });
+          } else {
+            items.push({
+              label: this.l('channel.menu.removeFromGroup'),
+              iconClass: 'fas fa-fw fa-folder-minus',
+              topBorder: otherGroups.length === 0,
+              onClick: () => this.assignToGroup(null)
+            });
+          }
+        } else {
+          items.push({
+            label: this.l('channel.menu.addToNewGroup'),
+            iconClass: 'fas fa-fw fa-folder-plus',
+            topBorder: true,
+            onClick: () => this.createGroup()
+          });
+        }
+
+        return items;
       }
     },
     methods: {
@@ -122,6 +122,7 @@
           top: `${e.clientY}px`
         };
         this.showMenu = true;
+        this.$emit('open');
         this.$nextTick(() => {
           const menu = this.$refs['menu'] as HTMLElement | undefined;
           if (!menu) return;
@@ -139,7 +140,9 @@
         document.addEventListener('click', this.close, { once: true });
       },
       close(): void {
+        if (!this.showMenu) return;
         this.showMenu = false;
+        this.$emit('close');
       },
       markAsRead(): void {
         if (this.conversation) this.conversation.markRead();
@@ -169,41 +172,9 @@
 </script>
 
 <style lang="scss">
-  #channelMenu {
-    border-radius: 15px;
-    max-width: 265px;
-  }
-
-  #channelMenu .list-group-item {
-    padding: 3px 5px 3px 5px;
-  }
-
-  #channelMenu .list-group-item-action {
-    font-size: 1.04em;
-    border-top-width: 0;
-    border-top-style: solid;
-    border-color: var(--bs-border-color);
-  }
-
-  #channelMenu .list-group-item .fa-fw,
-  #channelMenu .list-group-item .action-label {
-    margin-left: 0.4rem;
-  }
-
   #channelMenu-header {
     padding: 7px 10px 5px 10px;
     font-size: 1.1em;
     font-weight: bold;
-  }
-
-  .channel-menu-divider {
-    padding: 0 !important;
-    height: 1px;
-    background: var(--bs-border-color);
-    border: none;
-  }
-
-  .channel-menu-danger {
-    color: var(--bs-danger, #dc3545);
   }
 </style>

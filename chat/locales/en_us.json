@@ -108,7 +108,7 @@
   "channel.menu.addToNewGroup": "Add to new group",
   "channel.menu.copyCode": "Copy channel code",
   "channel.menu.markRead": "Mark as read",
-  "channel.menu.moveTo": "Move to \"{0}\"",
+  "channel.menu.moveTo": "Move to...",
   "channel.menu.removeFromGroup": "Remove from group",
   "channel.official": "Official channel",
   "channelList.create": "Create room",
