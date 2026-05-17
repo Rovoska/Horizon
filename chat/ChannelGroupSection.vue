@@ -22,6 +22,12 @@
         @click.stop
       />
       <span
+        v-if="group.collapsed && collapsedUnreadCount > 0"
+        class="badge rounded-pill channel-group-badge"
+        :class="collapsedUnreadClass"
+        >{{ collapsedUnreadCount }}</span
+      >
+      <span
         class="fas fa-fw fa-trash channel-group-delete"
         @click.stop="deleteGroup"
         :aria-label="l('channel.group.delete')"
@@ -104,6 +110,17 @@
         renaming: false,
         renameValue: ''
       };
+    },
+    computed: {
+      collapsedUnreadCount(): number {
+        return this.conversations.reduce((sum, c) => sum + c.unreadCount, 0);
+      },
+      collapsedUnreadClass(): string {
+        const hasMention = this.conversations.some(
+          c => c.unread === Conversation.UnreadState.Mention
+        );
+        return hasMention ? 'text-bg-danger' : 'text-bg-warning';
+      }
     },
     mounted() {
       if (this.startEditing) {
@@ -231,6 +248,11 @@
     background: transparent;
     color: inherit;
     min-width: 0;
+  }
+  .channel-group-badge {
+    margin-right: 4px;
+    flex-shrink: 0;
+    font-size: 0.7em;
   }
   .channel-group-delete {
     opacity: 0;
