@@ -230,7 +230,6 @@
             icon-class="fas fa-fw fa-plus"
             link-style=""
             :keep-open="false"
-            :dropup="true"
           >
             <button class="dropdown-item" type="button" @click="showChannels()">
               <span class="fas fa-fw fa-hashtag"></span>

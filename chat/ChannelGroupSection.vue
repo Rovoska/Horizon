@@ -22,7 +22,7 @@
         @click.stop
       />
       <span
-        v-if="group.collapsed && collapsedUnreadCount > 0"
+        v-if="shouldShowCollapsedNotificationBadge(group)"
         class="badge rounded-pill channel-group-badge"
         :class="collapsedUnreadClass"
         >{{ collapsedUnreadCount }}</span
@@ -230,6 +230,14 @@
           core.state.generalSettings
             ?.horizonShowWindowAndChatNotificationBadge !== false &&
           conversation.unreadCount > 0
+        );
+      },
+      shouldShowCollapsedNotificationBadge(): boolean {
+        return (
+          this.group.collapsed &&
+          this.collapsedUnreadCount > 0 &&
+          core.state.generalSettings
+            ?.horizonShowWindowAndChatNotificationBadge !== false
         );
       }
     }

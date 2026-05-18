@@ -102,7 +102,7 @@
   "channel.mode.ads.countdown": "Ads ({0}m{1}s)",
   "channel.mode.both": "Both",
   "channel.mode.chat": "Chat",
-  "channel.group.add": "Add a group",
+  "channel.group.add": "Create new group",
   "channel.group.delete": "Delete group",
   "channel.group.dropHere": "Drop here",
   "channel.group.newGroup": "New Group",
