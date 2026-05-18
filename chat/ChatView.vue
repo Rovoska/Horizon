@@ -380,11 +380,18 @@
     <adCenter ref="adCenter"></adCenter>
     <settings ref="settingsDialog"></settings>
     <report-dialog ref="reportDialog"></report-dialog>
-    <user-menu ref="userMenu" :reportDialog="$refs['reportDialog']"></user-menu>
+    <user-menu
+      ref="userMenu"
+      :reportDialog="$refs['reportDialog']"
+      @open="onMenuOpen('user')"
+      @close="onMenuClose('user')"
+    ></user-menu>
     <channel-menu
       ref="channelMenu"
       @assign="onChannelAssign"
       @create-group="onChannelCreateGroup"
+      @open="onMenuOpen('channel')"
+      @close="onMenuClose('channel')"
     ></channel-menu>
     <recent-conversations ref="recentDialog"></recent-conversations>
     <image-preview ref="imagePreview"></image-preview>
@@ -444,6 +451,13 @@
     [Conversation.UnreadState.Unread]: 'list-group-item-danger'
   };
 
+  enum ContextMenuTypes {
+    User = 'user',
+    Channel = 'channel',
+    ChannelGroup = 'channelGroup',
+    Eicon = 'eicon'
+  }
+
   export default Vue.extend({
     components: {
       'user-list': UserList,
@@ -497,7 +511,8 @@
         ) => void,
         toasts: toasts,
         dismissToast: dismissToast,
-        pendingRenameGroupId: null as string | null
+        pendingRenameGroupId: null as string | null,
+        activeMenuType: 'none' as 'none' | 'user' | 'channel'
       };
     },
     computed: {
@@ -1010,7 +1025,20 @@
         (<PmPartnerAdder>this.$refs['addPmPartnerDialog']).show();
       },
 
+      onMenuOpen(menuType: 'user' | 'channel'): void {
+        this.activeMenuType = menuType;
+      },
+
+      onMenuClose(menuType: 'user' | 'channel'): void {
+        if (this.activeMenuType === menuType) {
+          this.activeMenuType = 'none';
+        }
+      },
+
       userMenuHandle(e: MouseEvent | TouchEvent): void {
+        const userMenu = this.$refs['userMenu'] as any;
+        const channelMenu = this.$refs['channelMenu'] as any;
+
         if (e.type === 'contextmenu') {
           const channelEl = (e.target as HTMLElement).closest(
             '[data-channel-id]'
@@ -1022,7 +1050,10 @@
               (c: any) => c.channel.id === channelId
             );
             if (conv) {
-              (this.$refs['channelMenu'] as any).handleEvent(
+              if (this.activeMenuType === 'user') {
+                userMenu.close();
+              }
+              channelMenu.handleEvent(
                 e,
                 conv,
                 core.conversations.channelGroups,
@@ -1032,7 +1063,15 @@
             }
           }
         }
-        (<UserMenu>this.$refs['userMenu']).handleEvent(e);
+
+        if (
+          this.activeMenuType === 'channel' &&
+          (e.type === 'contextmenu' || e.type === 'touchstart')
+        ) {
+          channelMenu.close();
+        }
+
+        userMenu.handleEvent(e);
       },
 
       onChannelAssign(channelId: string, groupId: string | null): void {
