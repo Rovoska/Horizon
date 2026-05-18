@@ -224,18 +224,26 @@
             class="btn btn-link"
             :title="l('chat.recentConversations')"
             ><span class="fas fa-fw fa-history"></span> </a
-          ><a
-            href="#"
-            @click.prevent="showChannels()"
-            class="btn btn-link"
-            :title="l('chat.channelJoin')"
-            :class="{
-              glowing:
-                conversations.channelConversations.length === 0 &&
-                channelCanGlow
-            }"
-            ><span class="fas fa-fw fa-plus"></span
-          ></a>
+          ><dropdown
+            wrap-class="dropdown"
+            link-class="btn btn-link"
+            icon-class="fas fa-fw fa-plus"
+            link-style=""
+            :keep-open="false"
+          >
+            <button class="dropdown-item" type="button" @click="showChannels()">
+              <span class="fas fa-fw fa-hashtag"></span>
+              {{ l('chat.channelJoin') }}
+            </button>
+            <button
+              class="dropdown-item"
+              type="button"
+              @click="addChannelGroup()"
+            >
+              <span class="fas fa-fw fa-folder-plus"></span>
+              {{ l('channel.group.add') }}
+            </button>
+          </dropdown>
         </div>
 
         <channel-group-section
@@ -414,6 +422,7 @@
   import Vue from 'vue';
   import { Keys } from '../keys';
   import ChannelList from './ChannelList.vue';
+  import Dropdown from '../components/Dropdown.vue';
   import CharacterSearch from './CharacterSearch.vue';
   import { characterImage, getKey, profileLink } from './common';
   import ConversationView from './ConversationView.vue';
@@ -479,7 +488,8 @@
       'quick-jump': QuickJump,
       toast: Toast,
       'channel-group-section': ChannelGroupSection,
-      'channel-menu': ChannelMenu
+      'channel-menu': ChannelMenu,
+      dropdown: Dropdown
     },
     data() {
       return {
@@ -1076,6 +1086,13 @@
 
       onChannelAssign(channelId: string, groupId: string | null): void {
         core.conversations.setChannelGroup(channelId, groupId);
+      },
+
+      addChannelGroup(): void {
+        const id = core.conversations.createChannelGroup(
+          l('channel.group.newGroup')
+        );
+        this.pendingRenameGroupId = id;
       },
 
       onChannelCreateGroup(channelId: string): void {

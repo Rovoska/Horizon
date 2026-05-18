@@ -22,10 +22,38 @@
         @click.stop
       />
       <span
+        v-if="shouldShowCollapsedNotificationBadge(group)"
+        class="badge rounded-pill channel-group-badge"
+        :class="collapsedUnreadClass"
+        >{{ collapsedUnreadCount }}</span
+      >
+      <span
         class="fas fa-fw fa-trash channel-group-delete"
         @click.stop="deleteGroup"
         :aria-label="l('channel.group.delete')"
       ></span>
+    </div>
+    <div
+      v-if="group.collapsed && activeConversation"
+      class="list-group conversation-nav channel-group-list"
+    >
+      <a
+        href="#"
+        @click.prevent="activeConversation.show()"
+        :class="getClasses(activeConversation)"
+        class="list-group-item list-group-item-action item-channel"
+        :data-channel-id="activeConversation.channel.id"
+        @click.middle.prevent.stop="activeConversation.close()"
+      >
+        <span class="name">{{ activeConversation.name }}</span>
+        <span class="conversation-actions">
+          <span
+            class="fas fa-times leave"
+            @click.stop="activeConversation.close()"
+            :aria-label="l('chat.closeTab')"
+          ></span>
+        </span>
+      </a>
     </div>
     <div
       v-show="!group.collapsed"
@@ -104,6 +132,24 @@
         renaming: false,
         renameValue: ''
       };
+    },
+    computed: {
+      activeConversation(): Conversation.ChannelConversation | null {
+        return (
+          this.conversations.find(
+            c => c === core.conversations.selectedConversation
+          ) ?? null
+        );
+      },
+      collapsedUnreadCount(): number {
+        return this.conversations.reduce((sum, c) => sum + c.unreadCount, 0);
+      },
+      collapsedUnreadClass(): string {
+        const hasMention = this.conversations.some(
+          c => c.unread === Conversation.UnreadState.Mention
+        );
+        return hasMention ? 'text-bg-danger' : 'text-bg-warning';
+      }
     },
     mounted() {
       if (this.startEditing) {
@@ -185,6 +231,14 @@
             ?.horizonShowWindowAndChatNotificationBadge !== false &&
           conversation.unreadCount > 0
         );
+      },
+      shouldShowCollapsedNotificationBadge(): boolean {
+        return (
+          this.group.collapsed &&
+          this.collapsedUnreadCount > 0 &&
+          core.state.generalSettings
+            ?.horizonShowWindowAndChatNotificationBadge !== false
+        );
       }
     }
   });
@@ -231,6 +285,11 @@
     background: transparent;
     color: inherit;
     min-width: 0;
+  }
+  .channel-group-badge {
+    margin-right: 4px;
+    flex-shrink: 0;
+    font-size: 0.7em;
   }
   .channel-group-delete {
     opacity: 0;
