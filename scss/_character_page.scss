@@ -289,22 +289,26 @@
     float: left;
   }
 
+  /*
   .guestbook-contents {
     //@include well();
     &.deleted {
       //@include alert-warning();
     }
   }
+  */
 
   .guestbook-reply {
     &:before {
       content: 'Reply ';
       font-weight: bold;
     }
+    /*
     .reply-message {
       //@include well;
       //@include alert-info;
     }
+    */
   }
 }
 
