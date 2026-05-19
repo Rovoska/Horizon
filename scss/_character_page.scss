@@ -12,7 +12,6 @@
 
 .character-page-avatar-bg {
   width: 100%;
-  max-height: 30vh;
   position: relative;
   overflow: visible;
   display: flex;
@@ -29,9 +28,9 @@
     background-size: cover;
     background-position: center;
     filter: blur(30px);
-    transform: scale(1); /* Prevents white edges caused by blur */
+    transform: scale(0.7);
     z-index: 0;
-    opacity: 0.8;
+    opacity: 0.6;
     border-radius: 100%;
   }
 }
