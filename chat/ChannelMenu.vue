@@ -67,32 +67,41 @@
           g => g.id !== this.currentGroupId
         );
         if (this.groups.length || this.currentGroupId) {
-          items.push({
-            label: this.l('channel.menu.moveTo'),
-            iconClass: 'fas fa-fw fa-folder-tree',
-            disabled: otherGroups.length === 0,
-            children: otherGroups.length
-              ? otherGroups.map(group => ({
-                  label: group.name,
-                  iconClass: 'fas fa-fw fa-folder',
-                  onClick: () => this.assignToGroup(group.id)
-                }))
-              : []
-          });
+          items.push(
+            otherGroups.length
+              ? {
+                  label: this.l('channel.menu.moveTo'),
+                  iconClass: 'fas fa-fw fa-folder-tree',
+                  topBorder: true,
+                  children: [
+                    {
+                      label: `${this.l('channel.group.newGroup')}...`,
+                      iconClass: 'fas fa-fw fa-plus',
+                      onClick: () => this.createGroup()
+                    },
+                    ...(otherGroups.length
+                      ? otherGroups.map(group => ({
+                          label: group.name,
+                          iconClass: 'fas fa-fw fa-folder',
+                          onClick: () => this.assignToGroup(group.id),
+                          topBorder: otherGroups.indexOf(group) === 0
+                        }))
+                      : [])
+                  ]
+                }
+              : {
+                  label: this.l('channel.menu.moveTo.new'),
+                  iconClass: 'fas fa-fw fa-folder-tree',
+                  onClick: () => this.createGroup()
+                }
+          );
 
-          if (!this.currentGroupId) {
-            items.push({
-              label: this.l('channel.menu.addToNewGroup'),
-              iconClass: 'fas fa-fw fa-folder-plus',
-              topBorder: otherGroups.length === 0,
-              onClick: () => this.createGroup()
-            });
-          } else {
+          if (this.currentGroupId) {
             items.push({
               label: this.l('channel.menu.removeFromGroup'),
               iconClass: 'fas fa-fw fa-folder-minus',
-              topBorder: otherGroups.length === 0,
-              onClick: () => this.assignToGroup(null)
+              onClick: () => this.assignToGroup(null),
+              topBorder: true
             });
           }
         } else {

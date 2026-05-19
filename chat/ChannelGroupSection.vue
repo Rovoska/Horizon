@@ -22,7 +22,7 @@
         @click.stop
       />
       <span
-        v-if="shouldShowCollapsedNotificationBadge(group)"
+        v-if="shouldShowCollapsedNotificationBadge()"
         class="badge rounded-pill channel-group-badge"
         :class="collapsedUnreadClass"
         >{{ collapsedUnreadCount }}</span

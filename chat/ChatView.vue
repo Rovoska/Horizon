@@ -1089,16 +1089,32 @@
       },
 
       addChannelGroup(): void {
-        const id = core.conversations.createChannelGroup(
-          l('channel.group.newGroup')
-        );
+        const id = core.conversations.createChannelGroup(this.newGroupName());
         this.pendingRenameGroupId = id;
       },
 
       onChannelCreateGroup(channelId: string): void {
-        const id = core.conversations.createChannelGroup('New Group');
+        const id = core.conversations.createChannelGroup(this.newGroupName());
         core.conversations.setChannelGroup(channelId, id);
         this.pendingRenameGroupId = id;
+      },
+
+      newGroupName(): string {
+        let newGroupNameCounter = 0;
+        while (
+          core.conversations.channelGroups.some(
+            g =>
+              (newGroupNameCounter === 0 &&
+                g.name === l('channel.group.newGroup')) ||
+              g.name ===
+                l('channel.group.newGroup.counter', newGroupNameCounter)
+          )
+        ) {
+          newGroupNameCounter++;
+        }
+        return newGroupNameCounter === 0
+          ? l('channel.group.newGroup')
+          : l('channel.group.newGroup.counter', newGroupNameCounter);
       },
 
       showQuickJump(): void {
