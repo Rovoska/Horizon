@@ -730,7 +730,21 @@ async function onReady(): Promise<void> {
               window.webContents.send('fix-logs'),
             id: 'fixLogs'
           },
-
+          ...(process.platform === 'darwin'
+            ? [
+                {
+                  label: `&${l('settings.export.manageData')}`,
+                  click: (_m, w) => {
+                    if (w)
+                      browserWindows.createExporterWindow(
+                        settings,
+                        'none',
+                        w as electron.BrowserWindow
+                      );
+                  }
+                } as MenuItemConstructorOptions
+              ]
+            : []),
           {
             label: 'Show/hide current profile',
             click: (_m: electron.MenuItem, w: electron.BrowserWindow) => {
