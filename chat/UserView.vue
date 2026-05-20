@@ -107,9 +107,9 @@
         case 'Female':
           return 'fa-fw fa-venus';
         case 'Shemale':
-          return 'fa-fw fa-mars-and-venus';
-        case 'Herm':
           return 'fa-fw fa-mercury';
+        case 'Herm':
+          return 'fa-fw fa-mars-and-venus';
         case 'Male-Herm':
           return 'fa-fw fa-mars-stroke-v';
         case 'Cunt-boy':
