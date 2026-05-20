@@ -614,6 +614,7 @@ class ChannelConversation
   }
 
   close(): void {
+    state.setChannelGroup(this.channel.id, null);
     core.connection.send('LCH', { channel: this.channel.id });
     clearInterval(this.cacheInterval);
     state.removeFromNavigationHistory(this);
@@ -863,11 +864,23 @@ class State implements Interfaces.State {
     return id;
   }
 
+  private removeChannelFromGroups(channelId: string): void {
+    for (const g of this.channelGroups) {
+      const i = g.channels.indexOf(channelId);
+      if (i !== -1) {
+        g.channels.splice(i, 1);
+        return;
+      }
+    }
+  }
+
   deleteChannelGroup(id: string): void {
     const idx = this.channelGroups.findIndex(g => g.id === id);
-    if (idx !== -1) this.channelGroups.splice(idx, 1);
+    if (idx === -1) return;
+    this.channelGroups.splice(idx, 1);
     this.channelGroups.forEach((g, i) => (g.order = i));
     void this.saveChannelGroups();
+    void this.savePinned();
   }
 
   renameChannelGroup(id: string, name: string): void {
@@ -879,13 +892,7 @@ class State implements Interfaces.State {
   }
 
   setChannelGroup(channelId: string, groupId: string | null): void {
-    for (const g of this.channelGroups) {
-      const i = g.channels.indexOf(channelId);
-      if (i !== -1) {
-        g.channels.splice(i, 1);
-        break;
-      }
-    }
+    this.removeChannelFromGroups(channelId);
     if (groupId !== null) {
       const group = this.channelGroups.find(g => g.id === groupId);
       if (group) group.channels.push(channelId);
