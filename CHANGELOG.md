@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Switched the icons for 'Herm' and 'Shemale' genders around. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/bedcb5e9d84b0888a2325343d7975d7363eea415)
+
+### Changed since last pre-release
+
+<!-- To whoever will do the changelogs for the stable 2.2.0 release, everything under this header is not meant for the final changelogs. It's just to tell people who were using beta.0 what was fixed since the last release. It's not relevant for general users at all.-->
+
+Various improvements to channel groups:
+
+- Notification badges are now visible if you collapse the group while having mentions in one of its channels. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/6376ac8c449feeb8153451a4db90eb28f6fdd215)
+- The 'Join channel' + button can now be used to both join a channel and create new groups directly. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/6376ac8c449feeb8153451a4db90eb28f6fdd215)
+- You can now properly move channels to other groups from the right click menu. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/549f8776349a61251581d905eb15f4105bd001d2)
+
+### Fixed since last pre-release
+
+<!-- To whoever will do the changelogs for the stable 2.2.0 release, everything under this header is not meant for the final changelogs. It's just to tell people who were using beta.0 what was fixed since the last release. It's not relevant for general users at all.-->
+
+- Fixed avatars in the profile viewer overlapping buttons if the window was too wide (or the avatar was too tall). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9921c107854462b6270115205329968005939571)
+- Fixed not being able to see your current conversation in the conversation list if it happened to be inside of a collapsed group. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/eb1232192018a52773ee26e73cbf1b7fed7d741c)
+- Rewrote context menu logic to use a generic, extendable component. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/74aca791230656ed4422df1e05762591002f2ef3)
+  - This also fixes issues where opening the user context menu would not close the channel context menu, and vice versa.
+- Deleting a group now properly unpins and ungroups the channels inside of it, instead of making them regroup in the "Pinned" group if you reconnect. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/3feb5ffe3481bf92aadc3eb539b3f5a292029b5a)
+- Leaving a channel no longer keeps the channel inside the group it might have been in. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/45c88b3ba5489205cd260f85004d4dcb92f4b926)
+  - This should fix issues where leaving a channel without ungrouping it would make you rejoin the channel when you reconnect.
+- Fixed the new Manage Data UI not being accessible on MacOS. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/4867a304e5569322c5b73232ab338134dc171317)
+
 ## [2.2.0-beta.0] - 2026-05-16
 
 ### Added
