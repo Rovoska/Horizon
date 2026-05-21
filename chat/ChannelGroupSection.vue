@@ -169,8 +169,37 @@
         },
         onAdd: (e: Sortable.SortableEvent) => {
           const channelId = (e.item as HTMLElement).dataset?.channelId;
-          if (channelId)
-            core.conversations.setChannelGroup(channelId, this.group.id);
+          if (!channelId) return;
+          core.conversations.setChannelGroup(channelId, this.group.id);
+
+          const allConvs = core.conversations.channelConversations;
+          const draggedConv = allConvs.find(c => c.channel.id === channelId);
+          if (!draggedConv) return;
+
+          const groupConvs = allConvs.filter(
+            c =>
+              core.conversations.channelGroupAssignments[c.channel.id] ===
+              this.group.id
+          );
+          const othersInGroup = groupConvs.filter(c => c !== draggedConv);
+          if (othersInGroup.length === 0) return;
+
+          const targetNewIndex = e.newIndex ?? 0;
+          const draggedAbsIdx = allConvs.indexOf(draggedConv);
+          let targetAbsIndex: number;
+
+          if (targetNewIndex >= groupConvs.length - 1) {
+            const lastOther = othersInGroup[othersInGroup.length - 1];
+            const lastOtherAbsIdx = allConvs.indexOf(lastOther);
+            targetAbsIndex =
+              lastOtherAbsIdx - (draggedAbsIdx < lastOtherAbsIdx ? 1 : 0) + 1;
+          } else {
+            const nextInGroup = othersInGroup[targetNewIndex];
+            const nextAbsIdx = allConvs.indexOf(nextInGroup);
+            targetAbsIndex = nextAbsIdx - (draggedAbsIdx < nextAbsIdx ? 1 : 0);
+          }
+
+          void draggedConv.sort(targetAbsIndex);
         },
         onRemove: (e: Sortable.SortableEvent) => {
           const destGroupId = (e.to as HTMLElement).dataset?.groupId;

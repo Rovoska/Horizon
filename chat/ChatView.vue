@@ -762,7 +762,12 @@
       onKeyDown(e: KeyboardEvent): void {
         const selected = this.conversations.selectedConversation;
         const pms = this.conversations.privateConversations;
-        const channels = this.conversations.channelConversations;
+        const channels = [
+          ...this.sortedChannelGroups.flatMap((g: any) =>
+            this.channelsInGroup(g.id)
+          ),
+          ...this.ungroupedChannels
+        ];
         const console = this.conversations.consoleTab;
         if (getKey(e) === Keys.ArrowUp) {
           if (e.altKey && !e.shiftKey && !e.ctrlKey && !e.metaKey) {

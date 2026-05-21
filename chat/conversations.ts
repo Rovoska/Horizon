@@ -626,6 +626,8 @@ class ChannelConversation
       1
     );
     state.channelConversations.splice(newIndex, 0, this);
+    state.syncGroupChannels();
+    void state.saveChannelGroups();
     return state.savePinned();
   }
 
@@ -835,6 +837,14 @@ class State implements Interfaces.State {
     return key[0] === '#'
       ? this.channelMap[key.substr(1)]
       : this.privateMap[key];
+  }
+
+  syncGroupChannels(): void {
+    const assignments = this.channelGroupAssignments;
+    for (const group of this.channelGroups)
+      group.channels = this.channelConversations
+        .filter(c => assignments[c.channel.id] === group.id)
+        .map(c => c.channel.id);
   }
 
   async savePinned(): Promise<void> {
