@@ -246,16 +246,18 @@
           </dropdown>
         </div>
 
-        <channel-group-section
-          v-for="group in sortedChannelGroups"
-          :key="group.id"
-          :group="group"
-          :conversations="channelsInGroup(group.id)"
-          :all-groups="conversations.channelGroups"
-          :start-editing="pendingRenameGroupId === group.id"
-          @editing-started="pendingRenameGroupId = null"
-          @create-and-rename="id => (pendingRenameGroupId = id)"
-        ></channel-group-section>
+        <div ref="channelGroups">
+          <channel-group-section
+            v-for="group in sortedChannelGroups"
+            :key="group.id"
+            :group="group"
+            :conversations="channelsInGroup(group.id)"
+            :all-groups="conversations.channelGroups"
+            :start-editing="pendingRenameGroupId === group.id"
+            @editing-started="pendingRenameGroupId = null"
+            @create-and-rename="id => (pendingRenameGroupId = id)"
+          ></channel-group-section>
+        </div>
 
         <div
           class="list-group conversation-nav"
@@ -629,6 +631,21 @@
           return core.conversations.privateConversations[e.oldIndex!].sort(
             e.newIndex!
           );
+        }
+      });
+      Sortable.create(<HTMLElement>this.$refs['channelGroups'], {
+        handle: '.channel-group-header',
+        animation: 150,
+        fallbackTolerance: 5,
+        onEnd: (e: Sortable.SortableEvent) => {
+          if (e.oldIndex === e.newIndex) return;
+          const sorted = [...core.conversations.channelGroups].sort(
+            (a, b) => a.order - b.order
+          );
+          const [moved] = sorted.splice(e.oldIndex!, 1);
+          sorted.splice(e.newIndex!, 0, moved);
+          sorted.forEach((g, i) => (g.order = i));
+          void core.conversations.saveChannelGroups();
         }
       });
       Sortable.create(<HTMLElement>this.$refs['channelConversations'], {
