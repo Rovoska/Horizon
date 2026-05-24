@@ -634,6 +634,7 @@
         }
       });
       Sortable.create(<HTMLElement>this.$refs['channelGroups'], {
+        group: { name: 'groups', pull: false, put: false },
         handle: '.channel-group-header',
         animation: 150,
         fallbackTolerance: 5,
