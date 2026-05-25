@@ -246,7 +246,7 @@
           </dropdown>
         </div>
 
-        <div ref="channelGroups">
+        <div ref="channelGroups" class="border-bottom pb-2 border-opacity-50">
           <channel-group-section
             v-for="group in sortedChannelGroups"
             :key="group.id"
@@ -260,7 +260,7 @@
         </div>
 
         <div
-          class="list-group conversation-nav"
+          class="list-group conversation-nav ungrouped-channels"
           ref="channelConversations"
           :style="sortedChannelGroups.length ? 'margin-top: 6px' : ''"
         >
@@ -422,6 +422,11 @@
   import { characterImage, getKey, profileLink } from './common';
   import ConversationView from './ConversationView.vue';
   import core from './core';
+  import {
+    endChannelDragging,
+    setActiveDropZone,
+    startChannelDragging
+  } from './channelDragDropHighlight';
   import { Character, Connection, Conversation } from './interfaces';
   import l from './localize';
   import PmPartnerAdder from './PmPartnerAdder.vue';
@@ -602,14 +607,10 @@
         sort: true,
         animation: 150,
         fallbackTolerance: 5,
-        onStart: () =>
-          document
-            .getElementById('conversations')
-            ?.classList.add('channel-dragging'),
+        onStart: () => startChannelDragging(),
+        onMove: (e: any) => setActiveDropZone(e.to as HTMLElement | undefined),
         onEnd: async (e: any) => {
-          document
-            .getElementById('conversations')
-            ?.classList.remove('channel-dragging');
+          endChannelDragging();
           if (e.to !== e.from || e.oldIndex === e.newIndex) return;
           const allConvs = core.conversations.channelConversations;
           const ungrouped = allConvs.filter(
@@ -1419,18 +1420,33 @@
 
   // Drag-to-group styles
   // Show collapsed group lists as drop zones while dragging
-  #conversations.channel-dragging .channel-group-list {
-    display: block !important;
-    min-height: 28px;
+  #conversations.channel-dragging {
+    .channel-group-list,
+    .ungrouped-channels {
+      display: block !important;
+      min-height: 28px;
+      &:empty::before {
+        content: 'Drop here!';
+        display: block;
+        text-align: center;
+        font-size: 0.75rem;
+        padding: 5px 0;
+        opacity: 0.5;
+      }
+      &.ungrouped-channels:empty::before {
+        content: 'Drop here to ungroup';
+      }
+    }
+
+    .channel-group-list,
+    .ungrouped-channels {
+      &.sortable-over {
+        border: 2px dashed var(--bs-primary);
+        border-radius: 4px;
+      }
+    }
   }
-  #conversations.channel-dragging .channel-group-list:empty::before {
-    content: 'Drop here';
-    display: block;
-    text-align: center;
-    font-size: 0.75rem;
-    padding: 5px 0;
-    opacity: 0.5;
-  }
+
   // Sortable ghost/chosen states for channels
   .item-channel.sortable-ghost {
     opacity: 0.4;

@@ -100,6 +100,11 @@
   import Sortable from 'sortablejs'; // tslint:disable-line:no-require-imports
   import Vue, { PropType } from 'vue';
   import core from './core';
+  import {
+    endChannelDragging,
+    setActiveDropZone,
+    startChannelDragging
+  } from './channelDragDropHighlight';
   import { Conversation } from './interfaces';
   import l from './localize';
 
@@ -162,11 +167,8 @@
         group: { name: 'channels', pull: true, put: true },
         animation: 50,
         fallbackTolerance: 5,
-        onStart: () => {
-          document
-            .getElementById('conversations')
-            ?.classList.add('channel-dragging');
-        },
+        onStart: () => startChannelDragging(),
+        onMove: (e: any) => setActiveDropZone(e.to as HTMLElement | undefined),
         onAdd: (e: Sortable.SortableEvent) => {
           const channelId = (e.item as HTMLElement).dataset?.channelId;
           if (!channelId) return;
@@ -209,9 +211,7 @@
           }
         },
         onEnd: async (e: Sortable.SortableEvent) => {
-          document
-            .getElementById('conversations')
-            ?.classList.remove('channel-dragging');
+          endChannelDragging();
           if (e.to !== e.from || e.oldIndex === e.newIndex) return;
           const conv = this.conversations[e.oldIndex!];
           if (!conv) return;
