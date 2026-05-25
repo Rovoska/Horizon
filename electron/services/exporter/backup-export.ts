@@ -90,12 +90,17 @@ export function getSelectedExportCharacters(vm: ExporterVm): string[] {
 
 /**
  * Generates the default export file path with timestamp.
- * Filename format: `horizon-export-YYYY-MM-DDTHH-MM-SS.zip` (colons replaced with hyphens for Windows).
+ * Filename format: `horizon-export-YYYY-MM-DDTHH-MM-SS.zip` in the user's local
+ * time (colons replaced with hyphens for Windows).
  *
  * @returns Absolute path to a timestamped ZIP file in the user's Downloads folder
  */
 export function getExportDefaultPath(): string {
-  const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const timestamp =
+    `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}` +
+    `T${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
   return path.join(
     remote.app.getPath('downloads'),
     `horizon-export-${timestamp}.zip`
