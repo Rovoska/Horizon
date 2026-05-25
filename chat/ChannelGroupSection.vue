@@ -1,5 +1,5 @@
 <template>
-  <div class="channel-group">
+  <div class="channel-group" :class="{ collapsed: group.collapsed }">
     <div class="channel-group-header" @click="toggleCollapse">
       <span
         class="fas fa-fw fa-chevron-right channel-group-chevron"
@@ -78,17 +78,27 @@
             v-show="shouldShowNotificationBadge(conversation)"
             >{{ conversation.unreadCount }}</span
           >
+
           <span
             v-if="conversation.hasAutomatedAds()"
             class="fas fa-ad ads"
             :class="{ active: conversation.isSendingAutomatedAds() }"
             :aria-label="l('chat.toggleAds')"
             @click.stop="conversation.toggleAutomatedAds()"
+            role="button"
           ></span>
+          <span
+            class="fas fa-thumbtack pin active"
+            @click="unpinConversation(conversation)"
+            :aria-label="l('chat.pin.remove')"
+            role="button"
+          >
+          </span>
           <span
             class="fas fa-times leave"
             @click.stop="conversation.close()"
             :aria-label="l('chat.closeTab')"
+            role="button"
           ></span>
         </span>
       </a>
@@ -247,6 +257,9 @@
       deleteGroup() {
         core.conversations.deleteChannelGroup(this.group.id);
       },
+      unpinConversation(conversation: Conversation.ChannelConversation) {
+        core.conversations.setChannelGroup(conversation.channel.id, null);
+      },
       getClasses(conversation: Conversation.Conversation): string {
         return conversation === core.conversations.selectedConversation
           ? ' active'
@@ -274,6 +287,14 @@
 </script>
 
 <style>
+  .channel-group:only-child:not(.editing):not(.collapsed) {
+    .channel-group-header {
+      display: none;
+    }
+    .channel-group-list .list-group-item.item-channel {
+      margin-left: 0px;
+    }
+  }
   .channel-group-header {
     display: flex;
     align-items: center;
@@ -331,8 +352,5 @@
   }
   .channel-group-delete:hover {
     opacity: 1 !important;
-  }
-  .channel-group-list {
-    padding-left: 8px;
   }
 </style>

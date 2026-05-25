@@ -155,6 +155,7 @@
   "chat.logout": "Log out",
   "chat.menu": "Menu",
   "chat.pin": "Pin",
+  "chat.pin.remove": "Ungroup",
   "chat.pinTab": "Pin this tab",
   "chat.pms": "Private messages",
   "chat.pms.short": "PMs",
