@@ -1423,7 +1423,7 @@
   #conversations.channel-dragging {
     .channel-group-list,
     .ungrouped-channels {
-      display: block !important;
+      display: flex !important;
       min-height: 28px;
       &:empty::before {
         content: 'Drop here!';
@@ -1441,8 +1441,7 @@
     .channel-group-list,
     .ungrouped-channels {
       &.sortable-over {
-        border: 2px dashed var(--bs-primary);
-        border-radius: 4px;
+        --bs-border-color: var(--bs-primary);
       }
     }
   }
