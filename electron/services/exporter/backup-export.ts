@@ -309,6 +309,9 @@ export async function runExport(vm: ExporterVm): Promise<void> {
 
     const selectedCharacters = getSelectedExportCharacters(vm);
     const entries = buildExportEntries(dataDir, selectedCharacters, vm);
+    const charactersWithData = selectedCharacters.filter(char =>
+      entries.some(e => e.zip.startsWith(`characters/${char}/`))
+    );
     const total = entries.length || 1;
     vm.exportTotal = entries.length;
     vm.exportCount = 0;
@@ -328,7 +331,7 @@ export async function runExport(vm: ExporterVm): Promise<void> {
 
     // Write manifest as first entry
     const manifest = createManifest(
-      selectedCharacters,
+      charactersWithData,
       buildManifestIncludes(vm),
       entries.length,
       vm.settings?.logDirectory
