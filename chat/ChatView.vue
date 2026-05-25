@@ -246,16 +246,18 @@
           </dropdown>
         </div>
 
-        <channel-group-section
-          v-for="group in sortedChannelGroups"
-          :key="group.id"
-          :group="group"
-          :conversations="channelsInGroup(group.id)"
-          :all-groups="conversations.channelGroups"
-          :start-editing="pendingRenameGroupId === group.id"
-          @editing-started="pendingRenameGroupId = null"
-          @create-and-rename="id => (pendingRenameGroupId = id)"
-        ></channel-group-section>
+        <div ref="channelGroups">
+          <channel-group-section
+            v-for="group in sortedChannelGroups"
+            :key="group.id"
+            :group="group"
+            :conversations="channelsInGroup(group.id)"
+            :all-groups="conversations.channelGroups"
+            :start-editing="pendingRenameGroupId === group.id"
+            @editing-started="pendingRenameGroupId = null"
+            @create-and-rename="id => (pendingRenameGroupId = id)"
+          ></channel-group-section>
+        </div>
 
         <div
           class="list-group conversation-nav"
@@ -579,6 +581,22 @@
           );
         }
       });
+      Sortable.create(<HTMLElement>this.$refs['channelGroups'], {
+        group: { name: 'groups', pull: false, put: false },
+        handle: '.channel-group-header',
+        animation: 150,
+        fallbackTolerance: 5,
+        onEnd: (e: Sortable.SortableEvent) => {
+          if (e.oldIndex === e.newIndex) return;
+          const sorted = [...core.conversations.channelGroups].sort(
+            (a, b) => a.order - b.order
+          );
+          const [moved] = sorted.splice(e.oldIndex!, 1);
+          sorted.splice(e.newIndex!, 0, moved);
+          sorted.forEach((g, i) => (g.order = i));
+          void core.conversations.saveChannelGroups();
+        }
+      });
       Sortable.create(<HTMLElement>this.$refs['channelConversations'], {
         group: { name: 'channels', pull: true, put: true },
         sort: true,
@@ -706,7 +724,12 @@
       onKeyDown(e: KeyboardEvent): void {
         const selected = this.conversations.selectedConversation;
         const pms = this.conversations.privateConversations;
-        const channels = this.conversations.channelConversations;
+        const channels = [
+          ...this.sortedChannelGroups.flatMap((g: any) =>
+            this.channelsInGroup(g.id)
+          ),
+          ...this.ungroupedChannels
+        ];
         const console = this.conversations.consoleTab;
         if (getKey(e) === Keys.ArrowUp) {
           if (e.altKey && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
