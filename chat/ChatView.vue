@@ -405,6 +405,7 @@
     ></channel-menu>
     <channel-group-menu
       ref="channelGroupMenu"
+      @rename="onChannelGroupRename"
       @open="onMenuOpen(ContextMenuTypes.ChannelGroup)"
       @close="onMenuClose(ContextMenuTypes.ChannelGroup)"
     ></channel-group-menu>
@@ -451,6 +452,7 @@
   import AdCenterDialog from './ads/AdCenter.vue';
   import AdLauncherDialog from './ads/AdLauncher.vue';
   import ChannelGroupSection from './ChannelGroupSection.vue';
+  import ChannelGroupMenu from './ChannelGroupMenu.vue';
   import ChannelMenu from './ChannelMenu.vue';
   import CustomDialog from '../components/custom_dialog';
   import Modal from '../components/Modal.vue';
@@ -490,6 +492,7 @@
       modal: Modal,
       'quick-jump': QuickJump,
       'channel-group-section': ChannelGroupSection,
+      'channel-group-menu': ChannelGroupMenu,
       'channel-menu': ChannelMenu,
       dropdown: Dropdown
     },
@@ -1020,12 +1023,23 @@
         }
       },
 
-      userMenuHandle(e: MouseEvent | TouchEvent): void {
+      closeAllMenus(): void {
         //i wanna rework this instancetype nonsense in a proper file that exposes types so we don't have to do this dumb casting bullshit anymore
         //but it's out of scope for what i want to do now, so I'll do it when I want to clean up things again
+        (this.$refs.userMenu as InstanceType<typeof UserMenu>).close();
+        (this.$refs.channelMenu as InstanceType<typeof ChannelMenu>).close();
+        (
+          this.$refs.channelGroupMenu as InstanceType<typeof ChannelGroupMenu>
+        ).close();
+      },
+
+      userMenuHandle(e: MouseEvent | TouchEvent): void {
         const userMenu = this.$refs.userMenu as InstanceType<typeof UserMenu>;
         const channelMenu = this.$refs.channelMenu as InstanceType<
           typeof ChannelMenu
+        >;
+        const channelGroupMenu = this.$refs.channelGroupMenu as InstanceType<
+          typeof ChannelGroupMenu
         >;
 
         if (e.type === 'contextmenu') {
@@ -1039,9 +1053,7 @@
               (c: any) => c.channel.id === channelId
             );
             if (conv) {
-              if (this.activeMenuType === ContextMenuTypes.User && userMenu) {
-                userMenu.close();
-              }
+              this.closeAllMenus();
               channelMenu.handleEvent(
                 e,
                 conv,
@@ -1051,16 +1063,38 @@
               return;
             }
           }
+
+          const groupHeaderEl = (e.target as HTMLElement).closest(
+            '[data-group-id]'
+          );
+          if (groupHeaderEl) {
+            e.preventDefault();
+            const groupId = (groupHeaderEl as HTMLElement).dataset.groupId!;
+            const group = core.conversations.channelGroups.find(
+              g => g.id === groupId
+            );
+            if (group) {
+              this.closeAllMenus();
+              channelGroupMenu.handleEvent(
+                e as MouseEvent,
+                group,
+                core.conversations.channelGroups
+              );
+              return;
+            }
+          }
         }
 
-        if (
-          this.activeMenuType === ContextMenuTypes.Channel &&
-          (e.type === 'contextmenu' || e.type === 'touchstart')
-        ) {
+        if (e.type === 'contextmenu' || e.type === 'touchstart') {
           channelMenu.close();
+          channelGroupMenu.close();
         }
 
         userMenu.handleEvent(e);
+      },
+
+      onChannelGroupRename(groupId: string): void {
+        this.pendingRenameGroupId = groupId;
       },
 
       onChannelAssign(channelId: string, groupId: string | null): void {

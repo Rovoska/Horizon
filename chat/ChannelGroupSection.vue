@@ -1,6 +1,10 @@
 <template>
   <div class="channel-group">
-    <div class="channel-group-header" @click="toggleCollapse">
+    <div
+      class="channel-group-header"
+      :data-group-id="group.id"
+      @click="toggleCollapse"
+    >
       <span
         class="fas fa-fw fa-chevron-right channel-group-chevron"
         :class="{ expanded: !group.collapsed }"
@@ -154,6 +158,16 @@
           c => c.unread === Conversation.UnreadState.Mention
         );
         return hasMention ? 'text-bg-danger' : 'text-bg-warning';
+      }
+    },
+    watch: {
+      startEditing(val: boolean) {
+        if (val) {
+          this.$nextTick(() => {
+            this.startRename();
+            this.$emit('editing-started');
+          });
+        }
       }
     },
     mounted() {

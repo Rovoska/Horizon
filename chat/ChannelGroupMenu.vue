@@ -1,5 +1,10 @@
 <template>
-  <div ref="menu">
+  <div
+    v-if="showMenu"
+    :style="position"
+    style="position: fixed; z-index: 1100"
+    ref="menu"
+  >
     <custom-context-menu
       id="channelGroupMenu"
       :menu-items="channelMenuItems"
@@ -21,6 +26,7 @@
   } from '../components/CustomContextMenu.vue';
   import l from './localize';
   import { Dialog } from '../helpers/dialog';
+  import core from './core';
 
   export default Vue.extend({
     name: 'ChannelGroupMenu',
@@ -39,9 +45,15 @@
     },
     computed: {
       channelMenuItems(): ContextMenuItemProps[] {
+        const sorted = [...this.groups].sort((a, b) => a.order - b.order);
+        const currentIdx = sorted.findIndex(g => g.id === this.currentGroupId);
+        const otherGroups = this.groups.filter(
+          g => g.id !== this.currentGroupId
+        );
+
         const items: ContextMenuItemProps[] = [
           {
-            label: l('channelGroup.menu.markRead'),
+            label: l('channel.group.menu.markRead'),
             iconClass: 'fas fa-fw fa-check-double',
             onClick: () => {
               this.markAsRead();
@@ -55,46 +67,44 @@
             }
           },
           {
-            label: l('channelGroup.menu.moveUp'),
+            label: l('channel.group.menu.moveUp'),
             iconClass: 'fas fa-fw fa-arrow-up',
-            disabled: this.groups.length <= 1,
+            disabled: currentIdx <= 0,
             onClick: () => {
-              //tbd
+              this.moveUp();
             }
           },
           {
-            label: l('channelGroup.menu.moveDown'),
+            label: l('channel.group.menu.moveDown'),
             iconClass: 'fas fa-fw fa-arrow-down',
-            disabled: this.groups.length <= 1,
+            disabled: currentIdx < 0 || currentIdx >= sorted.length - 1,
             onClick: () => {
-              //tbd
+              this.moveDown();
             }
           },
-          ...(this.groups.length > 1
+          ...(otherGroups.length > 1
             ? [
                 {
-                  label: l('channelGroup.menu.merge'),
+                  label: l('channel.group.menu.merge'),
                   iconClass: 'fas fa-fw fa-compress',
-                  children: this.groups
-                    .filter(g => g.id !== this.currentGroupId)
-                    .map(g => ({
-                      label: g.name,
-                      onClick: () => {
-                        this.mergeGroup(g.id);
-                      }
-                    }))
+                  children: otherGroups.map(g => ({
+                    label: g.name,
+                    onClick: () => {
+                      this.mergeGroup(g.id);
+                    }
+                  }))
                 }
               ]
-            : this.groups.length === 1
+            : otherGroups.length === 1
               ? [
                   {
                     label: l(
-                      'channelGroup.menu.merge.single',
-                      this.channelGroup?.name || ''
+                      'channel.group.menu.merge.single',
+                      otherGroups[0].name
                     ),
                     iconClass: 'fas fa-fw fa-compress',
                     onClick: () => {
-                      this.mergeGroup(this.groups[0].id);
+                      this.mergeGroup(otherGroups[0].id);
                     }
                   }
                 ]
@@ -107,12 +117,13 @@
               if (
                 Dialog.confirmDialog(
                   l(
-                    'channelGroup.menu.delete.confirm',
+                    'channel.group.delete.confirm',
                     this.channelGroup?.name || ''
                   )
                 )
               ) {
-                // Implementation here
+                core.conversations.deleteChannelGroup(this.channelGroup!.id);
+                this.close();
               }
             }
           }
@@ -121,15 +132,94 @@
       }
     },
     methods: {
-      markAsRead() {
-        //tbd
+      handleEvent(
+        e: MouseEvent,
+        group: Conversation.ChannelGroup,
+        groups: Conversation.ChannelGroup[]
+      ): void {
+        this.channelGroup = group;
+        this.currentGroupId = group.id;
+        this.groups = groups;
+        this.position = {
+          left: `${e.clientX}px`,
+          top: `${e.clientY}px`
+        };
+        this.showMenu = true;
+        this.$emit('open');
+        this.$nextTick(() => {
+          const menu = this.$refs['menu'] as HTMLElement | undefined;
+          if (!menu) return;
+          if (
+            parseInt(this.position.left, 10) + menu.offsetWidth >
+            window.innerWidth
+          )
+            this.position.left = `${window.innerWidth - menu.offsetWidth - 1}px`;
+          if (
+            parseInt(this.position.top, 10) + menu.offsetHeight >
+            window.innerHeight
+          )
+            this.position.top = `${window.innerHeight - menu.offsetHeight - 1}px`;
+        });
+        document.addEventListener('click', this.close, { once: true });
       },
-      renameGroup() {
-        //tbd
+      close(): void {
+        if (!this.showMenu) return;
+        this.showMenu = false;
+        this.$emit('close');
       },
-      mergeGroup(_groupId: string) {
-        //tbd
+      markAsRead(): void {
+        if (!this.channelGroup) return;
+        const channels = this.channelGroup.channels;
+        core.conversations.channelConversations
+          .filter(c => channels.includes(c.channel.id))
+          .forEach(c => c.markRead());
+        this.close();
+      },
+      renameGroup(): void {
+        this.$emit('rename', this.currentGroupId);
+        this.close();
+      },
+      mergeGroup(targetGroupId: string): void {
+        if (!this.channelGroup) return;
+        const channels = [...this.channelGroup.channels];
+        for (const channelId of channels) {
+          core.conversations.setChannelGroup(channelId, targetGroupId);
+        }
+        core.conversations.deleteChannelGroup(this.channelGroup.id);
+        this.close();
+      },
+      moveUp(): void {
+        if (!this.channelGroup) return;
+        const sorted = [...this.groups].sort((a, b) => a.order - b.order);
+        const idx = sorted.findIndex(g => g.id === this.channelGroup!.id);
+        if (idx <= 0) return;
+        const prev = sorted[idx - 1];
+        const tmp = prev.order;
+        prev.order = this.channelGroup.order;
+        this.channelGroup.order = tmp;
+        void core.conversations.saveChannelGroups();
+        this.close();
+      },
+      moveDown(): void {
+        if (!this.channelGroup) return;
+        const sorted = [...this.groups].sort((a, b) => a.order - b.order);
+        const idx = sorted.findIndex(g => g.id === this.channelGroup!.id);
+        if (idx < 0 || idx >= sorted.length - 1) return;
+        const next = sorted[idx + 1];
+        const tmp = next.order;
+        next.order = this.channelGroup.order;
+        this.channelGroup.order = tmp;
+        void core.conversations.saveChannelGroups();
+        this.close();
       }
     }
   });
 </script>
+
+<style lang="scss">
+  #channelGroupMenu-header {
+    padding: 7px 10px 5px 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+</style>

@@ -110,6 +110,8 @@
   "channel.group.menu.markRead": "Mark all as read",
   "channel.group.menu.merge": "Merge with...",
   "channel.group.menu.merge.single": "Merge with {0}",
+  "channel.group.menu.moveDown": "Move down",
+  "channel.group.menu.moveUp": "Move up",
   "channel.group.newGroup": "New Group",
   "channel.group.newGroup.counter": "New Group ({0})",
   "channel.menu.addToNewGroup": "Add to new group",
