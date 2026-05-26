@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed since last pre-release
+
+<!-- To whoever will do the changelogs for the stable 2.2.0 release, everything under this header is not meant for the final changelogs. It's just to tell people who were using beta.1 what was fixed since the last release. It's not relevant for general users at all.-->
+
+- You can now click-drag channel groups around to sort them as well, instead of just individual channels. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/21e512db7fc4ffb6bc27163533fb29ce21c75217)
+- You can now right-click a channel group to rename, move, and delete it. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ecfb06a08f6598b27827b215e96b1776cc24659a)
+
+### Fixed since last pre-release
+
+<!-- To whoever will do the changelogs for the stable 2.2.0 release, everything under this header is not meant for the final changelogs. It's just to tell people who were using beta.1 what was fixed since the last release. It's not relevant for general users at all.-->
+
+- Dropping channels inside of a group will now put them in the position where they were dropped, rather than at the end of the group. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/625276995a0309a660c3ac61a09fcb8f52055ae6)
+  - This also fixes issues where reordering channels into new groups would mess up the navigation order with keyboard shortcuts.
+- Fixed the automatic backup toast not being visible in cases where you have it backup your logs when you first connect. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/b7799285b95069d8c4270a866604fdb40df0c34e)
+- Fixed data export filenames using UTC time instead of your own timezone. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/1cb281f7df07c43b45e8fd7b48a0a335e1141b61)
+- Fixed cases where exporting data would fail if you tried to export an "empty" character directory. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/4450373daaf292668a34951bf722167867899a5d)
+
+### Merged Pull Requests
+
+- https://github.com/Fchat-Horizon/Horizon/pull/785 by @Kannamoris
+- https://github.com/Fchat-Horizon/Horizon/pull/790 by @Kannamoris and @FatCatClient
+- Non-PR'd changes by @CodingWithAnxiety and @FatCatClient
+
 ## [2.2.0-beta.1] - 2026-05-20
 
 ### Changed
