@@ -393,16 +393,22 @@
     <user-menu
       ref="userMenu"
       :reportDialog="$refs['reportDialog']"
-      @open="onMenuOpen('user')"
-      @close="onMenuClose('user')"
+      @open="onMenuOpen(ContextMenuTypes.User)"
+      @close="onMenuClose(ContextMenuTypes.User)"
     ></user-menu>
     <channel-menu
       ref="channelMenu"
       @assign="onChannelAssign"
       @create-group="onChannelCreateGroup"
-      @open="onMenuOpen('channel')"
-      @close="onMenuClose('channel')"
+      @open="onMenuOpen(ContextMenuTypes.Channel)"
+      @close="onMenuClose(ContextMenuTypes.Channel)"
     ></channel-menu>
+    <channel-group-menu
+      ref="channelGroupMenu"
+      @rename="onChannelGroupRename"
+      @open="onMenuOpen(ContextMenuTypes.ChannelGroup)"
+      @close="onMenuClose(ContextMenuTypes.ChannelGroup)"
+    ></channel-group-menu>
     <recent-conversations ref="recentDialog"></recent-conversations>
     <image-preview ref="imagePreview"></image-preview>
     <add-pm-partner ref="addPmPartnerDialog"></add-pm-partner>
@@ -446,6 +452,7 @@
   import AdCenterDialog from './ads/AdCenter.vue';
   import AdLauncherDialog from './ads/AdLauncher.vue';
   import ChannelGroupSection from './ChannelGroupSection.vue';
+  import ChannelGroupMenu from './ChannelGroupMenu.vue';
   import ChannelMenu from './ChannelMenu.vue';
   import CustomDialog from '../components/custom_dialog';
   import Modal from '../components/Modal.vue';
@@ -461,7 +468,8 @@
     User = 'user',
     Channel = 'channel',
     ChannelGroup = 'channelGroup',
-    Eicon = 'eicon'
+    Eicon = 'eicon',
+    None = 'none'
   }
 
   export default Vue.extend({
@@ -484,6 +492,7 @@
       modal: Modal,
       'quick-jump': QuickJump,
       'channel-group-section': ChannelGroupSection,
+      'channel-group-menu': ChannelGroupMenu,
       'channel-menu': ChannelMenu,
       dropdown: Dropdown
     },
@@ -511,7 +520,8 @@
         ) => boolean,
         mouseButtonListener: undefined as any as (e: MouseEvent) => void,
         pendingRenameGroupId: null as string | null,
-        activeMenuType: 'none' as 'none' | 'user' | 'channel'
+        activeMenuType: 'none' as ContextMenuTypes,
+        ContextMenuTypes: ContextMenuTypes
       };
     },
     computed: {
@@ -1003,19 +1013,34 @@
         (<PmPartnerAdder>this.$refs['addPmPartnerDialog']).show();
       },
 
-      onMenuOpen(menuType: 'user' | 'channel'): void {
+      onMenuOpen(menuType: ContextMenuTypes): void {
         this.activeMenuType = menuType;
       },
 
-      onMenuClose(menuType: 'user' | 'channel'): void {
+      onMenuClose(menuType: ContextMenuTypes): void {
         if (this.activeMenuType === menuType) {
-          this.activeMenuType = 'none';
+          this.activeMenuType = ContextMenuTypes.None;
         }
       },
 
+      closeAllMenus(): void {
+        //i wanna rework this instancetype nonsense in a proper file that exposes types so we don't have to do this dumb casting bullshit anymore
+        //but it's out of scope for what i want to do now, so I'll do it when I want to clean up things again
+        (this.$refs.userMenu as InstanceType<typeof UserMenu>).close();
+        (this.$refs.channelMenu as InstanceType<typeof ChannelMenu>).close();
+        (
+          this.$refs.channelGroupMenu as InstanceType<typeof ChannelGroupMenu>
+        ).close();
+      },
+
       userMenuHandle(e: MouseEvent | TouchEvent): void {
-        const userMenu = this.$refs['userMenu'] as any;
-        const channelMenu = this.$refs['channelMenu'] as any;
+        const userMenu = this.$refs.userMenu as InstanceType<typeof UserMenu>;
+        const channelMenu = this.$refs.channelMenu as InstanceType<
+          typeof ChannelMenu
+        >;
+        const channelGroupMenu = this.$refs.channelGroupMenu as InstanceType<
+          typeof ChannelGroupMenu
+        >;
 
         if (e.type === 'contextmenu') {
           const channelEl = (e.target as HTMLElement).closest(
@@ -1028,9 +1053,7 @@
               (c: any) => c.channel.id === channelId
             );
             if (conv) {
-              if (this.activeMenuType === 'user') {
-                userMenu.close();
-              }
+              this.closeAllMenus();
               channelMenu.handleEvent(
                 e,
                 conv,
@@ -1040,16 +1063,38 @@
               return;
             }
           }
+
+          const groupHeaderEl = (e.target as HTMLElement).closest(
+            '[data-group-id]'
+          );
+          if (groupHeaderEl) {
+            e.preventDefault();
+            const groupId = (groupHeaderEl as HTMLElement).dataset.groupId!;
+            const group = core.conversations.channelGroups.find(
+              g => g.id === groupId
+            );
+            if (group) {
+              this.closeAllMenus();
+              channelGroupMenu.handleEvent(
+                e as MouseEvent,
+                group,
+                core.conversations.channelGroups
+              );
+              return;
+            }
+          }
         }
 
-        if (
-          this.activeMenuType === 'channel' &&
-          (e.type === 'contextmenu' || e.type === 'touchstart')
-        ) {
+        if (e.type === 'contextmenu' || e.type === 'touchstart') {
           channelMenu.close();
+          channelGroupMenu.close();
         }
 
         userMenu.handleEvent(e);
+      },
+
+      onChannelGroupRename(groupId: string): void {
+        this.pendingRenameGroupId = groupId;
       },
 
       onChannelAssign(channelId: string, groupId: string | null): void {
