@@ -393,16 +393,21 @@
     <user-menu
       ref="userMenu"
       :reportDialog="$refs['reportDialog']"
-      @open="onMenuOpen('user')"
-      @close="onMenuClose('user')"
+      @open="onMenuOpen(ContextMenuTypes.User)"
+      @close="onMenuClose(ContextMenuTypes.User)"
     ></user-menu>
     <channel-menu
       ref="channelMenu"
       @assign="onChannelAssign"
       @create-group="onChannelCreateGroup"
-      @open="onMenuOpen('channel')"
-      @close="onMenuClose('channel')"
+      @open="onMenuOpen(ContextMenuTypes.Channel)"
+      @close="onMenuClose(ContextMenuTypes.Channel)"
     ></channel-menu>
+    <channel-group-menu
+      ref="channelGroupMenu"
+      @open="onMenuOpen(ContextMenuTypes.ChannelGroup)"
+      @close="onMenuClose(ContextMenuTypes.ChannelGroup)"
+    ></channel-group-menu>
     <recent-conversations ref="recentDialog"></recent-conversations>
     <image-preview ref="imagePreview"></image-preview>
     <add-pm-partner ref="addPmPartnerDialog"></add-pm-partner>
@@ -461,7 +466,8 @@
     User = 'user',
     Channel = 'channel',
     ChannelGroup = 'channelGroup',
-    Eicon = 'eicon'
+    Eicon = 'eicon',
+    None = 'none'
   }
 
   export default Vue.extend({
@@ -511,7 +517,8 @@
         ) => boolean,
         mouseButtonListener: undefined as any as (e: MouseEvent) => void,
         pendingRenameGroupId: null as string | null,
-        activeMenuType: 'none' as 'none' | 'user' | 'channel'
+        activeMenuType: 'none' as ContextMenuTypes,
+        ContextMenuTypes: ContextMenuTypes
       };
     },
     computed: {
@@ -1003,19 +1010,23 @@
         (<PmPartnerAdder>this.$refs['addPmPartnerDialog']).show();
       },
 
-      onMenuOpen(menuType: 'user' | 'channel'): void {
+      onMenuOpen(menuType: ContextMenuTypes): void {
         this.activeMenuType = menuType;
       },
 
-      onMenuClose(menuType: 'user' | 'channel'): void {
+      onMenuClose(menuType: ContextMenuTypes): void {
         if (this.activeMenuType === menuType) {
-          this.activeMenuType = 'none';
+          this.activeMenuType = ContextMenuTypes.None;
         }
       },
 
       userMenuHandle(e: MouseEvent | TouchEvent): void {
-        const userMenu = this.$refs['userMenu'] as any;
-        const channelMenu = this.$refs['channelMenu'] as any;
+        //i wanna rework this instancetype nonsense in a proper file that exposes types so we don't have to do this dumb casting bullshit anymore
+        //but it's out of scope for what i want to do now, so I'll do it when I want to clean up things again
+        const userMenu = this.$refs.userMenu as InstanceType<typeof UserMenu>;
+        const channelMenu = this.$refs.channelMenu as InstanceType<
+          typeof ChannelMenu
+        >;
 
         if (e.type === 'contextmenu') {
           const channelEl = (e.target as HTMLElement).closest(
@@ -1028,7 +1039,7 @@
               (c: any) => c.channel.id === channelId
             );
             if (conv) {
-              if (this.activeMenuType === 'user') {
+              if (this.activeMenuType === ContextMenuTypes.User && userMenu) {
                 userMenu.close();
               }
               channelMenu.handleEvent(
@@ -1043,7 +1054,7 @@
         }
 
         if (
-          this.activeMenuType === 'channel' &&
+          this.activeMenuType === ContextMenuTypes.Channel &&
           (e.type === 'contextmenu' || e.type === 'touchstart')
         ) {
           channelMenu.close();
