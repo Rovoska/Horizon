@@ -53,7 +53,6 @@
   "admgr.confirmRemoveAd": "Biztos vagy benne hogy eltávolítod ezt a hirdetést?",
   "admgr.copyChannelAds": "Csatorna hirdetéseinek másolása a hirdetésszerkesztőbe",
   "admgr.delay": "Minimum késleltetés posztok között",
-  "admgr.disable": "Kikapcsolás",
   "admgr.editChannelAds": "Csatorna hirdetések szerkesztése…",
   "admgr.editor": "Hirdetésszerkesztő",
   "admgr.expiresIn": ", automatikus posztolás lejár {0}p {1}mp múlva",
