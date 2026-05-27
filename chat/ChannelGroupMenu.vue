@@ -67,7 +67,7 @@
             }
           },
           {
-            label: l('channel.group.menu.moveUp'),
+            label: l('action.move.up'),
             iconClass: 'fas fa-fw fa-arrow-up',
             disabled: currentIdx <= 0,
             onClick: () => {
@@ -75,7 +75,7 @@
             }
           },
           {
-            label: l('channel.group.menu.moveDown'),
+            label: l('action.move.down'),
             iconClass: 'fas fa-fw fa-arrow-down',
             disabled: currentIdx < 0 || currentIdx >= sorted.length - 1,
             onClick: () => {
