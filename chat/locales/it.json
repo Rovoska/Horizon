@@ -10,6 +10,7 @@
   "action.copyWithoutBBCode": "Copia senza BBCode",
   "action.cut": "Taglia",
   "action.delete": "Elimina",
+  "action.disable": "Disattiva",
   "action.dismiss": "Scarta",
   "action.edit": "Modifica",
   "action.eicon.copy": "Copia nome Eicon",
