@@ -34,7 +34,7 @@
           id="userMenuStatus"
           :text="character.statusText"
           v-show="character.statusText"
-          class="list-group-item"
+          class="list-group-item bbcode"
           style="max-height: 200px; overflow: auto; clear: both"
         ></bbcode>
 
@@ -344,8 +344,15 @@
       },
       close(): void {
         if (!this.showContextMenu) return;
+        document.removeEventListener('click', this.closeOnOutsideClick);
         this.showContextMenu = false;
         this.$emit('close');
+      },
+      closeOnOutsideClick(e: MouseEvent): void {
+        const menu = this.getMenuElement();
+        if (menu && menu.contains(e.target as Node)) return;
+        document.removeEventListener('click', this.closeOnOutsideClick);
+        this.close();
       },
       openConversation(jump: boolean): void {
         const conversation = core.conversations.getPrivate(this.character!);
@@ -583,7 +590,8 @@
             this.position.top = `${window.innerHeight - menu.offsetHeight - 1}px`;
         });
 
-        document.addEventListener('click', this.close, { once: true });
+        document.removeEventListener('click', this.closeOnOutsideClick);
+        document.addEventListener('click', this.closeOnOutsideClick);
       }
     }
   });
