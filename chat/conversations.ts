@@ -614,7 +614,6 @@ class ChannelConversation
   }
 
   close(): void {
-    state.setChannelGroup(this.channel.id, null);
     core.connection.send('LCH', { channel: this.channel.id });
     clearInterval(this.cacheInterval);
     state.removeFromNavigationHistory(this);
