@@ -1,10 +1,10 @@
 <template>
-  <div
-    class="channel-group-header"
-    :data-group-id="group.id"
-    @click="toggleCollapse"
-  >
-    <div class="channel-group" :class="{ collapsed: group.collapsed }">
+  <div class="channel-group" :class="{ collapsed: group.collapsed }">
+    <div
+      class="channel-group-header"
+      :data-group-id="group.id"
+      @click="toggleCollapse"
+    >
       <span
         class="fas fa-fw fa-chevron-right channel-group-chevron"
         :class="{ expanded: !group.collapsed }"
