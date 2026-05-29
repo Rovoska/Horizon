@@ -1027,6 +1027,9 @@ class State implements Interfaces.State {
         channels: ungroupedPinned
       });
       await this.saveChannelGroups();
+      this.consoleTab.addMessage(
+        new EventMessage(l('channel.group.noticePinned'))
+      );
     }
     this.pinned.channels = this.channelGroups.flatMap(g => g.channels);
     //tslint:enable
