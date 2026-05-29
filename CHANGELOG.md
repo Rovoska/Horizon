@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- MacOS builds are now code-signed and notarized. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/30b273bbaec3c8db43775fb1d11d69f3acac8fcc)
+  - Special thanks to the F-List team for sponsoring us, and extra thanks to Dari for helping us out with the process.
+
+### Changed since last pre-release
+
+<!-- To whoever will do the changelogs for the stable 2.2.0 release, everything under this header is not meant for the final changelogs. It's just to tell people who were using beta.2 what was fixed since the last release. It's not relevant for general users at all.-->
+
+- The 'pin channel' button is back, and if you only have one group it visibly merges into the normal channel list. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/2c2e508a7dc9c7ef12a1a59486e72e3249206cbf)
+  - This was polled on Discord and won out by a pretty considerable margin, but since that was for the test release we might repoll it with the general audience later on.
+- Importing 'pins' into the new group system now shows you a message about what's new. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/412ef877702f3551806fd239090ead743cfb8fd1)
+- Grouped all 'Remove from group' and 'Move to X' menu items for a channel into the same submenu. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/8391a1f2d21d6f7eba309a0bac16d50790a64f42)
+
+### Fixed since last pre-release
+
+<!-- To whoever will do the changelogs for the stable 2.2.0 release, everything under this header is not meant for the final changelogs. It's just to tell people who were using beta.2 what was fixed since the last release. It's not relevant for general users at all.-->
+
+- Fixed the user right-click menu closing when clicking inside the status area. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/dcdd0121e3cd3cbec74b42deb776b467553fb1c8)
+- Fixed channels being ungrouped before the server replies with a message saying you have left the channel, when you leave them for any reason. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/713a55f74e3c2105204587db5ab64d5b05347bae)
+  - This should fix ghostly afterimages of channels haunting you for a brief second after leaving them.
+- Fixed deleting a channel group with the little trash can button not having a confirmation dialog. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/efd7e267472f3db5e9f10e93a201c32be7380611)
+
+### Merged pull requests
+
+- https://github.com/Fchat-Horizon/Horizon/pull/794 by @Kannamoris
+- https://github.com/Fchat-Horizon/Horizon/pull/789 by @FatCatClient
+
 ## [2.2.0-beta.2] - 2026-05-26
 
 ### Changed since last pre-release
