@@ -290,6 +290,11 @@
                 @click.stop="conversation.toggleAutomatedAds()"
               ></span>
               <span
+                class="pin fas fa-thumbtack"
+                @click="pinConversation(conversation)"
+                :aria-label="l('chat.pin')"
+              ></span>
+              <span
                 class="fas fa-times leave"
                 @click.stop="conversation.close()"
                 :aria-label="l('chat.closeTab')"
@@ -457,6 +462,7 @@
   import CustomDialog from '../components/custom_dialog';
   import Modal from '../components/Modal.vue';
   import QuickJump from './QuickJump.vue';
+  import { group, log } from 'node:console';
 
   const unreadClasses = {
     [Conversation.UnreadState.None]: '',
@@ -1092,9 +1098,20 @@
 
         userMenu.handleEvent(e);
       },
-
       onChannelGroupRename(groupId: string): void {
         this.pendingRenameGroupId = groupId;
+      },
+      pinConversation(conversation: Conversation.ChannelConversation): void {
+        let groupId = '';
+        if (core.conversations.channelGroups.length < 1) {
+          groupId = core.conversations.createChannelGroup(
+            l('channel.group.ungrouped')
+          );
+        } else {
+          groupId = core.conversations.channelGroups[0].id;
+        }
+        console.log(`id: ${groupId}`);
+        this.onChannelAssign(conversation.channel.id, groupId);
       },
 
       onChannelAssign(channelId: string, groupId: string | null): void {
