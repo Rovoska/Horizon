@@ -121,6 +121,7 @@
   } from './channelDragDropHighlight';
   import { Conversation } from './interfaces';
   import l from './localize';
+  import { Dialog } from '../helpers/dialog';
 
   const unreadClasses = {
     [Conversation.UnreadState.None]: '',
@@ -268,8 +269,15 @@
       cancelRename() {
         this.renaming = false;
       },
-      deleteGroup() {
-        core.conversations.deleteChannelGroup(this.group.id);
+      deleteGroup(e: MouseEvent) {
+        if (
+          e.getModifierState('Shift') ||
+          Dialog.confirmDialog(
+            l('channel.group.delete.confirm', this.group.name || '')
+          )
+        ) {
+          core.conversations.deleteChannelGroup(this.group.id);
+        }
       },
       unpinConversation(conversation: Conversation.ChannelConversation) {
         core.conversations.setChannelGroup(conversation.channel.id, null);
