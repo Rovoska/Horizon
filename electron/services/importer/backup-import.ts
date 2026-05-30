@@ -16,8 +16,11 @@ import { ipcRenderer } from 'electron';
 import log from 'electron-log';
 import AdmZip from 'adm-zip';
 import type { IZipEntry } from 'adm-zip';
-import { isValidManifest } from '../exporter/manifest';
-import type { ExportManifest } from '../exporter/manifest';
+import {
+  isValidManifest,
+  shouldIncludeSettingsFile
+} from '../exporter/manifest';
+import type { ExportManifest, SettingsSelection } from '../exporter/manifest';
 import type { ExporterVm } from '../exporter-vm';
 /** Default log directory in the renderer process (avoids instantiating GeneralSettings). */
 const defaultLogDirectory = path.join(remote.app.getPath('userData'), 'data');
@@ -478,32 +481,25 @@ function shouldImportEntry(
     decision.shouldImport = true;
     decision.isDrafts = true;
   } else if (category === 'settings' && info.hasSettings) {
-    decision.shouldImport = shouldImportSettingsFile(vm, segments, info);
+    decision.shouldImport = shouldImportSettingsFile(vm, segments);
   }
 
   return decision;
 }
 
-function shouldImportSettingsFile(
-  vm: ExporterVm,
-  segments: string[],
-  info: BackupCharacterInfo
-): boolean {
-  if (vm.importIncludeCharacterSettings) return true;
-
+function shouldImportSettingsFile(vm: ExporterVm, segments: string[]): boolean {
   const fileName = segments.slice(3).join('/');
-  return (
-    (fileName === 'pinned' &&
-      vm.importIncludePinnedConversations &&
-      info.hasPinnedConversations) ||
-    (fileName === 'favoriteEIcons' &&
-      vm.importIncludePinnedEicons &&
-      info.hasPinnedEicons) ||
-    ((fileName === 'recent' || fileName === 'recentChannels') &&
-      vm.importIncludeRecents &&
-      info.hasRecents) ||
-    (fileName === 'hiddenUsers' && vm.importIncludeHidden && info.hasHidden)
-  );
+  return shouldIncludeSettingsFile(fileName, importSettingsSelection(vm));
+}
+
+function importSettingsSelection(vm: ExporterVm): SettingsSelection {
+  return {
+    includeCharacterSettings: vm.importIncludeCharacterSettings,
+    includePinnedConversations: vm.importIncludePinnedConversations,
+    includePinnedEicons: vm.importIncludePinnedEicons,
+    includeRecents: vm.importIncludeRecents,
+    includeHidden: vm.importIncludeHidden
+  };
 }
 
 /**

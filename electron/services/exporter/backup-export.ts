@@ -15,8 +15,12 @@ import path from 'path';
 import log from 'electron-log';
 import archiver from 'archiver';
 import AdmZip from 'adm-zip';
-import { createManifest, isValidManifest } from './manifest';
-import type { ExportManifest } from './manifest';
+import {
+  createManifest,
+  isValidManifest,
+  shouldIncludeSettingsFile
+} from './manifest';
+import type { ExportManifest, SettingsSelection } from './manifest';
 import type { ExporterVm } from '../exporter-vm';
 import { binaryLogToJson } from './backup-export-cli';
 
@@ -177,27 +181,13 @@ function buildExportEntries(
 
     const settingsDir = path.join(characterDir, 'settings');
     if (fs.existsSync(settingsDir)) {
-      if (vm.exportIncludeCharacterSettings) {
-        const files = listFilesRecursive(settingsDir);
-        for (const abs of files) {
-          const rel = path.relative(settingsDir, abs).replace(/\\/g, '/');
-          const zip = path.posix.join('characters', character, 'settings', rel);
-          entries.push({ abs, zip });
-        }
-      } else {
-        const includeFiles = getSettingsFilesToInclude(vm);
-        for (const file of Array.from(includeFiles)) {
-          const filePath = path.join(settingsDir, file);
-          if (fs.existsSync(filePath)) {
-            const zip = path.posix.join(
-              'characters',
-              character,
-              'settings',
-              file
-            );
-            entries.push({ abs: filePath, zip });
-          }
-        }
+      const selection = exportSettingsSelection(vm);
+      const files = listFilesRecursive(settingsDir);
+      for (const abs of files) {
+        const rel = path.relative(settingsDir, abs).replace(/\\/g, '/');
+        if (!shouldIncludeSettingsFile(rel, selection)) continue;
+        const zip = path.posix.join('characters', character, 'settings', rel);
+        entries.push({ abs, zip });
       }
     }
   }
@@ -205,16 +195,14 @@ function buildExportEntries(
   return entries;
 }
 
-function getSettingsFilesToInclude(vm: ExporterVm): Set<string> {
-  const includeFiles = new Set<string>();
-  if (vm.exportIncludePinnedConversations) includeFiles.add('pinned');
-  if (vm.exportIncludePinnedEicons) includeFiles.add('favoriteEIcons');
-  if (vm.exportIncludeRecents) {
-    includeFiles.add('recent');
-    includeFiles.add('recentChannels');
-  }
-  if (vm.exportIncludeHidden) includeFiles.add('hiddenUsers');
-  return includeFiles;
+function exportSettingsSelection(vm: ExporterVm): SettingsSelection {
+  return {
+    includeCharacterSettings: vm.exportIncludeCharacterSettings,
+    includePinnedConversations: vm.exportIncludePinnedConversations,
+    includePinnedEicons: vm.exportIncludePinnedEicons,
+    includeRecents: vm.exportIncludeRecents,
+    includeHidden: vm.exportIncludeHidden
+  };
 }
 
 /**

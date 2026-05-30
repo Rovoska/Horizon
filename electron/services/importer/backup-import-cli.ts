@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import AdmZip from 'adm-zip';
+import { shouldIncludeSettingsFile } from '../exporter/manifest';
 
 /**
  * Configuration options for CLI-based import operations.
@@ -87,15 +88,8 @@ function shouldImportSettingsFile(
   opts: ImportCliOptions,
   segments: string[]
 ): boolean {
-  if (opts.includeCharacterSettings) return true;
   const fileName = segments.slice(3).join('/');
-  return (
-    (fileName === 'pinned' && opts.includePinnedConversations) ||
-    (fileName === 'favoriteEIcons' && opts.includePinnedEicons) ||
-    ((fileName === 'recent' || fileName === 'recentChannels') &&
-      opts.includeRecents) ||
-    (fileName === 'hiddenUsers' && opts.includeHidden)
-  );
+  return shouldIncludeSettingsFile(fileName, opts);
 }
 
 function classifyEntry(
