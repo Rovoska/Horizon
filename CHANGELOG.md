@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MacOS builds are now code-signed and notarized. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/30b273bbaec3c8db43775fb1d11d69f3acac8fcc)
   - Special thanks to the F-List team for sponsoring us, and extra thanks to Dari for helping us out with the process.
 
+### Fixed
+
+- Fixed your general app settings not being added to backup exports if your log directory isn't set to the default. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/e4853e5fa1c27eaef668c518c7b0c1ac07b828b1)
+- Fixed the exporter always exporting every single settings file (including pinned channels, conversation history, etc) anyway if you had 'Character settings' checked. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ea543cc2ace275c57f59dfc6c41f2c7fd48c579f)
+
 ### Changed since last pre-release
 
 <!-- To whoever will do the changelogs for the stable 2.2.0 release, everything under this header is not meant for the final changelogs. It's just to tell people who were using beta.2 what was fixed since the last release. It's not relevant for general users at all.-->
@@ -20,6 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - This was polled on Discord and won out by a pretty considerable margin, but since that was for the test release we might repoll it with the general audience later on.
 - Importing 'pins' into the new group system now shows you a message about what's new. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/412ef877702f3551806fd239090ead743cfb8fd1)
 - Grouped all 'Remove from group' and 'Move to X' menu items for a channel into the same submenu. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/8391a1f2d21d6f7eba309a0bac16d50790a64f42)
+- Design tweaks for channel groups and custom context menus: [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/835c95d14da6938e3bbf95bc0a3021c3354760be)
+  - Long names in channel/ channel group menus do not overflow anymore.
+  - Channel/ channel group menu headers text size now matches user menu's.
+  - Channel (group) header padding has been re-aligned.
+  - Dangerous menu items are now not obnoxiously red.
+  - Channel groups are no longer always listed with uppercase letters.
+  - Removed the split line between grouped/ ungrouped channels, this was an unneccesary overcorrection after beta.0
 
 ### Fixed since last pre-release
 
@@ -34,6 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - https://github.com/Fchat-Horizon/Horizon/pull/794 by @Kannamoris
 - https://github.com/Fchat-Horizon/Horizon/pull/789 by @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/801 by @Kannamoris
+- https://github.com/Fchat-Horizon/Horizon/pull/802 by @Kannamoris
 
 ## [2.2.0-beta.2] - 2026-05-26
 
