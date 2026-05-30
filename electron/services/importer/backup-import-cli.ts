@@ -6,7 +6,8 @@ import AdmZip from 'adm-zip';
  * Configuration options for CLI-based import operations.
  *
  * @property zip - Absolute path to the ZIP backup file to import from
- * @property dataDir - Absolute path to the Horizon data directory where data will be imported
+ * @property dataDir - Absolute path to the Horizon data directory where character data will be imported
+ * @property settingsDir - Absolute path to the general settings directory; defaults to dataDir. Pass the fixed `{userData}/data` when the log directory is custom.
  * @property includeGeneral - Whether to import general application settings
  * @property includeCharacterSettings - Whether to import all character-specific settings files
  * @property includeLogs - Whether to import chat log history for characters
@@ -22,6 +23,7 @@ import AdmZip from 'adm-zip';
 export interface ImportCliOptions {
   zip: string;
   dataDir: string;
+  settingsDir?: string;
   includeGeneral: boolean;
   includeCharacterSettings: boolean;
   includeLogs: boolean;
@@ -137,7 +139,8 @@ function importGeneralSettingsFromZip(
   const general = zip.getEntry('settings');
   if (!general) return false;
 
-  const dst = getSafeDestination(dataDir, 'settings');
+  // General settings belong at the fixed location, not under a custom log dir.
+  const dst = getSafeDestination(opts.settingsDir ?? dataDir, 'settings');
   if (!dst) throw new Error('Invalid settings destination');
 
   fs.mkdirSync(path.dirname(dst), { recursive: true });
@@ -213,7 +216,9 @@ function printDryRunGeneralSettings(
 ): void {
   const general = zip.getEntry('settings');
   const hasGeneral = general !== null;
-  const generalExists = fs.existsSync(path.join(dataDir, 'settings'));
+  const generalExists = fs.existsSync(
+    path.join(opts.settingsDir ?? dataDir, 'settings')
+  );
 
   let generalStatus = opts.includeGeneral && hasGeneral ? 'YES' : 'NO';
   if (opts.includeGeneral && hasGeneral && generalExists) {

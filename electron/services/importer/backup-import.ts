@@ -21,6 +21,12 @@ import type { ExportManifest } from '../exporter/manifest';
 import type { ExporterVm } from '../exporter-vm';
 /** Default log directory in the renderer process (avoids instantiating GeneralSettings). */
 const defaultLogDirectory = path.join(remote.app.getPath('userData'), 'data');
+/**
+ * Directory holding the general (app-wide) settings file. Fixed at
+ * `{userData}/data` regardless of the user's custom `logDirectory`, matching
+ * where the main process reads/writes general settings.
+ */
+const generalSettingsDir = defaultLogDirectory;
 
 /**
  * Information about a character found in a Horizon backup ZIP file.
@@ -538,7 +544,6 @@ async function checkConnectedCharacters(): Promise<boolean> {
 function importGeneralSettings(
   vm: ExporterVm,
   zip: AdmZip,
-  dataDir: string,
   stats: ImportStats
 ): void {
   if (!vm.importGeneralAvailable || !vm.importIncludeGeneralSettings) return;
@@ -547,7 +552,9 @@ function importGeneralSettings(
   const generalEntry = zip.getEntry('settings');
   if (!generalEntry) return;
 
-  const destination = getSafeDestination(dataDir, 'settings');
+  // General settings always belong at the fixed location, not under a custom
+  // log directory, so the main process can read them back.
+  const destination = getSafeDestination(generalSettingsDir, 'settings');
   if (!destination) return;
 
   fs.mkdirSync(path.dirname(destination), { recursive: true });
@@ -752,7 +759,7 @@ export async function runZipImport(vm: ExporterVm): Promise<void> {
       charactersTouched: new Set<string>()
     };
 
-    importGeneralSettings(vm, zip, dataDir, stats);
+    importGeneralSettings(vm, zip, stats);
     importCharacterData(
       vm,
       zip,
