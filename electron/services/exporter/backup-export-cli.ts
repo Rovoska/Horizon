@@ -6,7 +6,8 @@ import { createManifest } from './manifest';
 /**
  * Configuration options for CLI-based export operations.
  *
- * @property dataDir - Absolute path to the Horizon data directory
+ * @property dataDir - Absolute path to the Horizon data directory (character data / logs)
+ * @property settingsDir - Absolute path to the general settings directory; defaults to dataDir. Pass the fixed `{userData}/data` when the log directory is custom.
  * @property out - Absolute path where the output ZIP file will be created
  * @property includeGeneral - Include general application settings
  * @property includeCharacterSettings - Include all character-specific settings files
@@ -21,6 +22,7 @@ import { createManifest } from './manifest';
  */
 export interface ExportCliOptions {
   dataDir: string;
+  settingsDir?: string;
   out: string;
   includeGeneral: boolean;
   includeCharacterSettings: boolean;
@@ -185,7 +187,10 @@ function logDryRunDetails(
   console.log('');
 
   console.log('Export options:');
-  const generalSettingsFile = path.join(dataDir, 'settings');
+  const generalSettingsFile = path.join(
+    opts.settingsDir ?? dataDir,
+    'settings'
+  );
   const hasGeneral = fs.existsSync(generalSettingsFile);
   console.log(
     `  - General settings: ${opts.includeGeneral && hasGeneral ? 'YES' : 'NO'}`
@@ -221,7 +226,10 @@ function countEntries(
   let count = 0;
 
   if (opts.includeGeneral) {
-    const generalSettingsFile = path.join(dataDir, 'settings');
+    const generalSettingsFile = path.join(
+      opts.settingsDir ?? dataDir,
+      'settings'
+    );
     if (fs.existsSync(generalSettingsFile)) count++;
   }
 
@@ -301,7 +309,10 @@ async function createArchive(
   });
 
   if (opts.includeGeneral) {
-    const generalSettingsFile = path.join(dataDir, 'settings');
+    const generalSettingsFile = path.join(
+      opts.settingsDir ?? dataDir,
+      'settings'
+    );
     if (fs.existsSync(generalSettingsFile)) {
       archive.file(generalSettingsFile, { name: 'settings' });
     }

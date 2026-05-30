@@ -20,6 +20,13 @@ import type { ExportManifest } from './manifest';
 import type { ExporterVm } from '../exporter-vm';
 import { binaryLogToJson } from './backup-export-cli';
 
+/**
+ * Directory holding the general (app-wide) settings file. This is fixed at
+ * `{userData}/data` regardless of the user's custom `logDirectory`, since the
+ * main process always reads/writes general settings there.
+ */
+const generalSettingsDir = path.join(remote.app.getPath('userData'), 'data');
+
 async function yieldToUi(vm?: ExporterVm): Promise<void> {
   try {
     if (vm && typeof vm.$nextTick === 'function') {
@@ -139,7 +146,8 @@ function buildExportEntries(
   const entries: ExportEntry[] = [];
 
   if (vm.exportIncludeGeneralSettings) {
-    const generalSettingsFile = path.join(dataDir, 'settings');
+    // General settings always live at the fixed location, not under logDirectory.
+    const generalSettingsFile = path.join(generalSettingsDir, 'settings');
     if (fs.existsSync(generalSettingsFile))
       entries.push({ abs: generalSettingsFile, zip: 'settings' });
   }

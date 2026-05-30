@@ -170,6 +170,7 @@ EXAMPLES:
     const dryRun = has('-n') || has('--dry-run');
     const exportResult = await runExportCli({
       dataDir,
+      settingsDir: path.join(app.getPath('userData'), 'data'),
       out,
       includeGeneral: include('--include-general', true),
       includeCharacterSettings: include('--include-character-settings', true),
@@ -213,6 +214,7 @@ EXAMPLES:
     const importResult = await runImportCli({
       zip,
       dataDir,
+      settingsDir: path.join(app.getPath('userData'), 'data'),
       includeGeneral: include('--include-general', true),
       includeCharacterSettings: include('--include-character-settings', true),
       includeLogs: include('--include-logs', true),
