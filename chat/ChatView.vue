@@ -246,7 +246,7 @@
           </dropdown>
         </div>
 
-        <div ref="channelGroups" class="border-bottom pb-2 border-opacity-50">
+        <div ref="channelGroups">
           <channel-group-section
             v-for="group in sortedChannelGroups"
             :key="group.id"

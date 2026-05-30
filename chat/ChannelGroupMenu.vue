@@ -8,10 +8,10 @@
     <custom-context-menu
       id="channelGroupMenu"
       :menu-items="channelMenuItems"
-      style="display: block; min-width: 220px; z-index: 1100"
+      style="display: block; min-width: 220px; max-width: 350px; z-index: 1100"
     >
       <div class="list-group-item" id="channelGroupMenu-header">
-        <span class="fas fa-fw fa-folder"></span>
+        <span class="fas fa-fw fa-folder" style="margin-right: 3px"></span>
         <span class="userInfo-name">{{ channelGroup?.name }}</span>
       </div>
     </custom-context-menu>
@@ -218,8 +218,18 @@
 
 <style lang="scss">
   #channelGroupMenu-header {
-    padding: 7px 10px 5px 10px;
+    display: flex;
+    align-items: center;
     font-size: 1.1em;
+    padding: 7px 10px 5px 6px;
     font-weight: bold;
+  }
+
+  #channelGroupMenu-header .userInfo-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
   }
 </style>

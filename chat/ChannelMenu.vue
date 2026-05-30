@@ -8,7 +8,7 @@
     <custom-context-menu
       id="channelMenu"
       :menu-items="channelMenuItems"
-      style="display: block; min-width: 220px; z-index: 1100"
+      style="display: block; min-width: 220px; max-width: 350px; z-index: 1100"
     >
       <div class="list-group-item" id="channelMenu-header">
         <span
@@ -18,6 +18,7 @@
               ? 'fa-hashtag'
               : 'fa-star'
           "
+          style="margin-right: 3px"
         ></span>
         <span class="userInfo-name">{{ conversation.name }}</span>
       </div>
@@ -170,8 +171,17 @@
 
 <style lang="scss">
   #channelMenu-header {
-    padding: 7px 10px 5px 10px;
-    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    padding: 7px 10px 5px 6px;
     font-weight: bold;
+  }
+
+  #channelMenu-header .userInfo-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
   }
 </style>

@@ -324,7 +324,6 @@
     padding: 4px 8px;
     font-size: 0.8rem;
     font-weight: 600;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
     opacity: 0.8;
     user-select: none;
