@@ -46,6 +46,12 @@
                 class="card-body settings-content"
                 style="height: 100%; width: 100%"
               >
+                <div class="h5 pb-2 border-bottom border-warning w-75 mb-0">
+                  {{ l('admgr.prepareToMove') }}
+                </div>
+                <div class="text-muted mb-4 w-75 bg-light p-3 bg-opacity-10">
+                  {{ l('settings.charactersToGeneral.generalInfo') }}
+                </div>
                 <h5>
                   {{ l('settings.tabs.general') }}
                 </h5>
