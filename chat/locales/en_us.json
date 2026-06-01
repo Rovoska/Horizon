@@ -883,6 +883,7 @@
   "settings.profile.ignoredList.empty": "You aren't currently ignoring any users.",
   "settings.profile.viewer": "Profile viewer",
   "settings.profileViewer": "Use profile viewer",
+  "settings.profileViewer.smallerDefaultAvatars": "Shrink default (non-custom) avatars to their real size.",
   "settings.profileViewerGalleryType": "Gallery type",
   "settings.profileViewerGalleryType.full": "Full",
   "settings.profileViewerGalleryType.thumbnail": "Carousel with thumbnails",

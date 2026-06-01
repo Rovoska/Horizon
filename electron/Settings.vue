@@ -641,6 +641,23 @@
                   </div>
                 </div>
 
+                <div class="mb-3" v-if="settings.profileViewer">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="profileViewerSmallerDefaultAvatars"
+                      v-model="settings.profileViewerSmallerDefaultAvatars"
+                    />
+                    <label
+                      class="form-check-label"
+                      for="profileViewerSmallerDefaultAvatars"
+                    >
+                      {{ l('settings.profileViewer.smallerDefaultAvatars') }}
+                    </label>
+                  </div>
+                </div>
+
                 <div class="mb-3">
                   <div class="form-check">
                     <input
