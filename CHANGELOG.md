@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed an F-Chat Rising security exploit for Linux and Mac involving the custom browser setting and intentionally malformed URLs. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/99b7cedbe0f838af4deb3db253a380ba7dd9d78f)
 - The bookmark button on the profile viewer's side bar is a million times less jank, and actually gives you visual feedback now. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/069769fdc9f6f58cbb6fcb299912f2840938da9b)
 - Fixed your general app settings not being added to backup exports if your log directory isn't set to the default. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/e4853e5fa1c27eaef668c518c7b0c1ac07b828b1)
 - Fixed the exporter always exporting every single settings file (including pinned channels, conversation history, etc) anyway if you had 'Character settings' checked. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ea543cc2ace275c57f59dfc6c41f2c7fd48c579f)
