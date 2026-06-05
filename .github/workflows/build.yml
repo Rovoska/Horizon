@@ -50,26 +50,6 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
-      - name: Run Build Script (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          # ! Execute Linux build script
-          chmod +x electron/release-scripts/linux.sh
-          electron/release-scripts/linux.sh "$RELEASE_VERSION" "$GITHUB_WORKSPACE/release_artifacts/linux/$RELEASE_VERSION"
-
-      - name: Run Build Script (macOS)
-        if: matrix.os == 'macos-26'
-        env:
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          # ! Execute macOS build script
-          chmod +x electron/release-scripts/macos.sh
-          electron/release-scripts/macos.sh "$RELEASE_VERSION" "$GITHUB_WORKSPACE/release_artifacts/macos/$RELEASE_VERSION"
-
       - name: Run Build Script (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
