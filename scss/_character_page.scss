@@ -1,14 +1,48 @@
-.character-avatar.character-page-avatar {
+.character-page-avatar-bg {
   width: 100%;
-  height: auto;
-  max-height: 50vh;
-  object-fit: contain;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--character-avatar-bg);
+    background-size: cover;
+    background-position: center;
+  }
+  &.small-default-avatar {
+    &::before {
+      filter: blur(30px);
+      transform: scale(0.7);
+      z-index: 0;
+      opacity: 0.6;
+      border-radius: 100%;
+    }
+    .character-avatar.character-page-avatar[src^='https://static.f-list.net/images/avatar/'] {
+      object-fit: scale-down;
+    }
+  }
+  .character-avatar.character-page-avatar {
+    width: 100%;
+    height: auto;
+    max-height: 50vh;
+    object-fit: contain;
+    z-index: 1;
+    position: relative;
+  }
 }
 
 // Inline images
 .inline-image {
   max-width: 100%;
   height: auto;
+  vertical-align: unset;
 }
 
 .character-page {
@@ -258,22 +292,26 @@
     float: left;
   }
 
+  /*
   .guestbook-contents {
     //@include well();
     &.deleted {
       //@include alert-warning();
     }
   }
+  */
 
   .guestbook-reply {
     &:before {
       content: 'Reply ';
       font-weight: bold;
     }
+    /*
     .reply-message {
       //@include well;
       //@include alert-info;
     }
+    */
   }
 }
 

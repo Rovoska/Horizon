@@ -7,11 +7,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-06-04
+
+### Added
+
+- Pinned channels can now be grouped and sorted. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/55ce65d34df296d0a3ff8664e8c4ef4403c556d5)
+  - Right-click any open channel to create a new group or move it into an existing one. You can also right-click channel groups to manage them more directly.
+  - Drag channels between groups directly in the sidebar. Drag groups to reorder them.
+  - Click a group header to collapse it, double-click to rename it, or hover for the delete button.
+  - Thank you, @Kannamoris!!
+- Reworked the logs/ data exporter siginificantly! [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/2fb21e99a3798119441281bef09ead36e52f6667)
+  - Now features automated backups that you can fully configure based on intervals, triggers, and more.
+  - Improved menu with more clarity for functions.
+  - The export format has been generified, making it easier to parse for other clients (if they should want to).
+  - Data integrity verification _after_ exporting
+- MacOS builds are now code-signed and notarized. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/30b273bbaec3c8db43775fb1d11d69f3acac8fcc)
+  - Special thanks to the F-List team for sponsoring us, and extra thanks to Dari for helping us out with the process.
+
+### Changed
+
+- Switched the icons for 'Herm' and 'Shemale' genders around. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/bedcb5e9d84b0888a2325343d7975d7363eea415)
+- Various visual improvements to the profile viewer, to get it to match the website better mostly: [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/a7eb9390ca8e89879f710da0a5f257da1aa6bc1f)
+  - Added a setting for vanilla (100 pixels) profile pics in the sidebar to be shrunk down to normal size and have a glow, instead of being blown up into a crusty, blurry mess. Can be found in the app settings window.
+  - Inlines are no longer visually centered across their element.
+    - This should fix issues where 'dropdown shadow' inlines underneath things like `[collapse]` tags would often have a small gap.
+  - Your own icon in the kink compare tool below now fits properly.
+  - Icons for the compare tool's button.
+  - Customs that arent expanded no longer have an annoying border around them.
+  - Empty columns in the info tab don't show up anymore.
+  - Custom kinks with an empty description now show the "No description set yet" text.
+
+### Fixed
+
+- Fixed an F-Chat Rising security exploit for Linux and Mac involving the custom browser setting and intentionally malformed URLs. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/99b7cedbe0f838af4deb3db253a380ba7dd9d78f)
+- The bookmark button on the profile viewer's side bar is a million times less jank, and actually gives you visual feedback now. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/069769fdc9f6f58cbb6fcb299912f2840938da9b)
+- Fixed your general app settings not being added to backup exports if your log directory isn't set to the default. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/e4853e5fa1c27eaef668c518c7b0c1ac07b828b1)
+- Fixed the exporter always exporting every single settings file (including pinned channels, conversation history, etc) anyway if you had 'Character settings' checked. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/ea543cc2ace275c57f59dfc6c41f2c7fd48c579f)
+- Fixed an ancient 3.0 issue with looking up characters with names matching certain Javascript prototypes. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d1b7cce295b2dd53b20cbab5181eafd2fd57f18e)
+- The BBCode editor buttons' tooltips are now localized. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/8306f5987e605af44001a40cec00134eb42196be)
+
+### Development
+
+- Upgraded to Electron 40 (`v40.10.0`) from `39.8.3`. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/d63788bce78e2934853c483cf1732cadee2ef16b)
+
+### Documentation
+
+- Fixed incorrect e-mail in the security document. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/724f947a95eb1cd02d91510d1dec533884ede92b)
+- Added documentation for the new exporter format.
+
+### Merged Pull Requests
+
+- https://github.com/Fchat-Horizon/Horizon/pull/643 by @CodingWithAnxiety
+- https://github.com/Fchat-Horizon/Horizon/pull/749 by @Kannamoris
+- https://github.com/Fchat-Horizon/Horizon/pull/751 by @Kannamoris
+- https://github.com/Fchat-Horizon/Horizon/pull/755 by @devinliszt
+  - This is their first contribution! 🎉
+- https://github.com/Fchat-Horizon/Horizon/pull/754 by @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/757 by @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/785 by @Kannamoris
+- https://github.com/Fchat-Horizon/Horizon/pull/790 by @Kannamoris and @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/794 by @Kannamoris
+- https://github.com/Fchat-Horizon/Horizon/pull/789 by @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/801 by @Kannamoris
+- https://github.com/Fchat-Horizon/Horizon/pull/802 by @Kannamoris
+- Non-PR'd changes by @CodingWithAnxiety and @FatCatClient
+
 ## [2.1.4] - 2026-05-06
 
 ### Added
 
 - If you're a channel mod, you can now directly time-out or ban users from the right-click menu too. After confirming it in a prompt of course. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/9d2e51a15605eb611f802bde8446bc54d975aab5)
+- Added the 'Fluxer' sound theme. [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/6b70426c4de99392a6d4303d825967b978f99d50)
 
 ### Changed
 
@@ -28,6 +94,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Development
 
 - Updated Prettier to 3.8.3 (from 3.8.2). [[Commit]](https://github.com/Fchat-Horizon/Horizon/commit/aed8da7ddee520939c44071930adf47ec16f13e9)
+
+### Merged Pull Requests
+
+- https://github.com/Fchat-Horizon/Horizon/pull/719 by @CodingWithAnxiety
+- https://github.com/Fchat-Horizon/Horizon/pull/745 by @FatCatClient
+- https://github.com/Fchat-Horizon/Horizon/pull/746 by @Kannamoris
 
 ## [2.1.3] - 2026-04-25
 
@@ -1332,7 +1404,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IOS build removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/41261d1ba7043eb7dfd5a1a6331dc604ff338814)]
 - Webchat removed [[Commit](https://github.com/Fchat-Horizon/Horizon/commit/b894a180b9be31f68d1458aaa3c59f9c4470da89)]
 
-[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.4...development
+[Unreleased]: https://github.com/Fchat-Horizon/Horizon/compare/v2.2.0...development
+[2.2.0]: https://github.com/Fchat-Horizon/Horizon/compare/v2.2.0-beta.3...v2.2.0
+[2.2.0-beta.3]: https://github.com/Fchat-Horizon/Horizon/compare/v2.2.0-beta.2...v2.2.0-beta.3
+[2.2.0-beta.2]: https://github.com/Fchat-Horizon/Horizon/compare/v2.2.0-beta.1...v2.2.0-beta.2
+[2.2.0-beta.1]: https://github.com/Fchat-Horizon/Horizon/compare/v2.2.0-beta.0...v2.2.0-beta.1
+[2.2.0-beta.0]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.4...v2.2.0-beta.0
 [2.1.4]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.3...v2.1.4
 [2.1.3]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/Fchat-Horizon/Horizon/compare/v2.1.1...v2.1.2

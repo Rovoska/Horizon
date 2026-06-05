@@ -43,6 +43,7 @@ import * as electron from 'electron';
 import log from 'electron-log'; //tslint:disable-line:match-default-export-name
 import * as fs from 'fs';
 import * as path from 'path';
+import { execFile } from 'child_process';
 // import * as url from 'url';
 import l from '../chat/localize';
 import { defaultHost, GeneralSettings } from './common';
@@ -74,6 +75,9 @@ const app = electron.app;
 remoteMain.initialize();
 
 const characters: string[] = [];
+let autoBackupScheduler:
+  | import('./services/exporter/auto-backup').AutoBackupScheduler
+  | undefined;
 
 async function tryHandleCli(): Promise<boolean> {
   const argv = process.argv.slice(1);
@@ -166,6 +170,7 @@ EXAMPLES:
     const dryRun = has('-n') || has('--dry-run');
     const exportResult = await runExportCli({
       dataDir,
+      settingsDir: path.join(app.getPath('userData'), 'data'),
       out,
       includeGeneral: include('--include-general', true),
       includeCharacterSettings: include('--include-character-settings', true),
@@ -209,6 +214,7 @@ EXAMPLES:
     const importResult = await runImportCli({
       zip,
       dataDir,
+      settingsDir: path.join(app.getPath('userData'), 'data'),
       includeGeneral: include('--include-general', true),
       includeCharacterSettings: include('--include-character-settings', true),
       includeLogs: include('--include-logs', true),
@@ -347,57 +353,73 @@ async function checkForGitRelease(
     log.error(`Error checking for update: ${e}`);
   }
 }
-export function openURLExternally(linkUrl: string): void {
-  // check if user set a path and whether it exists
-  const pathIsValid =
-    settings.browserPath !== '' && fs.existsSync(settings.browserPath);
+// Schemes safe to hand to a spawned browser; anything else goes to the OS.
+const EXTERNAL_BROWSER_SCHEMES = ['http:', 'https:'];
 
-  if (pathIsValid) {
-    // also check if the user can execute whatever is located at the selected path
-    let fileIsExecutable = false;
-    try {
-      fs.accessSync(settings.browserPath, fs.constants.X_OK);
-      fileIsExecutable = true;
-    } catch (err) {
-      log.error(
-        `Selected browser is not executable by user. Path: "${settings.browserPath}"`
-      );
-    }
+function resolveCustomBrowser(): string | null {
+  const browserPath = settings.browserPath;
+  if (browserPath === '' || !fs.existsSync(browserPath)) return null;
 
-    if (fileIsExecutable) {
-      // regular expression that looks for an encoded % symbol followed by two hexadecimal characters
-      // using this expression, we can find parts of the URL that were encoded twice
-      const re = /%25([0-9a-f]{2})/gi;
-
-      // encode the URL no matter what
-      linkUrl = encodeURI(linkUrl);
-
-      // eliminate double-encoding using expression above
-      linkUrl = linkUrl.replace(re, '%$1');
-
-      if (!settings.browserArgs.includes('%s')) {
-        // append %s to params if it is not already there
-        settings.browserArgs += ' %s';
-      }
-
-      // replace %s in arguments with URL and encapsulate in quotes to prevent issues with spaces and special characters in the path
-      let link = settings.browserArgs.replace('%s', '"' + linkUrl + '"');
-
-      const execFile = require('child_process').exec;
-      if (process.platform === 'darwin') {
-        // NOTE: This is seemingly bugged on MacOS when setting Safari as the external browser while using a different default browser.
-        // In that case, this will open the URL in both the selected application AND the default browser.
-        // Other browsers work fine. (Tested with Chrome with Firefox as the default browser.)
-        // https://developer.apple.com/forums/thread/685385
-        execFile(`open -a "${settings.browserPath}" ${link}`);
-      } else {
-        execFile(`"${settings.browserPath}" ${link}`);
-      }
-      return;
-    }
+  try {
+    fs.accessSync(browserPath, fs.constants.X_OK);
+  } catch {
+    log.error(
+      `Selected browser is not executable by user. Path: "${browserPath}"`
+    );
+    return null;
   }
 
-  electron.shell.openExternal(linkUrl);
+  return browserPath;
+}
+
+function isWebUrl(linkUrl: string): boolean {
+  try {
+    return EXTERNAL_BROWSER_SCHEMES.includes(new URL(linkUrl).protocol);
+  } catch {
+    return false;
+  }
+}
+
+// Encode the URL once, undoing any accidental double-encoding (%25xx -> %xx).
+function normalizeUrl(linkUrl: string): string {
+  return encodeURI(linkUrl).replace(/%25([0-9a-f]{2})/gi, '%$1');
+}
+
+export function openURLExternally(linkUrl: string): void {
+  const browserPath = resolveCustomBrowser();
+
+  // No custom browser, or not a web link: let the OS handle it.
+  if (browserPath === null || !isWebUrl(linkUrl)) {
+    electron.shell.openExternal(linkUrl);
+    return;
+  }
+
+  const url = normalizeUrl(linkUrl);
+  const argTokens = settings.browserArgs.split(/\s+/).filter(Boolean);
+
+  // execFile uses no shell, so the URL is an inert argument: it cannot inject
+  // commands, and the http(s) guard keeps it from being read as a flag.
+  if (process.platform === 'darwin') {
+    // `open -a <app>`: args before --args are documents (the URL); flags follow
+    // --args. NOTE: Safari-as-browser with a different OS default opens the URL
+    // twice. https://developer.apple.com/forums/thread/685385
+    const flags = argTokens.filter(arg => !arg.includes('%s'));
+    const openArgs = ['-a', browserPath, url];
+    if (flags.length > 0) openArgs.push('--args', ...flags);
+    execFile('open', openArgs);
+    return;
+  }
+
+  // Substitute the URL into %s (e.g. --app=%s), or append it if absent.
+  let urlSubstituted = false;
+  const launchArgs = argTokens.map(arg => {
+    if (!arg.includes('%s')) return arg;
+    urlSubstituted = true;
+    return arg.replace('%s', url);
+  });
+  if (!urlSubstituted) launchArgs.push(url);
+
+  execFile(browserPath, launchArgs);
 }
 
 let zoomLevel = settings.zoomLevel;
@@ -722,18 +744,26 @@ async function onReady(): Promise<void> {
             accelerator: 'CmdOrCtrl+,'
           },
           {
-            label: l('settings.export.title'),
-            click: (_m, window: electron.BrowserWindow) => {
-              browserWindows.createExporterWindow(settings, 'none', window);
-            }
-          },
-          {
             label: l('fixLogs.action'),
             click: (_m, window: electron.BrowserWindow) =>
               window.webContents.send('fix-logs'),
             id: 'fixLogs'
           },
-
+          ...(process.platform === 'darwin'
+            ? [
+                {
+                  label: `&${l('settings.export.manageData')}`,
+                  click: (_m, w) => {
+                    if (w)
+                      browserWindows.createExporterWindow(
+                        settings,
+                        'none',
+                        w as electron.BrowserWindow
+                      );
+                  }
+                } as MenuItemConstructorOptions
+              ]
+            : []),
           {
             label: 'Show/hide current profile',
             click: (_m: electron.MenuItem, w: electron.BrowserWindow) => {
@@ -774,6 +804,17 @@ async function onReady(): Promise<void> {
           { role: 'selectall' }
         ] as MenuItemConstructorOptions[]
       },
+      {
+        label: `&${l('settings.export.manageData')}`,
+        click: (_m, w) => {
+          if (w)
+            browserWindows.createExporterWindow(
+              settings,
+              'none',
+              w as electron.BrowserWindow
+            );
+        }
+      } as MenuItemConstructorOptions,
       viewItem,
       windowItem,
       {
@@ -904,6 +945,7 @@ async function onReady(): Promise<void> {
       characters.push(character);
       e.returnValue = true;
       broadcastConnectedCharacters();
+      if (autoBackupScheduler) autoBackupScheduler.runOnConnect();
     }
   );
   electron.ipcMain.on(
@@ -941,6 +983,28 @@ async function onReady(): Promise<void> {
 
   electron.ipcMain.handle('get-connected-characters', () => {
     return characters.slice();
+  });
+
+  electron.ipcMain.handle('list-auto-backups', () => {
+    const backupDir =
+      settings.autoBackupDirectory || path.join(baseDir, 'backups');
+    try {
+      return fs
+        .readdirSync(backupDir)
+        .filter(f => /^auto-backup-.*\.zip$/.test(f))
+        .map(f => {
+          const stat = fs.statSync(path.join(backupDir, f));
+          return {
+            name: f,
+            path: path.join(backupDir, f),
+            mtime: stat.mtimeMs,
+            size: stat.size
+          };
+        })
+        .sort((a, b) => b.mtime - a.mtime);
+    } catch {
+      return [];
+    }
   });
 
   const adCoordinator = new AdCoordinatorHost();
@@ -1031,6 +1095,9 @@ async function onReady(): Promise<void> {
             settings.horizonCustomCssEnabled
           );
         }
+        if (autoBackupScheduler) {
+          autoBackupScheduler.reload();
+        }
         if (badgeChange) {
           browserWindows.updateNotificationBadges(
             settings.horizonShowNotificationBadge
@@ -1057,6 +1124,13 @@ async function onReady(): Promise<void> {
     );
     showChangelogOnBoot = false;
   }
+
+  import('./services/exporter/auto-backup').then(({ AutoBackupScheduler }) => {
+    autoBackupScheduler = new AutoBackupScheduler(settings, baseDir);
+    if (settings.autoBackupEnabled) {
+      autoBackupScheduler.start();
+    }
+  });
 }
 
 // Twitter fix
@@ -1102,5 +1176,24 @@ app.on('before-quit', (event: Event) => {
     }
   }
   browserWindows.quitAllWindows();
+});
+let willQuitHandled = false;
+app.on('will-quit', (event: Event) => {
+  if (
+    !willQuitHandled &&
+    autoBackupScheduler &&
+    settings.autoBackupEnabled &&
+    Array.isArray(settings.autoBackupTriggers) &&
+    settings.autoBackupTriggers.includes('close')
+  ) {
+    willQuitHandled = true;
+    event.preventDefault();
+    autoBackupScheduler.runOnClose().finally(() => {
+      if (autoBackupScheduler) autoBackupScheduler.stop();
+      app.quit();
+    });
+  } else if (autoBackupScheduler) {
+    autoBackupScheduler.stop();
+  }
 });
 app.on('window-all-closed', () => app.quit());
